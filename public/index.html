@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USKAN - Test Your Skills & Earn Money</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <style>
+        .hero-section { text-align: center; padding: 40px 0 20px; }
+        .hero-section .logo { font-size: 48px; font-weight: 800; color: var(--navy); }
+        .hero-section .logo span { background: linear-gradient(135deg, var(--primary-orange), var(--speed-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-section .tagline { font-size: 20px; color: var(--medium-grey); margin-top: 8px; }
+        .hero-section .subtagline { font-size: 16px; color: var(--medium-grey); margin-top: 4px; }
+        .hero-section .earn-badge { display: inline-block; background: #F0FFF4; color: var(--success-green); padding: 6px 20px; border-radius: 30px; font-weight: 600; font-size: 14px; margin-top: 12px; }
+        .test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 32px 0; }
+        @media (max-width: 600px) { .test-grid { grid-template-columns: 1fr; } }
+        .test-card { background: var(--white); border-radius: 16px; border: 2px solid #E2E8F0; padding: 24px; transition: all 0.3s ease; text-decoration: none; color: inherit; display: block; }
+        .test-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-orange); }
+        .test-card .test-icon { font-size: 40px; }
+        .test-card h3 { font-size: 20px; color: var(--navy); margin: 8px 0 4px; }
+        .test-card p { font-size: 14px; color: var(--medium-grey); margin: 0; }
+        .test-card .test-meta { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; color: var(--medium-grey); }
+        .test-card .test-meta span { background: var(--off-white); padding: 2px 12px; border-radius: 12px; }
+        .test-card .coming-soon { opacity: 0.6; cursor: not-allowed; }
+        .how-section { background: var(--off-white); border-radius: 16px; padding: 32px; margin: 32px 0; }
+        .how-section h2 { text-align: center; font-size: 24px; color: var(--navy); margin-bottom: 24px; }
+        .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        @media (max-width: 600px) { .how-steps { grid-template-columns: 1fr 1fr; } }
+        .how-step { text-align: center; }
+        .how-step .step-num { display: inline-block; background: var(--primary-orange); color: white; width: 32px; height: 32px; border-radius: 50%; line-height: 32px; font-weight: 700; font-size: 14px; }
+        .how-step h4 { font-size: 15px; color: var(--navy); margin: 8px 0 4px; }
+        .how-step p { font-size: 13px; color: var(--medium-grey); margin: 0; }
+        .stats-home { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; text-align: center; }
+        @media (max-width: 600px) { .stats-home { grid-template-columns: 1fr; } }
+        .stat-home .number { font-size: 32px; font-weight: 800; color: var(--navy); }
+        .stat-home .label { font-size: 14px; color: var(--medium-grey); }
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: var(--medium-grey); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <div class="logo">🇰🇪 <span>USKAN</span></div>
+            <p class="tagline">Test your brain. Earn money. Build your future.</p>
+            <p class="subtagline">Take tests, get your results, and start earning by sharing your links.</p>
+            <div class="earn-badge">💰 Earn KSh 20 per referral</div>
+        </div>
+
+        <h2 style="font-size:24px; color:var(--navy); margin-top: 8px;">🧪 Available Tests</h2>
+        <div class="test-grid">
+            <a href="brain-test.html" class="test-card">
+                <div class="test-icon">🧠</div>
+                <h3>Brain Test</h3>
+                <p>48 puzzles across 5 cognitive areas in 10 minutes</p>
+                <div class="test-meta">
+                    <span>⏱️ 10 min</span>
+                    <span>🧩 48 questions</span>
+                    <span>💰 KSh 50</span>
+                </div>
+            </a>
+            <div class="test-card coming-soon">
+                <div class="test-icon">🫂</div>
+                <h3>Trauma Test <span style="font-size:12px; color:var(--medium-grey);">(Coming Soon)</span></h3>
+                <p>Assess emotional well-being and childhood experiences</p>
+                <div class="test-meta">
+                    <span>⏱️ 15 min</span>
+                    <span>📋 30 questions</span>
+                    <span>🔜 Coming Soon</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="how-section">
+            <h2>⚡ How It Works</h2>
+            <div class="how-steps">
+                <div class="how-step"><div class="step-num">1</div><h4>Take a Test</h4><p>Choose any test and complete the challenges</p></div>
+                <div class="how-step"><div class="step-num">2</div><h4>Get Your Results</h4><p>Pay KSh 50 to unlock your full report</p></div>
+                <div class="how-step"><div class="step-num">3</div><h4>Get Your Link</h4><p>Register your M-Pesa number and get a referral link</p></div>
+                <div class="how-step"><div class="step-num">4</div><h4>Share & Earn</h4><p>Share your link and earn KSh 20 per referral</p></div>
+            </div>
+        </div>
+
+        <div class="stats-home">
+            <div class="stat-home"><div class="number" id="statUsersHome">0</div><div class="label">Users</div></div>
+            <div class="stat-home"><div class="number" id="statEarnedHome">KSh 0</div><div class="label">Earned by Users</div></div>
+            <div class="stat-home"><div class="number" id="statTestsHome">0</div><div class="label">Tests Taken</div></div>
+        </div>
+
+        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
+    </div>
+
+    <script>
+        const SUPABASE_URL = document.querySelector('meta[name="supabase-url"]')?.content || '';
+        const SUPABASE_ANON_KEY = document.querySelector('meta[name="supabase-anon-key"]')?.content || '';
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const { count: users } = await supabase.from('users').select('*', { count: 'exact', head: true });
+                const { count: payments } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('status', 'completed');
+                const { data: referrals } = await supabase.from('referrals').select('commission_amount').in('payout_status', ['completed', 'manual_paid']);
+                const totalEarned = referrals?.reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+                document.getElementById('statUsersHome').textContent = users || 0;
+                document.getElementById('statEarnedHome').textContent = `KSh ${totalEarned}`;
+                document.getElementById('statTestsHome').textContent = payments || 0;
+            } catch (error) { console.error('Error loading stats:', error); }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brain Test - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .test-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #EDF2F7; margin-bottom: 24px; }
+        .test-nav .brand { font-size: 20px; font-weight: 700; color: var(--navy); }
+        .test-nav .brand span { color: var(--primary-orange); }
+        .test-nav .back-link { color: var(--medium-grey); text-decoration: none; font-size: 14px; }
+        .test-nav .back-link:hover { color: var(--navy); }
+        .test-intro { text-align: center; padding: 20px 0 32px; }
+        .test-intro h1 { font-size: 32px; color: var(--navy); }
+        .test-intro p { font-size: 16px; color: var(--medium-grey); max-width: 500px; margin: 8px auto; }
+        .test-intro .earn-note { background: #F0FFF4; color: var(--success-green); padding: 8px 20px; border-radius: 30px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 8px; }
+        .start-btn-wrapper { text-align: center; padding: 20px 0; }
+        .feature-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0; text-align: center; }
+        .feature-grid .feature { background: var(--off-white); padding: 12px; border-radius: 12px; }
+        .feature-grid .feature .icon { font-size: 24px; }
+        .feature-grid .feature .label { font-size: 12px; font-weight: 600; }
+        footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: var(--medium-grey); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-nav">
+            <div class="brand">🇰🇪 US<span>KAN</span></div>
+            <a href="index.html" class="back-link">← Home</a>
+        </div>
+        
+        <div class="test-intro">
+            <h1>🧠 Brain Test</h1>
+            <p>48 puzzles across 5 cognitive areas. Discover your brain type and earn money by sharing your results.</p>
+            <div class="earn-note">💰 Earn KSh 20 per referral after taking the test</div>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature"><div class="icon">🧩</div><div class="label">Logic</div></div>
+            <div class="feature"><div class="icon">🧠</div><div class="label">Memory</div></div>
+            <div class="feature"><div class="icon">🌀</div><div class="label">Spatial</div></div>
+            <div class="feature"><div class="icon">📝</div><div class="label">Verbal</div></div>
+            <div class="feature"><div class="icon">⚡</div><div class="label">Speed</div></div>
+        </div>
+        
+        <div class="start-btn-wrapper">
+            <a href="test.html" class="btn-primary btn-large">🚀 Start the Test</a>
+            <p style="font-size:14px; color:var(--medium-grey); margin-top:8px;">Takes about 10–12 minutes • KSh 50 for full results</p>
+        </div>
+        
+        <div style="background:var(--off-white); border-radius:16px; padding:20px; margin-top:24px; text-align:center;">
+            <p style="font-style:italic; color:var(--dark-grey);">"I made KSh 400 in my first week just by sharing my link on WhatsApp!"</p>
+            <p style="font-size:14px; color:var(--medium-grey);">– David, 24</p>
+        </div>
+        
+        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

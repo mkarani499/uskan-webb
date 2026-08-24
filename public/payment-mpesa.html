@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pay with M-Pesa - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .payment-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #EDF2F7; margin-bottom: 24px; }
+        .payment-nav .brand { font-size: 20px; font-weight: 700; color: #1A2A3A; }
+        .payment-nav .brand span { color: #ED8936; }
+        .payment-nav .back-link { color: #718096; text-decoration: none; font-size: 14px; }
+        .payment-container { max-width: 500px; margin: 0 auto; }
+        .payment-header { text-align: center; margin-bottom: 24px; }
+        .payment-header h1 { font-size: 28px; color: #1A2A3A; }
+        .payment-header p { color: #718096; font-size: 16px; }
+        .price-display { text-align: center; background: #F8FAFC; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .price-display .amount { font-size: 48px; font-weight: 800; color: #1A2A3A; display: block; }
+        .price-display .label { font-size: 16px; color: #718096; }
+        .payment-form { display: flex; flex-direction: column; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-weight: 600; font-size: 16px; color: #1A2A3A; }
+        .form-group input { padding: 12px 16px; border: 2px solid #E2E8F0; border-radius: 12px; font-size: 16px; outline: none; }
+        .form-group input:focus { border-color: #3182CE; }
+        .form-group small { font-size: 13px; color: #718096; }
+        .phone-input { display: flex; align-items: center; border: 2px solid #E2E8F0; border-radius: 12px; overflow: hidden; background: white; }
+        .phone-input .country-code { padding: 12px 16px; background: #F8FAFC; font-weight: 600; color: #4A5568; }
+        .phone-input input { flex: 1; padding: 12px 16px; border: none; font-size: 18px; outline: none; background: white; }
+        .btn-mpesa { background: linear-gradient(135deg, #00A651, #00843D) !important; width: 100%; padding: 16px; font-size: 18px; border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .btn-mpesa:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 166, 81, 0.5) !important; }
+        .btn-mpesa:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .btn-secondary { display: inline-block; padding: 12px 24px; background: #F8FAFC; color: #4A5568; border: 2px solid #E2E8F0; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .btn-secondary:hover { border-color: #3182CE; background: #EBF8FF; }
+        .payment-status { text-align: center; padding: 32px 0; display: none; }
+        .payment-status .status-icon { font-size: 48px; }
+        .payment-status h3 { margin: 8px 0 4px; }
+        .payment-status p { color: #718096; }
+        .payment-success { text-align: center; padding: 32px 0; display: none; }
+        .payment-success .success-icon { font-size: 48px; }
+        .payment-success h3 { margin: 8px 0 4px; color: #48BB78; }
+        .payment-success p { color: #718096; }
+        .btn-primary { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #ED8936, #DD6B20); color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(237, 137, 54, 0.4); }
+        .trust-signals { display: flex; justify-content: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+        .trust-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #718096; }
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: #718096; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2A3A; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 16px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s ease; z-index: 1000; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container payment-container">
+        <div class="payment-nav">
+            <div class="brand">🇰🇪 US<span>KAN</span></div>
+            <a href="results-preview.html" class="back-link">← Back</a>
+        </div>
+
+        <div class="payment-header">
+            <h1>💳 Pay with M-Pesa</h1>
+            <p>Unlock your full Brain Test results</p>
+        </div>
+
+        <div class="price-display">
+            <span class="amount">KSh 50</span>
+            <span class="label">One-time payment for your full report</span>
+        </div>
+
+        <form id="mpesaForm" class="payment-form">
+            <div class="form-group">
+                <label for="phoneNumber">📱 M-Pesa Phone Number</label>
+                <div class="phone-input">
+                    <span class="country-code">+254</span>
+                    <input type="tel" id="phoneNumber" placeholder="712345678" required maxlength="9" pattern="[0-9]{9}" />
+                </div>
+                <small>Enter your M-Pesa registered phone number</small>
+            </div>
+            <div class="form-group">
+                <label for="email">📧 Email Address (Optional)</label>
+                <input type="email" id="email" placeholder="you@email.com" />
+                <small>We'll send your report here too</small>
+            </div>
+            <button type="submit" class="btn-mpesa" id="payBtn">📲 Pay KSh 50 via M-Pesa</button>
+        </form>
+
+        <div id="paymentStatus" class="payment-status">
+            <div class="status-icon">⏳</div>
+            <h3>Waiting for your confirmation...</h3>
+            <p>Check your phone for the M-Pesa PIN prompt.</p>
+            <button id="checkStatusBtn" class="btn-secondary" style="margin-top:12px;">Check Status</button>
+        </div>
+
+        <div id="paymentSuccess" class="payment-success">
+            <div class="success-icon">✅</div>
+            <h3>Payment Successful!</h3>
+            <p>Your Brain Report is now ready.</p>
+            <a href="results-full.html" class="btn-primary" style="margin-top:12px; display:inline-block;">📊 View Your Report</a>
+        </div>
+
+        <div class="trust-signals">
+            <div class="trust-item">🔒 Secure & Encrypted</div>
+            <div class="trust-item">📱 Verified by Safaricom</div>
+            <div class="trust-item">💰 One-time payment only</div>
+        </div>
+
+        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
+    </script>
+    <script>
+        // ============================================================
+        // SUPABASE CLIENT
+        // ============================================================
+        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
+
+        // Check if supabaseJs is loaded
+        if (typeof supabaseJs !== 'undefined') {
+            var supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase connected');
+        } else {
+            console.warn('⚠️ supabaseJs not loaded, using fetch fallback');
+            var supabase = null;
+        }
+
+        // ============================================================
+        // PAYMENT HANDLER - REAL MPESA
+        // ============================================================
+        let checkoutRequestID = null;
+        let userId = null;
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        document.getElementById('mpesaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('📥 Payment form submitted');
+
+            const phoneInput = document.getElementById('phoneNumber');
+            const emailInput = document.getElementById('email');
+            const payBtn = document.getElementById('payBtn');
+
+            const phoneNumber = phoneInput.value.replace(/\D/g, '');
+
+            if (phoneNumber.length !== 9) {
+                showToast('❌ Please enter a valid 9-digit phone number');
+                return;
+            }
+
+            const formattedPhone = `254${phoneNumber}`;
+            const email = emailInput?.value || null;
+
+            payBtn.disabled = true;
+            payBtn.textContent = '⏳ Processing...';
+
+            try {
+                // ============================================================
+                // REAL MPESA PAYMENT - NO TEST MODE
+                // ============================================================
+
+                // 1. Get or create user
+                let user = null;
+                if (supabase) {
+                    let { data: existingUser } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('phone_number', formattedPhone)
+                        .single();
+
+                    if (!existingUser) {
+                        const { data: newUser } = await supabase
+                            .from('users')
+                            .insert({
+                                phone_number: formattedPhone,
+                                email: email
+                            })
+                            .select()
+                            .single();
+                        user = newUser;
+                    } else {
+                        user = existingUser;
+                    }
+                    userId = user.id;
+                    localStorage.setItem('userId', userId);
+                }
+
+                // 2. Get test data
+                let testData = null;
+                if (supabase) {
+                    const { data } = await supabase
+                        .from('tests')
+                        .select('*')
+                        .eq('slug', 'brain')
+                        .single();
+                    testData = data;
+                } else {
+                    // Fallback if Supabase isn't loaded
+                    testData = { id: 1, name: 'Brain Test', price: 50 };
+                }
+
+                // 3. Initiate STK Push
+                const response = await fetch('/api/mpesa-stk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: formattedPhone,
+                        amount: 50,
+                        accountReference: `USKAN-${Date.now()}`,
+                        transactionDesc: 'USKAN Brain Test'
+                    })
+                });
+
+                const data = await response.json();
+                console.log('📤 Response:', data);
+
+                if (data.success) {
+                    checkoutRequestID = data.checkoutRequestID;
+
+                    // Save payment record
+                    if (supabase && testData) {
+                        await supabase
+                            .from('payments')
+                            .insert({
+                                user_id: userId,
+                                test_id: testData.id,
+                                phone_number: formattedPhone,
+                                amount: 50,
+                                checkout_request_id: checkoutRequestID,
+                                merchant_request_id: data.merchantRequestID,
+                                status: 'pending'
+                            });
+                    }
+
+                    // Store for polling
+                    localStorage.setItem('checkoutRequestID', checkoutRequestID);
+
+                    document.getElementById('paymentStatus').style.display = 'block';
+                    document.getElementById('mpesaForm').style.display = 'none';
+
+                    // Start polling for payment status
+                    startPolling(checkoutRequestID);
+                } else {
+                    showToast('❌ Payment failed: ' + (data.error || 'Unknown error'));
+                    payBtn.disabled = false;
+                    payBtn.textContent = '📲 Pay KSh 50 via M-Pesa';
+                }
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showToast('❌ Something went wrong. Please try again.');
+                payBtn.disabled = false;
+                payBtn.textContent = '📲 Pay KSh 50 via M-Pesa';
+            }
+        });
+
+        // ============================================================
+        // POLL PAYMENT STATUS
+        // ============================================================
+        function startPolling(checkoutID) {
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            const pollInterval = setInterval(async () => {
+                attempts++;
+
+                try {
+                    const response = await fetch('/api/verify-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            checkoutRequestID: checkoutID
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        document.getElementById('paymentStatus').style.display = 'none';
+                        document.getElementById('paymentSuccess').style.display = 'block';
+
+                        // Save results to Supabase
+                        if (supabase && userId) {
+                            const results = JSON.parse(localStorage.getItem('testResults') || '{}');
+                            const answers = JSON.parse(localStorage.getItem('testAnswers') || '[]');
+                            const timeTaken = parseInt(localStorage.getItem('testTime') || '0');
+
+                            const { data: testData } = await supabase
+                                .from('tests')
+                                .select('*')
+                                .eq('slug', 'brain')
+                                .single();
+
+                            await supabase
+                                .from('test_results')
+                                .insert({
+                                    user_id: userId,
+                                    test_id: testData.id,
+                                    overall_score: results.overallCorrect || 0,
+                                    overall_percentage: results.overall || 0,
+                                    abstract_score: results.abstract || 0,
+                                    memory_score: results.memory || 0,
+                                    spatial_score: results.spatial || 0,
+                                    verbal_score: results.verbal || 0,
+                                    speed_score: results.speed || 0,
+                                    brain_type: results.brainType || 'Balanced Thinker',
+                                    time_taken: Math.floor(timeTaken / 1000) || 0,
+                                    answers: answers || []
+                                });
+                        }
+
+                        // Set payment completed flag
+                        localStorage.setItem('paymentCompleted', 'true');
+
+                        setTimeout(() => {
+                            window.location.href = 'results-full.html';
+                        }, 3000);
+
+                    } else if (data.status === 'failed' || attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        showToast('⏳ Payment still processing. You can check status manually.');
+                    }
+
+                } catch (error) {
+                    console.error('Status check error:', error);
+                }
+            }, 5000);
+        }
+
+        // Check status button
+        document.getElementById('checkStatusBtn')?.addEventListener('click', async function() {
+            const checkoutID = localStorage.getItem('checkoutRequestID');
+            if (!checkoutID) {
+                showToast('❌ No pending payment found');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/verify-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ checkoutRequestID: checkoutID })
+                });
+                const data = await response.json();
+                showToast(`Status: ${data.status} - ${data.resultDesc || ''}`);
+                console.log('Payment status:', data);
+            } catch (error) {
+                console.error('Status check error:', error);
+                showToast('❌ Error checking status');
+            }
+        });
+
+        console.log('✅ Payment page ready (REAL MPESA MODE)');
+        console.log('⚠️ REAL MONEY will be deducted! Test with small amount first.');
+    </script>
+</body>
+</html>

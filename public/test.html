@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Brain Test - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-nav { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        .test-nav .brand { font-size: 22px; font-weight: bold; color: #1A2A3A; }
+        .test-nav .brand span { color: #ED8936; }
+        .test-nav .back-link { color: #888; text-decoration: none; }
+        .test-header-top { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .test-timer { font-size: 18px; font-weight: 600; color: #1A2A3A; background: #f0f0f0; padding: 4px 16px; border-radius: 20px; }
+        .progress-bar { width: 100%; height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #3182CE, #D69E2E); border-radius: 3px; transition: width 0.3s; width: 0%; }
+        .test-meta { display: flex; justify-content: space-between; font-size: 14px; color: #718096; margin-bottom: 20px; }
+        .category-badge { background: #f0f0f0; padding: 2px 12px; border-radius: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+        .question-text { font-size: 22px; font-weight: 600; color: #1A2A3A; margin-bottom: 16px; }
+        .question-image { font-size: 28px; padding: 16px; background: #f8f9fa; border-radius: 12px; text-align: center; letter-spacing: 6px; min-height: 60px; margin-bottom: 16px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .option-btn { padding: 14px 20px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 18px; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover { border-color: #3182CE; background: #EBF8FF; transform: translateY(-2px); }
+        .option-btn.correct { border-color: #48BB78; background: #F0FFF4; }
+        .option-btn.incorrect { border-color: #E53E3E; background: #FFF5F5; }
+        .option-btn.disabled { cursor: not-allowed; opacity: 0.6; }
+        .feedback { padding: 14px 18px; border-radius: 10px; margin-top: 16px; display: none; }
+        .feedback.correct { background: #F0FFF4; border-left: 4px solid #48BB78; display: block; }
+        .feedback.incorrect { background: #FFF5F5; border-left: 4px solid #E53E3E; display: block; }
+        .feedback strong { display: block; margin-bottom: 4px; }
+        .test-footer { margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #888; }
+        .timer-warning { color: #E53E3E; animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-nav">
+            <div class="brand">🇰🇪 US<span>KAN</span></div>
+            <a href="brain-test.html" class="back-link">← Back</a>
+        </div>
+
+        <div class="test-header-top">
+            <span class="test-timer" id="timerDisplay">⏱️ 12:00</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="test-meta">
+            <span>Question <span id="progress">1</span> / <span id="totalQuestions">48</span></span>
+            <span>⏱️ <span id="questionTimer">15</span>s</span>
+            <span id="categoryDisplay" class="category-badge">Abstract</span>
+        </div>
+
+        <div class="question-text" id="questionText">Loading...</div>
+        <div class="question-image" id="questionImage"></div>
+        <div class="options-grid" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="test-footer"><p>Answer as quickly and accurately as possible</p></div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ALL QUESTIONS (48) - HARDCODED HERE
+        // ============================================================
+        const brainQuestions = [
+            { id: 1, category: "abstract", timer: 15, question: "Which option completes the pattern?", image: "⬆ → ⬇ → ⬅ → ?", options: ["➡", "⬆", "⬇", "⬅"], correct: 0 },
+            { id: 2, category: "abstract", timer: 15, question: "Which option completes the pattern?", image: "● → ●● → ●●● → ?", options: ["●", "●●", "●●●", "●●●●"], correct: 3 },
+            { id: 3, category: "abstract", timer: 15, question: "Which option completes the pattern?", image: "△ → ▲ → △ → ?", options: ["△", "▲", "▽", "▼"], correct: 1 },
+            { id: 4, category: "abstract", timer: 20, question: "Which option completes the pattern?", image: "●  ●●  ●●● | ●●  ●●●  ● | ●●●  ●  ?", options: ["●", "●●", "●●●", "●●●●"], correct: 1 },
+            { id: 5, category: "abstract", timer: 20, question: "Which option completes the pattern?", image: "○ → ○○ → ○○○ → ○○ → ○ → ?", options: ["○", "○○", "○○○", "○○○○"], correct: 2 },
+            { id: 6, category: "abstract", timer: 20, question: "Which option completes the pattern?", image: "□ → ■ → □□ → ■■ → □□□ → ?", options: ["■", "■■", "■■■", "□□□"], correct: 2 },
+            { id: 7, category: "abstract", timer: 25, question: "Which option completes the pattern?", image: "△  ▷  ▷▷ | ▷  ▷▷  △ | ▷▷  △  ?", options: ["△", "▷", "▷▷", "△△"], correct: 1 },
+            { id: 8, category: "abstract", timer: 25, question: "Which option completes the pattern?", image: "▲ → ▴ → ▸ → ?", options: ["▸", "▴", "▼", "◂"], correct: 3 },
+            { id: 9, category: "abstract", timer: 25, question: "Which option completes the pattern?", image: "★  ☆  ★★ | ☆  ★★  ★ | ★★  ★  ?", options: ["★", "☆", "★★", "☆☆"], correct: 1 },
+            { id: 10, category: "abstract", timer: 30, question: "Which option completes the pattern?", image: "◉ → ◉◉ → ◉◉◉ → ◉◉ → ◉ → ?", options: ["◉", "◉◉", "◉◉◉", "◉◉◉◉"], correct: 0 },
+            { id: 11, category: "abstract", timer: 30, question: "Which option completes the pattern?", image: "⬛  ⬜  ⬛⬛ | ⬜  ⬛⬛  ⬛ | ⬛⬛  ⬛  ?", options: ["⬛", "⬜", "⬛⬛", "⬜⬜"], correct: 1 },
+            { id: 12, category: "abstract", timer: 30, question: "Which option completes the pattern?", image: "◆ → ◇ → ◆◆ → ◇◇ → ◆◆◆ → ?", options: ["◇", "◇◇", "◇◇◇", "◆◆◆"], correct: 2 },
+            { id: 13, category: "memory", timer: 8, question: "What was the number sequence?", image: "3-7-2-9-4", options: ["3-7-2-9-4", "3-7-9-2-4", "7-3-2-9-4", "3-7-2-4-9"], correct: 0 },
+            { id: 14, category: "memory", timer: 8, question: "What was the number sequence?", image: "8-1-5-3-6", options: ["8-1-5-3-6", "8-5-1-3-6", "1-8-5-3-6", "8-1-3-5-6"], correct: 0 },
+            { id: 15, category: "memory", timer: 8, question: "What was the number sequence?", image: "4-9-2-7-5", options: ["4-9-2-7-5", "4-2-9-7-5", "9-4-2-7-5", "4-9-7-2-5"], correct: 0 },
+            { id: 16, category: "memory", timer: 12, question: "What was the number sequence?", image: "6-2-8-4-1-7", options: ["6-2-8-4-1-7", "6-8-2-4-1-7", "2-6-8-4-1-7", "6-2-8-1-4-7"], correct: 0 },
+            { id: 17, category: "memory", timer: 12, question: "What was the number sequence?", image: "5-9-3-7-2-8", options: ["5-9-3-7-2-8", "5-3-9-7-2-8", "9-5-3-7-2-8", "5-9-7-3-2-8"], correct: 0 },
+            { id: 18, category: "memory", timer: 15, question: "What was the number sequence?", image: "7-3-9-1-6-4-8", options: ["7-3-9-1-6-4-8", "7-9-3-1-6-4-8", "3-7-9-1-6-4-8", "7-3-9-6-1-4-8"], correct: 0 },
+            { id: 19, category: "memory", timer: 15, question: "What was the number sequence?", image: "2-8-5-1-9-3-7", options: ["2-8-5-1-9-3-7", "2-5-8-1-9-3-7", "8-2-5-1-9-3-7", "2-8-5-9-1-3-7"], correct: 0 },
+            { id: 20, category: "memory", timer: 18, question: "What was the number sequence?", image: "4-7-2-9-5-1-8-3", options: ["4-7-2-9-5-1-8-3", "4-2-7-9-5-1-8-3", "7-4-2-9-5-1-8-3", "4-7-2-9-1-5-8-3"], correct: 0 },
+            { id: 21, category: "spatial", timer: 15, question: "Which shape is a mirror image of the one shown?", image: "◁", options: ["▷", "◁", "◂", "▸"], correct: 0 },
+            { id: 22, category: "spatial", timer: 15, question: "Which shape is a 90° rotation of the one shown?", image: "△", options: ["△", "▽", "◁", "▷"], correct: 1 },
+            { id: 23, category: "spatial", timer: 15, question: "Which option shows the same shape rotated?", image: "⬛", options: ["⬛", "⬜", "▢", "▣"], correct: 0 },
+            { id: 24, category: "spatial", timer: 20, question: "Which shape completes the sequence?", image: "◢ → ◣ → ◤ → ?", options: ["◢", "◣", "◤", "◥"], correct: 3 },
+            { id: 25, category: "spatial", timer: 20, question: "Which shape is a mirror image of the one shown?", image: "◐", options: ["◐", "◑", "◒", "◓"], correct: 1 },
+            { id: 26, category: "spatial", timer: 20, question: "Which option shows the same shape reflected?", image: "⬆", options: ["⬆", "⬇", "⬅", "➡"], correct: 1 },
+            { id: 27, category: "spatial", timer: 25, question: "Which shape completes the sequence?", image: "◐ → ◑ → ◒ → ?", options: ["◐", "◑", "◒", "◓"], correct: 3 },
+            { id: 28, category: "spatial", timer: 25, question: "Which option shows the same 3D shape from a different angle?", image: "cube-1", options: ["cube-2", "cube-3", "cube-4", "cube-5"], correct: 1 },
+            { id: 29, category: "spatial", timer: 25, question: "Which shape completes the pattern?", image: "⬛⬜⬛ | ⬜⬛⬜ | ⬛⬜?", options: ["⬛", "⬜", "▢", "▣"], correct: 0 },
+            { id: 30, category: "spatial", timer: 30, question: "Which option shows the cube unfolded into a net?", image: "cube-3d", options: ["net-1", "net-2", "net-3", "net-4"], correct: 2 },
+            { id: 31, category: "verbal", timer: 15, question: "Hot is to Cold as Light is to:", image: "", options: ["Lamp", "Dark", "Bright", "Sun"], correct: 1 },
+            { id: 32, category: "verbal", timer: 15, question: "Dog is to Puppy as Cat is to:", image: "", options: ["Kitten", "Kitty", "Cat", "Feline"], correct: 0 },
+            { id: 33, category: "verbal", timer: 15, question: "Apple is to Fruit as Carrot is to:", image: "", options: ["Vegetable", "Salad", "Garden", "Orange"], correct: 0 },
+            { id: 34, category: "verbal", timer: 20, question: "All dogs are animals. Some animals are cats. Therefore:", image: "", options: ["All dogs are cats", "Some dogs are cats", "Some animals are dogs", "All animals are dogs"], correct: 2 },
+            { id: 35, category: "verbal", timer: 20, question: "If you rearrange the letters of 'CIFAIPC', you get the name of a:", image: "", options: ["City", "Ocean", "Country", "Planet"], correct: 1 },
+            { id: 36, category: "verbal", timer: 25, question: "Tree is to Forest as Star is to:", image: "", options: ["Sky", "Universe", "Galaxy", "Night"], correct: 2 },
+            { id: 37, category: "verbal", timer: 25, question: "If all zips are zaps, and some zaps are zops, which is true?", image: "", options: ["All zips are zops", "Some zips are zops", "Some zaps are zips", "All zops are zips"], correct: 2 },
+            { id: 38, category: "verbal", timer: 30, question: "Boat is to Harbor as Airplane is to:", image: "", options: ["Runway", "Airport", "Hangar", "Sky"], correct: 1 },
+            { id: 39, category: "speed", timer: 5, question: "Which symbol appears most frequently?", image: "⬛ ⬜ ⬛ ⬜ ⬛ ⬛ ⬜ ⬛ ⬜ ⬛", options: ["⬛", "⬜", "Equal", "Can't tell"], correct: 0 },
+            { id: 40, category: "speed", timer: 5, question: "Which symbol appears most frequently?", image: "● ○ ● ○ ● ● ○ ● ○ ●", options: ["●", "○", "Equal", "Can't tell"], correct: 0 },
+            { id: 41, category: "speed", timer: 5, question: "Which symbol appears most frequently?", image: "★ ☆ ★ ☆ ★ ★ ☆ ★ ☆ ★", options: ["★", "☆", "Equal", "Can't tell"], correct: 0 },
+            { id: 42, category: "speed", timer: 6, question: "What is 14 + 7 + 9?", image: "", options: ["28", "29", "30", "31"], correct: 2 },
+            { id: 43, category: "speed", timer: 6, question: "What is 22 + 8 + 5?", image: "", options: ["33", "34", "35", "36"], correct: 2 },
+            { id: 44, category: "speed", timer: 6, question: "What is 16 + 9 + 7?", image: "", options: ["30", "31", "32", "33"], correct: 2 },
+            { id: 45, category: "speed", timer: 4, question: "What is 17 + 8 + 3?", image: "", options: ["25", "27", "28", "30"], correct: 2 },
+            { id: 46, category: "speed", timer: 4, question: "What is 19 + 6 + 4?", image: "", options: ["27", "28", "29", "30"], correct: 2 },
+            { id: 47, category: "speed", timer: 4, question: "What is 23 + 7 + 2?", image: "", options: ["30", "31", "32", "33"], correct: 2 },
+            { id: 48, category: "speed", timer: 3, question: "What is 18 + 9 + 4 + 2?", image: "", options: ["31", "32", "33", "34"], correct: 2 }
+        ];
+
+        // ============================================================
+        // TEST ENGINE - HARDCODED HERE
+        // ============================================================
+        let currentQuestion = 0;
+        let score = { abstract: 0, memory: 0, spatial: 0, verbal: 0, speed: 0 };
+        let categoryCounts = { abstract: 0, memory: 0, spatial: 0, verbal: 0, speed: 0 };
+        let userAnswers = [];
+        let timePerQuestion = [];
+        let timerInterval;
+        let timeLeft = 0;
+        let totalTime = 0;
+
+        const categoryNames = {
+            abstract: 'Abstract Reasoning',
+            memory: 'Memory & Recall',
+            spatial: 'Spatial Awareness',
+            verbal: 'Verbal Reasoning',
+            speed: 'Processing Speed'
+        };
+
+        const categoryEmojis = {
+            abstract: '🧩',
+            memory: '🧠',
+            spatial: '🌀',
+            verbal: '📝',
+            speed: '⚡'
+        };
+
+        function startTest() {
+            const questions = brainQuestions || [];
+            if (questions.length === 0) {
+                document.getElementById('questionText').textContent = '⚠️ No questions found.';
+                return;
+            }
+            
+            currentQuestion = 0;
+            score = { abstract: 0, memory: 0, spatial: 0, verbal: 0, speed: 0 };
+            categoryCounts = { abstract: 0, memory: 0, spatial: 0, verbal: 0, speed: 0 };
+            userAnswers = [];
+            timePerQuestion = [];
+            totalTime = 0;
+            
+            document.getElementById('totalQuestions').textContent = questions.length;
+            showQuestion(questions);
+        }
+
+        function showQuestion(questions) {
+            const q = questions[currentQuestion];
+            if (!q) { finishTest(questions); return; }
+            
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progress').textContent = currentQuestion + 1;
+            
+            const categoryName = categoryNames[q.category] || q.category;
+            const categoryEmoji = categoryEmojis[q.category] || '🧠';
+            document.getElementById('categoryDisplay').textContent = `${categoryEmoji} ${categoryName}`;
+            document.getElementById('questionText').textContent = q.question;
+            
+            const imageEl = document.getElementById('questionImage');
+            if (q.image && q.image.length > 0) {
+                imageEl.textContent = q.image;
+                imageEl.style.display = 'flex';
+            } else {
+                imageEl.style.display = 'none';
+            }
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.className = 'option-btn';
+                btn.setAttribute('data-index', index);
+                btn.onclick = () => selectAnswer(index, questions);
+                optionsContainer.appendChild(btn);
+            });
+            
+            timeLeft = q.timer || 15;
+            startTimer(q, questions);
+            
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback';
+        }
+
+        function startTimer(q, questions) {
+            const timerDisplay = document.getElementById('questionTimer');
+            timerDisplay.textContent = timeLeft;
+            timerDisplay.className = '';
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 5) { timerDisplay.className = 'timer-warning'; }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    selectAnswer(-1, questions);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(index, questions) {
+            clearInterval(timerInterval);
+            const q = questions[currentQuestion];
+            const timeTaken = (q.timer || 15) - timeLeft;
+            timePerQuestion.push(timeTaken);
+            totalTime += timeTaken;
+            
+            const isCorrect = index === q.correct;
+            
+            userAnswers.push({
+                questionId: q.id,
+                category: q.category,
+                selected: index,
+                correct: q.correct,
+                isCorrect: isCorrect,
+                timeTaken: timeTaken
+            });
+            
+            if (isCorrect) { score[q.category] = (score[q.category] || 0) + 1; }
+            categoryCounts[q.category] = (categoryCounts[q.category] || 0) + 1;
+            
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.innerHTML = `
+                <strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong>
+                <p>${isCorrect ? 'Great job!' : 'The correct answer was: ' + q.options[q.correct]}</p>
+            `;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.className = 'option-btn disabled';
+                const btnIndex = parseInt(btn.getAttribute('data-index'));
+                if (btnIndex === q.correct) { btn.className = 'option-btn correct'; }
+                else if (btnIndex === index && !isCorrect) { btn.className = 'option-btn incorrect'; }
+            });
+            
+            setTimeout(() => {
+                currentQuestion++;
+                showQuestion(questions);
+            }, 1500);
+        }
+
+        function finishTest(questions) {
+            clearInterval(timerInterval);
+            const totalQuestions = questions.length;
+            const totalCorrect = Object.values(score).reduce((a, b) => a + b, 0);
+            
+            const result = {};
+            for (let cat in categoryCounts) {
+                const total = categoryCounts[cat] || 1;
+                const correct = score[cat] || 0;
+                result[cat] = Math.round((correct / total) * 100);
+            }
+            
+            result.overall = Math.round((totalCorrect / totalQuestions) * 100);
+            result.overallCorrect = totalCorrect;
+            result.overallTotal = totalQuestions;
+            
+            localStorage.setItem('testResults', JSON.stringify(result));
+            localStorage.setItem('testAnswers', JSON.stringify(userAnswers));
+            localStorage.setItem('testTime', JSON.stringify(totalTime));
+            localStorage.setItem('testSlug', 'brain');
+            
+            window.location.href = 'results-preview.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', startTest);
+    </script>
+</body>
+</html>
