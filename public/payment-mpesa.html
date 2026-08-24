@@ -142,6 +142,24 @@
             e.preventDefault();
             console.log('📥 Payment form submitted');
 
+            // ============================================================
+            // TEST MODE - Skip real M-Pesa (Remove this when going live!)
+            // ============================================================
+            const TEST_MODE = true; // Set to false for real payments
+
+            if (TEST_MODE) {
+                console.log('🧪 TEST MODE: Payment bypassed');
+                showToast('✅ TEST MODE: Payment successful!');
+                localStorage.setItem('paymentCompleted', 'true');
+                setTimeout(function() {
+                    window.location.href = 'results-full.html';
+                }, 2000);
+                return;
+            }
+            // ============================================================
+            // END TEST MODE
+            // ============================================================
+
             const phoneInput = document.getElementById('phoneNumber');
             const emailInput = document.getElementById('email');
             const payBtn = document.getElementById('payBtn');
@@ -360,8 +378,9 @@
             }
         });
 
-        console.log('✅ Payment page ready (REAL MPESA MODE)');
-        console.log('⚠️ REAL MONEY will be deducted! Test with small amount first.');
+        console.log('✅ Payment page ready (TEST MODE ENABLED)');
+        console.log('🔧 TEST_MODE = true - No real money will be deducted.');
+        console.log('⚠️ Set TEST_MODE = false when going live!');
     </script>
 </body>
 </html>
