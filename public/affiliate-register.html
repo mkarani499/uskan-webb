@@ -43,63 +43,144 @@
     </style>
 </head>
 <body>
-    <div class="container affiliate-container">
-        <div class="affiliate-nav">
-            <div class="brand">🇰🇪 US<span>KAN</span></div>
-            <a href="results-full.html" class="back-link">← Back to Results</a>
-        </div>
+    <div id="pageContent" style="display:none;">
+        <div class="container affiliate-container">
+            <div class="affiliate-nav">
+                <div class="brand">🇰🇪 US<span>KAN</span></div>
+                <a href="results-full.html" class="back-link">← Back to Results</a>
+            </div>
 
-        <div class="affiliate-header">
-            <span class="affiliate-icon">💰</span>
-            <h1>Start Earning Money!</h1>
-            <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
-        </div>
+            <div class="affiliate-header">
+                <span class="affiliate-icon">💰</span>
+                <h1>Start Earning Money!</h1>
+                <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
+            </div>
 
-        <div class="earnings-preview">
-            <div><div class="stat-number" id="totalReferrals">0</div><div class="stat-label">People Referred</div></div>
-            <div><div class="stat-number" id="totalEarnings">KSh 0</div><div class="stat-label">Total Earned</div></div>
-            <div><div class="stat-number" id="pendingEarnings">KSh 0</div><div class="stat-label">Pending</div></div>
-        </div>
+            <div class="earnings-preview">
+                <div><div class="stat-number" id="totalReferrals">0</div><div class="stat-label">People Referred</div></div>
+                <div><div class="stat-number" id="totalEarnings">KSh 0</div><div class="stat-label">Total Earned</div></div>
+                <div><div class="stat-number" id="pendingEarnings">KSh 0</div><div class="stat-label">Pending</div></div>
+            </div>
 
-        <form id="affiliateForm" class="affiliate-form">
-            <div class="form-group">
-                <label for="mpesaPhone">📱 Your M-Pesa Number</label>
-                <div class="phone-input">
-                    <span class="country-code">+254</span>
-                    <input type="tel" id="mpesaPhone" placeholder="712345678" required maxlength="9" pattern="[0-9]{9}" />
+            <form id="affiliateForm" class="affiliate-form">
+                <div class="form-group">
+                    <label for="mpesaPhone">📱 Your M-Pesa Number</label>
+                    <div class="phone-input">
+                        <span class="country-code">+254</span>
+                        <input type="tel" id="mpesaPhone" placeholder="712345678" required maxlength="9" pattern="[0-9]{9}" />
+                    </div>
+                    <small>This is where we'll send your referral earnings</small>
                 </div>
-                <small>This is where we'll send your referral earnings</small>
-            </div>
-            <button type="submit" class="btn-affiliate-register" id="registerBtn">🔗 Get My Referral Link</button>
-        </form>
+                <button type="submit" class="btn-affiliate-register" id="registerBtn">🔗 Get My Referral Link</button>
+            </form>
 
-        <div id="referralSection">
-            <div class="referral-link-box">
-                <h3>🔗 Your Unique Referral Link</h3>
-                <div class="link-display">
-                    <input type="text" id="referralLink" readonly />
-                    <button onclick="copyReferralLink()" class="btn-copy">📋 Copy</button>
+            <div id="referralSection">
+                <div class="referral-link-box">
+                    <h3>🔗 Your Unique Referral Link</h3>
+                    <div class="link-display">
+                        <input type="text" id="referralLink" readonly />
+                        <button onclick="copyReferralLink()" class="btn-copy">📋 Copy</button>
+                    </div>
+                    <p style="font-size:14px; color:var(--medium-grey);">Share this link on Facebook, WhatsApp, Instagram, or anywhere else!</p>
                 </div>
-                <p style="font-size:14px; color:var(--medium-grey);">Share this link on Facebook, WhatsApp, Instagram, or anywhere else!</p>
+
+                <div class="share-quick">
+                    <button onclick="shareReferral('facebook')" class="share-btn facebook">📘 Facebook</button>
+                    <button onclick="shareReferral('whatsapp')" class="share-btn whatsapp">💬 WhatsApp</button>
+                    <button onclick="shareReferral('twitter')" class="share-btn twitter">🐦 Twitter</button>
+                </div>
+
+                <div class="referral-stats">
+                    <h4>📊 Your Referral Stats</h4>
+                    <p>Total Referrals: <span id="statReferrals">0</span></p>
+                    <p>Total Earnings: <span id="statEarnings">KSh 0</span></p>
+                    <p>Pending: <span id="statPending">KSh 0</span></p>
+                </div>
             </div>
 
-            <div class="share-quick">
-                <button onclick="shareReferral('facebook')" class="share-btn facebook">📘 Facebook</button>
-                <button onclick="shareReferral('whatsapp')" class="share-btn whatsapp">💬 WhatsApp</button>
-                <button onclick="shareReferral('twitter')" class="share-btn twitter">🐦 Twitter</button>
-            </div>
-
-            <div class="referral-stats">
-                <h4>📊 Your Referral Stats</h4>
-                <p>Total Referrals: <span id="statReferrals">0</span></p>
-                <p>Total Earnings: <span id="statEarnings">KSh 0</span></p>
-                <p>Pending: <span id="statPending">KSh 0</span></p>
-            </div>
+            <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
         </div>
-
-        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="script.js"></script>
+    <script src="auth.js"></script>
+    
+    <!-- ============================================================
+    LOGIN CHECK
+    ============================================================ -->
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSession().then(session => {
+                if (!session.loggedIn) {
+                    // Redirect to home with login prompt
+                    alert('Please login or register to access affiliate features.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                // If logged in, show the page content
+                document.getElementById('pageContent').style.display = 'block';
+            });
+        });
+    </script>
+
+    <!-- ============================================================
+    TRACK PAGE VISITS
+    ============================================================ -->
+    <script>
+        async function trackPageVisit() {
+            try {
+                // Get the current page
+                const page = window.location.pathname;
+
+                // Get IP (using a free API)
+                let ip = '';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    ip = ipData.ip;
+                } catch (e) {
+                    console.log('Could not get IP:', e);
+                }
+
+                // Get user if logged in
+                let userId = null;
+                const user = localStorage.getItem('user');
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        userId = userData.id;
+                    } catch (e) {}
+                }
+
+                // Get referrer
+                const referrer = document.referrer || '';
+
+                // Save visit to Supabase
+                const { error } = await supabase
+                    .from('visits')
+                    .insert({
+                        page: page,
+                        ip: ip || null,
+                        user_id: userId || null,
+                        referrer: referrer,
+                        user_agent: navigator.userAgent
+                    });
+
+                if (error) {
+                    console.error('Error tracking visit:', error);
+                }
+            } catch (error) {
+                console.error('Error in trackPageVisit:', error);
+            }
+        }
+
+        // Track the visit when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay tracking to not impact page load
+            setTimeout(trackPageVisit, 1000);
+        });
+    </script>
 </body>
 </html>

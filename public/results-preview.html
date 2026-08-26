@@ -369,5 +369,130 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // CHECK FOR PROGRESS AND AUTH
+        // ============================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const user = localStorage.getItem('user');
+            const isLoggedIn = user ? true : false;
+            
+            if (!isLoggedIn) {
+                // Check if there's progress
+                const progress = localStorage.getItem('testProgress');
+                const results = localStorage.getItem('testResults');
+                
+                if (progress || results) {
+                    // Show a message about registering to save progress
+                    console.log('📦 Progress detected but user not logged in');
+                    
+                    // Add a banner to remind user to register
+                    const container = document.querySelector('.container');
+                    const banner = document.createElement('div');
+                    banner.style.cssText = `
+                        background: linear-gradient(135deg, #FFF3CD, #FFEAA7);
+                        border-radius: 12px;
+                        padding: 16px 20px;
+                        margin-bottom: 20px;
+                        border-left: 4px solid #F1C40F;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                    `;
+                    banner.innerHTML = `
+                        <span style="font-size: 20px;">🔐</span>
+                        <span style="flex:1; color: #1A2A3A; font-size: 14px;">
+                            <strong>You have test results ready!</strong> 
+                            Register or login to save your progress and start earning from referrals.
+                        </span>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button onclick="window.location.href='index.html#register'" style="background: linear-gradient(135deg, var(--primary-orange), #DD6B20); color:white; border:none; padding:8px 20px; border-radius:8px; font-weight:600; cursor:pointer;">
+                                Register
+                            </button>
+                            <button onclick="window.location.href='index.html#login'" style="background:transparent; color:#1A2A3A; border:2px solid #1A2A3A; padding:8px 20px; border-radius:8px; font-weight:600; cursor:pointer;">
+                                Login
+                            </button>
+                        </div>
+                    `;
+                    container.insertBefore(banner, container.firstChild);
+                }
+            } else {
+                // User is logged in, check if they have affiliate info
+                console.log('✅ User is logged in');
+                try {
+                    const userData = JSON.parse(user);
+                    console.log('👤 User:', userData.email);
+                } catch (e) {
+                    console.log('👤 User logged in');
+                }
+            }
+            
+            // Restore affiliate dashboard button visibility
+            const affiliateBtn = document.getElementById('affiliateDashboardBtn');
+            if (affiliateBtn && isLoggedIn) {
+                affiliateBtn.style.display = 'flex';
+            }
+        });
+
+        // ============================================================
+        // TRACK PAGE VISITS
+        // ============================================================
+
+        async function trackPageVisit() {
+            try {
+                // Get the current page
+                const page = window.location.pathname;
+
+                // Get IP (using a free API)
+                let ip = '';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    ip = ipData.ip;
+                } catch (e) {
+                    console.log('Could not get IP:', e);
+                }
+
+                // Get user if logged in
+                let userId = null;
+                const user = localStorage.getItem('user');
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        userId = userData.id;
+                    } catch (e) {}
+                }
+
+                // Get referrer
+                const referrer = document.referrer || '';
+
+                // Save visit to Supabase
+                const { error } = await supabase
+                    .from('visits')
+                    .insert({
+                        page: page,
+                        ip: ip || null,
+                        user_id: userId || null,
+                        referrer: referrer,
+                        user_agent: navigator.userAgent
+                    });
+
+                if (error) {
+                    console.error('Error tracking visit:', error);
+                }
+            } catch (error) {
+                console.error('Error in trackPageVisit:', error);
+            }
+        }
+
+        // Track the visit when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay tracking to not impact page load
+            setTimeout(trackPageVisit, 1000);
+        });
+    </script>
 </body>
 </html>

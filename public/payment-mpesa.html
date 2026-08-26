@@ -381,6 +381,63 @@
         console.log('✅ Payment page ready (TEST MODE ENABLED)');
         console.log('🔧 TEST_MODE = true - No real money will be deducted.');
         console.log('⚠️ Set TEST_MODE = false when going live!');
+
+        // ============================================================
+        // TRACK PAGE VISITS
+        // ============================================================
+
+        async function trackPageVisit() {
+            try {
+                // Get the current page
+                const page = window.location.pathname;
+
+                // Get IP (using a free API)
+                let ip = '';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    ip = ipData.ip;
+                } catch (e) {
+                    console.log('Could not get IP:', e);
+                }
+
+                // Get user if logged in
+                let userId = null;
+                const user = localStorage.getItem('user');
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        userId = userData.id;
+                    } catch (e) {}
+                }
+
+                // Get referrer
+                const referrer = document.referrer || '';
+
+                // Save visit to Supabase
+                const { error } = await supabase
+                    .from('visits')
+                    .insert({
+                        page: page,
+                        ip: ip || null,
+                        user_id: userId || null,
+                        referrer: referrer,
+                        user_agent: navigator.userAgent
+                    });
+
+                if (error) {
+                    console.error('Error tracking visit:', error);
+                }
+            } catch (error) {
+                console.error('Error in trackPageVisit:', error);
+            }
+        }
+
+        // Track the visit when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay tracking to not impact page load
+            setTimeout(trackPageVisit, 1000);
+        });
     </script>
 </body>
 </html>

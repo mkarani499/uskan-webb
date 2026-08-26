@@ -16,13 +16,39 @@
         .admin-logout-btn:hover { background: #C0392B; }
         .btn-refresh-small { background: var(--off-white); border: 1px solid #E2E8F0; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
         .btn-refresh-small:hover { background: #EDF2F7; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+        /* ===== ADMIN STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stats-grid .stat-card:last-child {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid .stat-card:last-child {
+                grid-column: span 1;
+            }
+        }
+
         .stat-card { background: var(--white); padding: 16px 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); }
         .stat-card .stat-number { font-size: 32px; font-weight: 800; color: var(--navy); }
         .stat-card .stat-label { font-size: 14px; color: var(--medium-grey); display: block; }
         .stat-card .stat-icon { font-size: 20px; }
         .stat-card .stat-sub { font-size: 12px; color: var(--medium-grey); }
+
         .admin-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid #EDF2F7; padding-bottom: 8px; flex-wrap: wrap; }
         .admin-tab { padding: 8px 20px; border: none; background: transparent; font-weight: 600; color: var(--medium-grey); cursor: pointer; border-radius: 8px; transition: all 0.2s; font-size: 14px; }
         .admin-tab:hover { background: var(--off-white); }
@@ -76,10 +102,48 @@
         
         <!-- Stats -->
         <div class="stats-grid" id="statsGrid">
-            <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-number" id="statUsers">0</div><span class="stat-label">Total Users</span></div>
-            <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-number" id="statPayments">0</div><span class="stat-label">Total Payments</span></div>
-            <div class="stat-card"><span class="stat-icon">🔗</span><div class="stat-number" id="statAffiliates">0</div><span class="stat-label">Total Affiliates</span></div>
-            <div class="stat-card"><span class="stat-icon">💸</span><div class="stat-number" id="statCommissions">KSh 0</div><span class="stat-label">Total Commissions Paid</span><span class="stat-sub" id="statPendingCommission"></span></div>
+            <!-- Card 1: Registered Users -->
+            <div class="stat-card">
+                <span class="stat-icon">👥</span>
+                <div class="stat-number" id="statRegisteredUsers">0</div>
+                <span class="stat-label">Registered Users</span>
+            </div>
+            <!-- Card 2: Total Payments -->
+            <div class="stat-card">
+                <span class="stat-icon">💰</span>
+                <div class="stat-number" id="statPayments">0</div>
+                <span class="stat-label">Total Payments</span>
+            </div>
+            <!-- Card 3: Total Affiliates -->
+            <div class="stat-card">
+                <span class="stat-icon">🔗</span>
+                <div class="stat-number" id="statAffiliates">0</div>
+                <span class="stat-label">Total Affiliates</span>
+            </div>
+            <!-- Card 4: Total Commissions -->
+            <div class="stat-card">
+                <span class="stat-icon">💸</span>
+                <div class="stat-number" id="statCommissions">KSh 0</div>
+                <span class="stat-label">Total Commissions Paid</span>
+                <span class="stat-sub" id="statPendingCommission"></span>
+            </div>
+            <!-- Card 5: Site Visits (spans 2 columns) -->
+            <div class="stat-card" style="grid-column: span 2;">
+                <span class="stat-icon">📊</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                    <div>
+                        <div class="stat-number" id="statTotalViews">0</div>
+                        <span class="stat-label">Total Views (72hrs)</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="stat-number" id="statUniqueVisitors">0</div>
+                        <span class="stat-label">Unique Visitors (72hrs)</span>
+                    </div>
+                </div>
+                <span class="stat-sub" style="display:block; margin-top:4px; font-size:11px; color:var(--medium-grey);">
+                    ⏱️ Auto-deletes data older than 72 hours
+                </span>
+            </div>
         </div>
         
         <!-- Tabs -->
@@ -188,21 +252,88 @@
         });
 
         // ============================================================
-        // LOAD ADMIN DATA (Placeholder)
+        // LOAD ADMIN DATA
         // ============================================================
         async function loadAdminData() {
             try {
-                // This will be populated with real data from Supabase
                 console.log('📊 Loading admin data...');
+                
+                // 1. Registered Users (only those with verified emails)
+                const { count: usersCount } = await supabase
+                    .from('users')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('email_verified', true);
+
+                // 2. Total Payments (completed)
+                const { count: paymentsCount } = await supabase
+                    .from('payments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'completed');
+
+                // 3. Total Affiliates
+                const { count: affiliatesCount } = await supabase
+                    .from('affiliates')
+                    .select('*', { count: 'exact', head: true });
+
+                // 4. Total Commissions Paid
+                const { data: referrals } = await supabase
+                    .from('referrals')
+                    .select('commission_amount, payout_status')
+                    .in('payout_status', ['completed', 'manual_paid']);
+
+                const totalCommissions = referrals?.reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+
+                const { data: pendingReferrals } = await supabase
+                    .from('referrals')
+                    .select('commission_amount')
+                    .in('payout_status', ['pending', 'processing']);
+
+                const pendingCommissions = pendingReferrals?.reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+
+                // 5. Site Visits (Last 72 hours)
+                try {
+                    // First, delete old visits
+                    await supabase.rpc('delete_old_visits');
+                } catch (deleteError) {
+                    console.warn('Note: delete_old_visits RPC not available - skipping');
+                }
+
+                // Then get visit stats
+                try {
+                    const { data: visitStats, error: visitError } = await supabase
+                        .rpc('get_visits_count');
+
+                    if (visitError) {
+                        console.warn('get_visits_count RPC not available:', visitError);
+                    } else if (visitStats && visitStats.length > 0) {
+                        document.getElementById('statTotalViews').textContent = visitStats[0].total_views || 0;
+                        document.getElementById('statUniqueVisitors').textContent = visitStats[0].unique_visitors || 0;
+                    }
+                } catch (visitError) {
+                    console.warn('Visit stats not available:', visitError);
+                }
+
+                // Update UI
+                document.getElementById('statRegisteredUsers').textContent = usersCount || 0;
+                document.getElementById('statPayments').textContent = paymentsCount || 0;
+                document.getElementById('statAffiliates').textContent = affiliatesCount || 0;
+                document.getElementById('statCommissions').textContent = `KSh ${totalCommissions}`;
+                document.getElementById('statPendingCommission').textContent = `Pending: KSh ${pendingCommissions}`;
                 document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
         }
 
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             loadAdminData();
         });
+
+        console.log('✅ Admin dashboard ready!');
     </script>
 </body>
 </html>

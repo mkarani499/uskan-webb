@@ -525,7 +525,7 @@
         <div class="affiliate-cta">
             <h2>💰 Start Earning Money!</h2>
             <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
-            <a href="affiliate-register.html" class="btn-affiliate">🔗 Get Your Referral Link</a>
+            <button onclick="handleAffiliateAccess()" class="btn-affiliate">🔗 Get Your Referral Link</button>
         </div>
 
         <div class="share-section">
@@ -832,6 +832,132 @@
         window.shareResults = shareResults;
 
         console.log('✅ Results script loaded');
+
+        // ============================================================
+        // TRACK PAGE VISITS
+        // ============================================================
+
+        async function trackPageVisit() {
+            try {
+                // Get the current page
+                const page = window.location.pathname;
+
+                // Get IP (using a free API)
+                let ip = '';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    ip = ipData.ip;
+                } catch (e) {
+                    console.log('Could not get IP:', e);
+                }
+
+                // Get user if logged in
+                let userId = null;
+                const user = localStorage.getItem('user');
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        userId = userData.id;
+                    } catch (e) {}
+                }
+
+                // Get referrer
+                const referrer = document.referrer || '';
+
+                // Save visit to Supabase
+                const { error } = await supabase
+                    .from('visits')
+                    .insert({
+                        page: page,
+                        ip: ip || null,
+                        user_id: userId || null,
+                        referrer: referrer,
+                        user_agent: navigator.userAgent
+                    });
+
+                if (error) {
+                    console.error('Error tracking visit:', error);
+                }
+            } catch (error) {
+                console.error('Error in trackPageVisit:', error);
+            }
+        }
+
+        // Track the visit when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay tracking to not impact page load
+            setTimeout(trackPageVisit, 1000);
+        });
+
+        // ============================================================
+        // AFFILIATE ACCESS HANDLER
+        // ============================================================
+        
+        async function handleAffiliateAccess() {
+            // Check if user is logged in
+            const session = await checkSession();
+            
+            if (session.loggedIn) {
+                // User is logged in, redirect to affiliate dashboard
+                // Open the affiliate dashboard slide-out panel
+                openAffiliateDashboard();
+            } else {
+                // User is not logged in, save progress and show login modal
+                // Check if there are test results to save
+                const results = localStorage.getItem('testResults');
+                const answers = localStorage.getItem('testAnswers');
+                const time = localStorage.getItem('testTime');
+                
+                if (results || answers || time) {
+                    // Save progress so it can be restored after login
+                    const progressData = {
+                        results: results ? JSON.parse(results) : null,
+                        answers: answers ? JSON.parse(answers) : [],
+                        time: time ? parseInt(time) : 0,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('testProgress', JSON.stringify(progressData));
+                    console.log('📦 Progress saved before login:', progressData);
+                }
+                
+                // Store the intended action
+                localStorage.setItem('intendedAction', 'affiliate');
+                
+                // Show login modal with a message
+                showToast('🔐 Please login or register to access affiliate features.');
+                
+                // Open login modal
+                setTimeout(() => {
+                    openLoginModal();
+                }, 500);
+            }
+        }
+        
+        // Make function globally accessible
+        window.handleAffiliateAccess = handleAffiliateAccess;
+        
+        // Check if user came back from login to continue affiliate flow
+        document.addEventListener('DOMContentLoaded', function() {
+            const intendedAction = localStorage.getItem('intendedAction');
+            if (intendedAction === 'affiliate') {
+                // Check if user is now logged in
+                checkSession().then(session => {
+                    if (session.loggedIn) {
+                        // Clear the intended action
+                        localStorage.removeItem('intendedAction');
+                        
+                        // Restore any saved progress
+                        restoreUserProgress();
+                        
+                        // Open affiliate dashboard
+                        setTimeout(() => {
+                            openAffiliateDashboard();
+                        }, 500);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

@@ -27,7 +27,16 @@
     <div class="container">
         <div class="test-nav">
             <div class="brand">🇰🇪 US<span>KAN</span></div>
-            <a href="index.html" class="back-link">← Home</a>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button id="affiliateDashboardBtn" onclick="openAffiliateDashboard()" style="display:none; align-items:center; gap:6px; background:var(--off-white); padding:8px 16px; border-radius:8px; border:1px solid #E2E8F0; cursor:pointer; font-weight:600; font-size:14px; color:var(--navy); transition:all 0.2s;">
+                    📊 Affiliate
+                </button>
+                <div id="authButtons">
+                    <button onclick="openLoginModal()" class="btn-login">Login</button>
+                    <button onclick="openRegisterModal()" class="btn-register">Register</button>
+                </div>
+                <a href="index.html" class="back-link">← Home</a>
+            </div>
         </div>
         
         <div class="test-intro">
@@ -56,6 +65,747 @@
         
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
+
+    <!-- Include Auth.js -->
+    <script src="auth.js"></script>
+
+    <!-- ============================================================
+    LOGIN / REGISTER MODAL
+    ============================================================ -->
+    <div id="authModal" class="auth-modal" style="display:none;">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close" onclick="closeAuthModal()">&times;</span>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form-container">
+                <h2>🔐 Login</h2>
+                <p class="auth-subtitle">Welcome back! Login to your account.</p>
+                
+                <div class="auth-form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="you@example.com" required />
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                </div>
+                
+                <div class="auth-form-options">
+                    <span class="auth-forgot-password" onclick="showForgotPassword()">Forgot password?</span>
+                </div>
+                
+                <button onclick="handleLogin()" class="auth-btn-primary">Login</button>
+                
+                <p class="auth-switch">
+                    Don't have an account? <span onclick="switchToRegister()">Register</span>
+                </p>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form-container" style="display:none;">
+                <h2>📝 Register</h2>
+                <p class="auth-subtitle">Create your account to track your progress and earn money!</p>
+                
+                <div class="auth-form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="you@example.com" required />
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" placeholder="Choose a username" required />
+                    <small id="usernameCheck" style="display:none;"></small>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Create a password" required />
+                    <small>Password must be at least 6 characters</small>
+                </div>
+                
+                <button onclick="handleRegister()" class="auth-btn-primary">Register</button>
+                
+                <p class="auth-switch">
+                    Already have an account? <span onclick="switchToLogin()">Login</span>
+                </p>
+            </div>
+            
+            <!-- Forgot Password Form -->
+            <div id="forgotPasswordForm" class="auth-form-container" style="display:none;">
+                <h2>🔑 Reset Password</h2>
+                <p class="auth-subtitle">Enter your email and we'll send you a reset link.</p>
+                
+                <div class="auth-form-group">
+                    <label for="resetEmail">Email</label>
+                    <input type="email" id="resetEmail" placeholder="you@example.com" required />
+                </div>
+                
+                <button onclick="handleResetPassword()" class="auth-btn-primary">Send Reset Link</button>
+                
+                <p class="auth-switch">
+                    <span onclick="switchToLogin()">Back to Login</span>
+                </p>
+            </div>
+            
+            <!-- Verification Message -->
+            <div id="verificationMessage" class="auth-form-container" style="display:none;">
+                <h2>📧 Check Your Email</h2>
+                <p class="auth-subtitle">
+                    We've sent a verification link to <strong id="verificationEmail"></strong>.
+                    Please check your inbox and click the link to verify your account.
+                </p>
+                <p style="margin-top: 12px; font-size: 14px; color: var(--medium-grey);">
+                    After verification, you can <strong>login</strong> using your email and password.
+                </p>
+                <button onclick="closeAuthModal()" class="auth-btn-primary" style="margin-top: 16px;">
+                    Got it! Take me back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    AFFILIATE DASHBOARD SLIDE-OUT PANEL
+    ============================================================ -->
+    <div id="affiliateDashboardOverlay" class="affiliate-dashboard-overlay"></div>
+    <div id="affiliateDashboardPanel" class="affiliate-dashboard-panel">
+        <div class="panel-header">
+            <h2>📊 My Affiliate Dashboard</h2>
+            <span class="panel-close" onclick="closeAffiliateDashboard()">&times;</span>
+        </div>
+        <div id="affiliateDashboardContent">
+            <p style="text-align:center; color:var(--medium-grey);">Loading...</p>
+        </div>
+    </div>
+
+    <style>
+        /* Auth Modal - same as index.html */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .auth-modal.active {
+            display: flex;
+        }
+        .auth-modal-content {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: authSlideUp 0.3s ease;
+        }
+        @keyframes authSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .auth-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--medium-grey);
+            transition: color 0.2s;
+        }
+        .auth-modal-close:hover {
+            color: var(--navy);
+        }
+        .auth-modal-content h2 {
+            font-size: 28px;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+        .auth-modal-content .auth-subtitle {
+            color: var(--medium-grey);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .auth-form-group {
+            margin-bottom: 16px;
+        }
+        .auth-form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark-grey);
+            margin-bottom: 4px;
+        }
+        .auth-form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .auth-form-group input:focus {
+            border-color: var(--primary-orange);
+        }
+        .auth-form-group small {
+            font-size: 12px;
+            color: var(--medium-grey);
+            display: block;
+            margin-top: 4px;
+        }
+        .auth-form-group small.success { color: var(--success-green); }
+        .auth-form-group small.error { color: var(--warning-red); }
+        .auth-form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+        .auth-forgot-password {
+            font-size: 13px;
+            color: var(--primary-orange);
+            cursor: pointer;
+        }
+        .auth-forgot-password:hover {
+            text-decoration: underline;
+        }
+        .auth-btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-orange), #DD6B20);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .auth-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 137, 54, 0.3);
+        }
+        .auth-btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .auth-switch {
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-top: 16px;
+        }
+        .auth-switch span {
+            color: var(--primary-orange);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-switch span:hover {
+            text-decoration: underline;
+        }
+        .auth-error {
+            color: var(--warning-red);
+            font-size: 14px;
+            padding: 10px 14px;
+            background: #FFF5F5;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning-red);
+            margin-bottom: 16px;
+            display: none;
+        }
+        .auth-success {
+            color: var(--success-green);
+            font-size: 14px;
+            padding: 10px 14px;
+            background: #F0FFF4;
+            border-radius: 8px;
+            border-left: 4px solid var(--success-green);
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .btn-login {
+            padding: 8px 20px;
+            background: transparent;
+            color: var(--navy);
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-login:hover {
+            border-color: var(--primary-orange);
+            color: var(--primary-orange);
+        }
+        .btn-register {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--primary-orange), #DD6B20);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
+        }
+        .btn-logout {
+            padding: 6px 16px;
+            background: #E53E3E;
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover {
+            background: #C0392B;
+        }
+        .auth-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .auth-user .username {
+            font-weight: 600;
+            color: var(--navy);
+            font-size: 14px;
+        }
+
+        .affiliate-dashboard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+        }
+        .affiliate-dashboard-overlay.active {
+            display: block;
+        }
+        .affiliate-dashboard-panel {
+            position: fixed;
+            top: 0;
+            left: -420px;
+            width: 400px;
+            height: 100%;
+            background: var(--white);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+            z-index: 1002;
+            padding: 32px 24px;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+        }
+        .affiliate-dashboard-panel.open {
+            left: 0;
+        }
+        .affiliate-dashboard-panel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 20px;
+        }
+        .affiliate-dashboard-panel .panel-header h2 {
+            font-size: 22px;
+            color: var(--navy);
+        }
+        .affiliate-dashboard-panel .panel-close {
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--medium-grey);
+        }
+        .affiliate-dashboard-panel .panel-close:hover {
+            color: var(--navy);
+        }
+        .affiliate-dashboard-panel .stat-item {
+            background: var(--off-white);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .affiliate-dashboard-panel .stat-item .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+        .affiliate-dashboard-panel .stat-item .stat-label {
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
+        .affiliate-dashboard-panel .referral-link-box {
+            background: var(--off-white);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .affiliate-dashboard-panel .referral-link-box .link-display {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .affiliate-dashboard-panel .referral-link-box .link-display input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--white);
+            color: var(--navy);
+        }
+        .affiliate-dashboard-panel .referral-link-box .link-display button {
+            padding: 10px 16px;
+            background: var(--logic-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .auth-modal-content {
+                padding: 24px 20px;
+            }
+            .affiliate-dashboard-panel {
+                width: 100%;
+                left: -100%;
+            }
+            .affiliate-dashboard-panel.open {
+                left: 0;
+            }
+        }
+    </style>
+
+    <script>
+        // ============================================================
+        // AUTH FUNCTIONS (duplicated from index.html for consistency)
+        // ============================================================
+
+        function openLoginModal() {
+            document.getElementById('authModal').classList.add('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('verificationMessage').style.display = 'none';
+            clearAuthErrors();
+        }
+
+        function openRegisterModal() {
+            document.getElementById('authModal').classList.add('active');
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('verificationMessage').style.display = 'none';
+            clearAuthErrors();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+            clearAuthErrors();
+        }
+
+        function switchToLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('verificationMessage').style.display = 'none';
+            clearAuthErrors();
+        }
+
+        function switchToRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('verificationMessage').style.display = 'none';
+            clearAuthErrors();
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            document.getElementById('verificationMessage').style.display = 'none';
+            clearAuthErrors();
+        }
+
+        function clearAuthErrors() {
+            const errors = document.querySelectorAll('.auth-error');
+            errors.forEach(el => el.style.display = 'none');
+            const successes = document.querySelectorAll('.auth-success');
+            successes.forEach(el => el.style.display = 'none');
+        }
+
+        function showAuthError(message) {
+            clearAuthErrors();
+            const errorDiv = document.getElementById('authError');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showAuthSuccess(message) {
+            clearAuthErrors();
+            const successDiv = document.getElementById('authSuccess');
+            if (successDiv) {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showAuthError('Please enter both email and password.');
+                return;
+            }
+
+            const btn = document.querySelector('#loginForm .auth-btn-primary');
+            btn.disabled = true;
+            btn.textContent = '⏳ Logging in...';
+
+            try {
+                const result = await loginUser(email, password);
+                
+                if (result.success) {
+                    if (result.requiresVerification) {
+                        showAuthSuccess('✅ Please verify your email before logging in.');
+                        btn.disabled = false;
+                        btn.textContent = 'Login';
+                        return;
+                    }
+                    
+                    showAuthSuccess('✅ Login successful!');
+                    setTimeout(() => {
+                        closeAuthModal();
+                        updateAuthUI();
+                        restoreProgress();
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showAuthError('❌ ' + result.error);
+                    btn.disabled = false;
+                    btn.textContent = 'Login';
+                }
+            } catch (error) {
+                showAuthError('❌ Something went wrong. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('registerEmail').value.trim();
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            if (!email || !username || !password) {
+                showAuthError('Please fill in all fields.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters.');
+                return;
+            }
+
+            const btn = document.querySelector('#registerForm .auth-btn-primary');
+            btn.disabled = true;
+            btn.textContent = '⏳ Registering...';
+
+            try {
+                const { available } = await checkUsername(username);
+                if (!available) {
+                    showAuthError('❌ Username is already taken. Please choose another.');
+                    btn.disabled = false;
+                    btn.textContent = 'Register';
+                    return;
+                }
+
+                const result = await registerUser(email, username, password);
+                
+                if (result.success) {
+                    document.getElementById('verificationEmail').textContent = email;
+                    document.getElementById('verificationMessage').style.display = 'block';
+                    document.getElementById('registerForm').style.display = 'none';
+                    
+                    localStorage.setItem('pendingVerificationEmail', email);
+                    
+                    btn.disabled = false;
+                    btn.textContent = 'Register';
+                    showAuthSuccess('✅ Registration successful! Check your email.');
+                } else {
+                    showAuthError('❌ ' + result.error);
+                    btn.disabled = false;
+                    btn.textContent = 'Register';
+                }
+            } catch (error) {
+                showAuthError('❌ Something went wrong. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Register';
+            }
+        }
+
+        async function handleResetPassword() {
+            const email = document.getElementById('resetEmail').value.trim();
+
+            if (!email) {
+                showAuthError('Please enter your email address.');
+                return;
+            }
+
+            const btn = document.querySelector('#forgotPasswordForm .auth-btn-primary');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+
+            try {
+                const result = await resetPassword(email);
+                
+                if (result.success) {
+                    showAuthSuccess('✅ ' + result.message);
+                    setTimeout(() => {
+                        switchToLogin();
+                    }, 2000);
+                } else {
+                    showAuthError('❌ ' + result.error);
+                }
+            } catch (error) {
+                showAuthError('❌ Something went wrong. Please try again.');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Send Reset Link';
+        }
+
+        function openAffiliateDashboard() {
+            const panel = document.getElementById('affiliateDashboardPanel');
+            const overlay = document.getElementById('affiliateDashboardOverlay');
+            if (panel) {
+                panel.classList.add('open');
+                overlay.classList.add('active');
+                loadAffiliateDashboard(); // ← UPDATED: Calls the full dashboard
+            }
+        }
+
+        function closeAffiliateDashboard() {
+            const panel = document.getElementById('affiliateDashboardPanel');
+            const overlay = document.getElementById('affiliateDashboardOverlay');
+            if (panel) {
+                panel.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('affiliateDashboardOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeAffiliateDashboard);
+            }
+            updateAuthUI();
+        });
+
+        // Make functions globally accessible
+        window.openLoginModal = openLoginModal;
+        window.openRegisterModal = openRegisterModal;
+        window.closeAuthModal = closeAuthModal;
+        window.switchToLogin = switchToLogin;
+        window.switchToRegister = switchToRegister;
+        window.showForgotPassword = showForgotPassword;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.handleResetPassword = handleResetPassword;
+        window.openAffiliateDashboard = openAffiliateDashboard;
+        window.closeAffiliateDashboard = closeAffiliateDashboard;
+        window.showAuthError = showAuthError;
+        window.showAuthSuccess = showAuthSuccess;
+        window.clearAuthErrors = clearAuthErrors;
+    </script>
+
+    <div id="authError" class="auth-error" style="display:none;"></div>
+    <div id="authSuccess" class="auth-success" style="display:none;"></div>
+
+    <!-- Load auth.js and user-progress.js -->
+    <script src="auth.js"></script>
+    <script src="user-progress.js"></script>
     <script src="script.js"></script>
+
+    <!-- ============================================================
+    TRACK PAGE VISITS
+    ============================================================ -->
+    <script>
+        async function trackPageVisit() {
+            try {
+                // Get the current page
+                const page = window.location.pathname;
+
+                // Get IP (using a free API)
+                let ip = '';
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    ip = ipData.ip;
+                } catch (e) {
+                    console.log('Could not get IP:', e);
+                }
+
+                // Get user if logged in
+                let userId = null;
+                const user = localStorage.getItem('user');
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        userId = userData.id;
+                    } catch (e) {}
+                }
+
+                // Get referrer
+                const referrer = document.referrer || '';
+
+                // Save visit to Supabase
+                const { error } = await supabase
+                    .from('visits')
+                    .insert({
+                        page: page,
+                        ip: ip || null,
+                        user_id: userId || null,
+                        referrer: referrer,
+                        user_agent: navigator.userAgent
+                    });
+
+                if (error) {
+                    console.error('Error tracking visit:', error);
+                }
+            } catch (error) {
+                console.error('Error in trackPageVisit:', error);
+            }
+        }
+
+        // Track the visit when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay tracking to not impact page load
+            setTimeout(trackPageVisit, 1000);
+        });
+    </script>
 </body>
 </html>
