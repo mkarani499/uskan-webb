@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: Arial, sans-serif; }
+        .auth-box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 420px; max-width: 95%; }
+        .auth-box h1 { color: #1a1a2e; font-size: 28px; margin-bottom: 4px; }
+        .auth-box .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
+        .auth-box .form-group { margin-bottom: 16px; }
+        .auth-box .form-group label { display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px; }
+        .auth-box .form-group input { width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        .auth-box .form-group input:focus { border-color: #4a90d9; }
+        .auth-box .auth-btn { width: 100%; padding: 14px; background: #4a90d9; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+        .auth-box .auth-btn:hover { background: #357abd; }
+        .auth-box .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .auth-box .auth-switch { text-align: center; font-size: 14px; color: #666; margin-top: 16px; }
+        .auth-box .auth-switch a { color: #4a90d9; text-decoration: none; font-weight: 600; }
+        .auth-box .auth-switch a:hover { text-decoration: underline; }
+        .auth-box .auth-error { color: #e74c3c; font-size: 14px; padding: 10px 14px; background: #fde8e8; border-radius: 8px; border-left: 4px solid #e74c3c; margin-bottom: 16px; display: none; }
+        .auth-box .auth-success { color: #27ae60; font-size: 14px; padding: 10px 14px; background: #e8f8ed; border-radius: 8px; border-left: 4px solid #27ae60; margin-bottom: 16px; display: none; }
+        .back-link { display: inline-block; margin-top: 16px; color: #888; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #333; }
+        .forgot-link { text-align: right; font-size: 13px; margin-top: 4px; }
+        .forgot-link a { color: #4a90d9; text-decoration: none; }
+        .forgot-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="auth-box">
+        <h1>🔐 Login</h1>
+        <p class="subtitle">Welcome back!</p>
+
+        <div id="authError" class="auth-error"></div>
+        <div id="authSuccess" class="auth-success"></div>
+
+        <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+        </div>
+
+        <div class="forgot-link">
+            <a href="#">Forgot password?</a>
+        </div>
+
+        <button onclick="handleLogin()" class="auth-btn" id="loginBtn">Login</button>
+
+        <p class="auth-switch">
+            Don't have an account? <a href="register.html">Register</a>
+        </p>
+
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('authError');
+            const successDiv = document.getElementById('authSuccess');
+            const btn = document.getElementById('loginBtn');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (!email || !password) {
+                errorDiv.textContent = 'Please enter both email and password.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Logging in...';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Save user to localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('accessToken', data.accessToken);
+
+                    successDiv.textContent = '✅ Login successful! Redirecting...';
+                    successDiv.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Login failed');
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Login';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = '❌ Network error. Please try again.';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        }
+
+        // Enter key support
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -17,7 +17,6 @@
         .btn-refresh-small { background: var(--off-white); border: 1px solid #E2E8F0; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
         .btn-refresh-small:hover { background: #EDF2F7; }
 
-        /* ===== ADMIN STATS ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -102,32 +101,27 @@
         
         <!-- Stats -->
         <div class="stats-grid" id="statsGrid">
-            <!-- Card 1: Registered Users -->
             <div class="stat-card">
                 <span class="stat-icon">👥</span>
                 <div class="stat-number" id="statRegisteredUsers">0</div>
                 <span class="stat-label">Registered Users</span>
             </div>
-            <!-- Card 2: Total Payments -->
             <div class="stat-card">
                 <span class="stat-icon">💰</span>
                 <div class="stat-number" id="statPayments">0</div>
                 <span class="stat-label">Total Payments</span>
             </div>
-            <!-- Card 3: Total Affiliates -->
             <div class="stat-card">
                 <span class="stat-icon">🔗</span>
                 <div class="stat-number" id="statAffiliates">0</div>
                 <span class="stat-label">Total Affiliates</span>
             </div>
-            <!-- Card 4: Total Commissions -->
             <div class="stat-card">
                 <span class="stat-icon">💸</span>
                 <div class="stat-number" id="statCommissions">KSh 0</div>
                 <span class="stat-label">Total Commissions Paid</span>
                 <span class="stat-sub" id="statPendingCommission"></span>
             </div>
-            <!-- Card 5: Site Visits (spans 2 columns) -->
             <div class="stat-card" style="grid-column: span 2;">
                 <span class="stat-icon">📊</span>
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
@@ -213,7 +207,7 @@
 
     <script>
         // ============================================================
-        // LOGOUT FUNCTION - DEFINED HERE
+        // LOGOUT FUNCTION
         // ============================================================
         function logout() {
             console.log('🚪 Logging out...');
@@ -221,6 +215,7 @@
             localStorage.removeItem('adminLoginTime');
             window.location.href = 'admin.html';
         }
+        window.logout = logout;
 
         // ============================================================
         // SESSION CHECK
@@ -231,13 +226,7 @@
             window.location.href = 'admin.html';
         }
 
-        // ============================================================
-        // MAKE LOGOUT GLOBAL
-        // ============================================================
-        window.logout = logout;
-
         console.log('✅ Admin dashboard loaded');
-        console.log('✅ Logout function available:', typeof logout === 'function');
 
         // ============================================================
         // TABS
@@ -258,7 +247,7 @@
             try {
                 console.log('📊 Loading admin data...');
                 
-                // 1. Registered Users (only those with verified emails)
+                // 1. Registered Users (email_verified = true)
                 const { count: usersCount } = await supabase
                     .from('users')
                     .select('*', { count: 'exact', head: true })
@@ -292,19 +281,11 @@
 
                 // 5. Site Visits (Last 72 hours)
                 try {
-                    // First, delete old visits
-                    await supabase.rpc('delete_old_visits');
-                } catch (deleteError) {
-                    console.warn('Note: delete_old_visits RPC not available - skipping');
-                }
-
-                // Then get visit stats
-                try {
                     const { data: visitStats, error: visitError } = await supabase
                         .rpc('get_visits_count');
 
                     if (visitError) {
-                        console.warn('get_visits_count RPC not available:', visitError);
+                        console.warn('get_visits_count RPC error:', visitError);
                     } else if (visitStats && visitStats.length > 0) {
                         document.getElementById('statTotalViews').textContent = visitStats[0].total_views || 0;
                         document.getElementById('statUniqueVisitors').textContent = visitStats[0].unique_visitors || 0;

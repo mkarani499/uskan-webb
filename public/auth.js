@@ -3,33 +3,115 @@
 // ============================================================
 
 // ============================================================
-// SUPABASE CLIENT (Reuse existing or create new)
+// SUPABASE CLIENT - Uses global supabase from HTML config
 // ============================================================
 
-// If supabase is already defined in script.js, use it
-// Otherwise, create a new client
 if (typeof supabase === 'undefined') {
-    const supabaseUrl = SUPABASE_URL;
-    const supabaseAnonKey = SUPABASE_ANON_KEY;
-    var supabase = supabaseJs.createClient(supabaseUrl, supabaseAnonKey);
+    console.error('❌ supabase is not defined!');
+    var supabase = null;
+} else {
+    console.log('✅ Supabase client available');
+}
+
+// ============================================================
+// AUTH MODAL FUNCTIONS (Defined FIRST so they're available)
+// ============================================================
+
+function openLoginModal() {
+    const modal = document.getElementById('authModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    document.getElementById('verificationMessage').style.display = 'none';
+    clearAuthErrors();
+}
+
+function openRegisterModal() {
+    const modal = document.getElementById('authModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    document.getElementById('verificationMessage').style.display = 'none';
+    clearAuthErrors();
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    clearAuthErrors();
+    const inputs = modal.querySelectorAll('input');
+    inputs.forEach(input => input.value = '');
+}
+
+function switchToLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    document.getElementById('verificationMessage').style.display = 'none';
+    clearAuthErrors();
+}
+
+function switchToRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    document.getElementById('verificationMessage').style.display = 'none';
+    clearAuthErrors();
+}
+
+function showForgotPassword() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'block';
+    document.getElementById('verificationMessage').style.display = 'none';
+    clearAuthErrors();
+}
+
+function clearAuthErrors() {
+    document.querySelectorAll('.auth-error').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.auth-success').forEach(el => el.style.display = 'none');
+}
+
+function showAuthError(message) {
+    clearAuthErrors();
+    const errorDiv = document.getElementById('authError');
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+function showAuthSuccess(message) {
+    clearAuthErrors();
+    const successDiv = document.getElementById('authSuccess');
+    if (successDiv) {
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+    }
 }
 
 // ============================================================
 // SESSION MANAGEMENT
 // ============================================================
 
-// Check if user is logged in
 async function checkSession() {
     try {
+        if (!supabase) {
+            console.warn('⚠️ Supabase not available');
+            return { loggedIn: false, user: null, profile: null };
+        }
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         if (session) {
-            // User is logged in
             const user = session.user;
             console.log('✅ User logged in:', user.email);
             
-            // Get user profile from users table
             const { data: profile, error: profileError } = await supabase
                 .from('users')
                 .select('*')
@@ -69,7 +151,10 @@ async function checkSession() {
 
 async function registerUser(email, username, password) {
     try {
-        // 1. Check if username is already taken
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
+        
         const { data: existingUser, error: checkError } = await supabase
             .from('users')
             .select('username')
@@ -80,7 +165,6 @@ async function registerUser(email, username, password) {
             return { success: false, error: 'Username already taken. Please choose another.' };
         }
         
-        // 2. Check if email is already taken
         const { data: existingEmail, error: emailError } = await supabase
             .from('users')
             .select('email')
@@ -91,7 +175,6 @@ async function registerUser(email, username, password) {
             return { success: false, error: 'Email already registered. Please login.' };
         }
         
-        // 3. Register with Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -107,7 +190,6 @@ async function registerUser(email, username, password) {
             return { success: false, error: authError.message };
         }
         
-        // 4. Create user profile in users table
         if (authData.user) {
             const { error: profileError } = await supabase
                 .from('users')
@@ -120,14 +202,11 @@ async function registerUser(email, username, password) {
             
             if (profileError) {
                 console.error('Error creating profile:', profileError);
-                // Don't return error here, user is created in auth
             }
             
-            // 5. Check if there's progress in localStorage
             const progress = localStorage.getItem('userProgress');
             if (progress) {
                 console.log('📦 Progress found, will restore after verification');
-                // Store email to restore progress after verification
                 localStorage.setItem('pendingVerificationEmail', email);
             }
             
@@ -153,6 +232,10 @@ async function registerUser(email, username, password) {
 
 async function loginUser(email, password) {
     try {
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
+        
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -162,17 +245,14 @@ async function loginUser(email, password) {
             return { success: false, error: error.message };
         }
         
-        // User is logged in
         const user = data.user;
         
-        // Get profile from users table
         const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('*')
             .eq('auth_user_id', user.id)
             .single();
         
-        // Check if email is verified
         if (!user.email_confirmed_at) {
             return { 
                 success: true, 
@@ -183,7 +263,6 @@ async function loginUser(email, password) {
             };
         }
         
-        // Update email_verified in users table
         if (profile && !profile.email_verified) {
             await supabase
                 .from('users')
@@ -191,20 +270,9 @@ async function loginUser(email, password) {
                 .eq('auth_user_id', user.id);
         }
         
-        // Check for pending progress
-        const progress = localStorage.getItem('userProgress');
-        if (progress) {
-            console.log('📦 Restoring saved progress...');
-            // Progress will be restored by the page
-        }
-        
-        // ============================================================
-        // CHECK FOR INTENDED ACTION
-        // ============================================================
         const intendedAction = localStorage.getItem('intendedAction');
         if (intendedAction === 'affiliate') {
             localStorage.removeItem('intendedAction');
-            // Restore progress and open affiliate dashboard
             setTimeout(() => {
                 restoreUserProgress();
                 openAffiliateDashboard();
@@ -231,10 +299,12 @@ async function loginUser(email, password) {
 
 async function logoutUser() {
     try {
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         
-        // Clear any stored user data
         localStorage.removeItem('user');
         localStorage.removeItem('userProfile');
         
@@ -251,6 +321,9 @@ async function logoutUser() {
 
 async function resetPassword(email) {
     try {
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/update-password.html`
         });
@@ -273,6 +346,9 @@ async function resetPassword(email) {
 
 async function updatePassword(newPassword) {
     try {
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
         const { data, error } = await supabase.auth.updateUser({
             password: newPassword
         });
@@ -294,18 +370,15 @@ async function updatePassword(newPassword) {
 // ============================================================
 
 async function restoreProgress() {
-    // Check if there's pending progress
     const progress = localStorage.getItem('userProgress');
     const pendingEmail = localStorage.getItem('pendingVerificationEmail');
     
     if (progress && pendingEmail) {
-        // Get current user
+        if (!supabase) return false;
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-            // Check if the logged-in user matches the pending email
             if (session.user.email === pendingEmail) {
                 console.log('📦 Restoring progress for:', pendingEmail);
-                // Progress will be restored by the page that saved it
                 localStorage.removeItem('pendingVerificationEmail');
                 return true;
             }
@@ -320,6 +393,9 @@ async function restoreProgress() {
 
 async function checkUsername(username) {
     try {
+        if (!supabase) {
+            return { available: true, message: 'Supabase not available' };
+        }
         const { data, error } = await supabase
             .from('users')
             .select('username')
@@ -332,7 +408,6 @@ async function checkUsername(username) {
             return { available: true, message: 'Username is available' };
         }
     } catch (error) {
-        // No user found means available
         return { available: true, message: 'Username is available' };
     }
 }
@@ -360,12 +435,10 @@ function getCurrentUser() {
 async function updateAuthUI() {
     const session = await checkSession();
     const authButtons = document.getElementById('authButtons');
-    const userDisplay = document.getElementById('userDisplay');
     
     if (!authButtons) return;
     
     if (session.loggedIn) {
-        // User is logged in
         const username = session.profile?.username || session.user?.email?.split('@')[0] || 'User';
         authButtons.innerHTML = `
             <div class="auth-user">
@@ -375,7 +448,6 @@ async function updateAuthUI() {
         `;
         authButtons.style.display = 'flex';
         
-        // Store user info
         localStorage.setItem('user', JSON.stringify({
             id: session.user.id,
             email: session.user.email,
@@ -383,21 +455,18 @@ async function updateAuthUI() {
             profile: session.profile
         }));
         
-        // Show affiliate button if available
         const affiliateBtn = document.getElementById('affiliateDashboardBtn');
         if (affiliateBtn) {
             affiliateBtn.style.display = 'flex';
         }
         
     } else {
-        // User is not logged in
         authButtons.innerHTML = `
             <button onclick="openLoginModal()" class="btn-login">Login</button>
             <button onclick="openRegisterModal()" class="btn-register">Register</button>
         `;
         authButtons.style.display = 'flex';
         
-        // Hide affiliate button
         const affiliateBtn = document.getElementById('affiliateDashboardBtn');
         if (affiliateBtn) {
             affiliateBtn.style.display = 'none';
@@ -416,7 +485,6 @@ async function handleLogout() {
     if (result.success) {
         await updateAuthUI();
         showToast('👋 Logged out successfully!');
-        // Reload the page to reset state
         setTimeout(() => {
             window.location.reload();
         }, 500);
@@ -447,7 +515,7 @@ function showToast(message) {
 
 async function getAffiliateData(userId) {
     try {
-        // Get affiliate profile
+        if (!supabase) return null;
         const { data: affiliate, error: affiliateError } = await supabase
             .from('affiliates')
             .select('*')
@@ -463,7 +531,6 @@ async function getAffiliateData(userId) {
             return { hasAffiliate: false };
         }
 
-        // Get referral stats
         const { data: referrals, error: referralsError } = await supabase
             .from('referrals')
             .select('*')
@@ -474,27 +541,16 @@ async function getAffiliateData(userId) {
         }
 
         const totalReferrals = referrals?.length || 0;
-        const completedReferrals = referrals?.filter(r => r.payout_status === 'completed' || r.manually_paid).length || 0;
-        const totalEarnings = referrals?.reduce((sum, r) => {
-            if (r.payout_status === 'completed' || r.manually_paid) {
-                return sum + (r.commission_amount || 0);
-            }
-            return sum;
-        }, 0) || 0;
-
-        const pendingEarnings = referrals?.reduce((sum, r) => {
-            if (r.payout_status === 'pending' || r.payout_status === 'processing') {
-                return sum + (r.commission_amount || 0);
-            }
-            return sum;
-        }, 0) || 0;
+        const totalEarnings = referrals?.filter(r => r.payout_status === 'completed' || r.manually_paid)
+            .reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+        const pendingEarnings = referrals?.filter(r => r.payout_status === 'pending' || r.payout_status === 'processing')
+            .reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
 
         return {
             hasAffiliate: true,
             affiliate: affiliate,
             stats: {
                 totalReferrals,
-                completedReferrals,
                 totalEarnings,
                 pendingEarnings
             },
@@ -508,7 +564,9 @@ async function getAffiliateData(userId) {
 
 async function registerAffiliateAccount(userId, mpesaPhone) {
     try {
-        // Check if user already has an affiliate account
+        if (!supabase) {
+            return { success: false, error: 'Supabase not available' };
+        }
         const { data: existing, error: checkError } = await supabase
             .from('affiliates')
             .select('id')
@@ -519,10 +577,8 @@ async function registerAffiliateAccount(userId, mpesaPhone) {
             return { success: false, error: 'You already have an affiliate account.' };
         }
 
-        // Generate unique referral code
         const referralCode = generateReferralCode();
 
-        // Create affiliate account
         const { data: affiliate, error } = await supabase
             .from('affiliates')
             .insert({
@@ -562,7 +618,6 @@ async function loadAffiliateDashboard() {
     const content = document.getElementById('affiliateDashboardContent');
     if (!content) return;
 
-    // Check if user is logged in
     const session = await checkSession();
     if (!session.loggedIn) {
         content.innerHTML = `
@@ -578,11 +633,8 @@ async function loadAffiliateDashboard() {
         return;
     }
 
-    // Get user data
     const user = session.user;
     const profile = session.profile;
-
-    // Get affiliate data
     const affiliateData = await getAffiliateData(profile?.id || user.id);
 
     if (!affiliateData) {
@@ -600,7 +652,6 @@ async function loadAffiliateDashboard() {
     }
 
     if (!affiliateData.hasAffiliate) {
-        // User doesn't have an affiliate account yet
         content.innerHTML = `
             <div style="text-align:center; padding:20px;">
                 <p style="font-size:48px; margin-bottom:12px;">💰</p>
@@ -624,7 +675,6 @@ async function loadAffiliateDashboard() {
         return;
     }
 
-    // User has affiliate account - show dashboard
     const affiliate = affiliateData.affiliate;
     const stats = affiliateData.stats;
     const baseUrl = window.location.origin;
@@ -692,8 +742,6 @@ async function registerAffiliateFromDashboard() {
     }
 
     const formattedPhone = `254${phone}`;
-
-    // Get current user
     const session = await checkSession();
     if (!session.loggedIn) {
         alert('Please login first.');
@@ -757,17 +805,232 @@ function shareAffiliateLink(platform) {
     window.open(shareUrl, '_blank', 'width=600,height=500');
 }
 
+function openAffiliateDashboard() {
+    const panel = document.getElementById('affiliateDashboardPanel');
+    const overlay = document.getElementById('affiliateDashboardOverlay');
+    if (panel) {
+        panel.classList.add('open');
+        overlay.classList.add('active');
+        loadAffiliateDashboard();
+    }
+}
+
+function closeAffiliateDashboard() {
+    const panel = document.getElementById('affiliateDashboardPanel');
+    const overlay = document.getElementById('affiliateDashboardOverlay');
+    if (panel) {
+        panel.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+}
+
 // ============================================================
-// EXPOSE NEW FUNCTIONS
+// TRACK PAGE VISITS (Safe version)
 // ============================================================
 
-window.getAffiliateData = getAffiliateData;
-window.registerAffiliateAccount = registerAffiliateAccount;
-window.generateReferralCode = generateReferralCode;
+async function trackPageVisit() {
+    try {
+        if (!supabase) {
+            console.warn('⚠️ Supabase not available for tracking');
+            return;
+        }
+
+        const page = window.location.pathname;
+        let ip = '';
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ip = ipData.ip;
+        } catch (e) {
+            console.log('Could not get IP:', e);
+        }
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const referrer = document.referrer || '';
+
+        await supabase
+            .from('visits')
+            .insert({
+                page: page,
+                ip: ip || null,
+                user_id: user?.profile?.id || null,
+                referrer: referrer,
+                user_agent: navigator.userAgent
+            });
+    } catch (error) {
+        console.error('Error tracking visit:', error);
+    }
+}
+
+// ============================================================
+// HANDLE LOGIN (Called from HTML button)
+// ============================================================
+
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        showAuthError('Please enter both email and password.');
+        return;
+    }
+
+    const btn = document.querySelector('#loginForm .auth-btn-primary');
+    btn.disabled = true;
+    btn.textContent = '⏳ Logging in...';
+
+    try {
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+            if (result.requiresVerification) {
+                showAuthSuccess('✅ Please verify your email before logging in.');
+                btn.disabled = false;
+                btn.textContent = 'Login';
+                return;
+            }
+            
+            showAuthSuccess('✅ Login successful!');
+            setTimeout(() => {
+                closeAuthModal();
+                updateAuthUI();
+                restoreProgress();
+                window.location.reload();
+            }, 1000);
+        } else {
+            showAuthError('❌ ' + result.error);
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showAuthError('❌ Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Login';
+    }
+}
+
+// ============================================================
+// HANDLE REGISTER (Called from HTML button)
+// ============================================================
+
+async function handleRegister() {
+    const email = document.getElementById('registerEmail').value.trim();
+    const username = document.getElementById('registerUsername').value.trim();
+    const password = document.getElementById('registerPassword').value;
+
+    if (!email || !username || !password) {
+        showAuthError('Please fill in all fields.');
+        return;
+    }
+
+    if (password.length < 6) {
+        showAuthError('Password must be at least 6 characters.');
+        return;
+    }
+
+    const btn = document.querySelector('#registerForm .auth-btn-primary');
+    btn.disabled = true;
+    btn.textContent = '⏳ Registering...';
+
+    try {
+        const { available } = await checkUsername(username);
+        if (!available) {
+            showAuthError('❌ Username is already taken. Please choose another.');
+            btn.disabled = false;
+            btn.textContent = 'Register';
+            return;
+        }
+
+        const result = await registerUser(email, username, password);
+        
+        if (result.success) {
+            document.getElementById('verificationEmail').textContent = email;
+            document.getElementById('verificationMessage').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            localStorage.setItem('pendingVerificationEmail', email);
+            btn.disabled = false;
+            btn.textContent = 'Register';
+            showAuthSuccess('✅ Registration successful! Check your email.');
+        } else {
+            showAuthError('❌ ' + result.error);
+            btn.disabled = false;
+            btn.textContent = 'Register';
+        }
+    } catch (error) {
+        console.error('Register error:', error);
+        showAuthError('❌ Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Register';
+    }
+}
+
+// ============================================================
+// HANDLE RESET PASSWORD (Called from HTML button)
+// ============================================================
+
+async function handleResetPassword() {
+    const email = document.getElementById('resetEmail').value.trim();
+
+    if (!email) {
+        showAuthError('Please enter your email address.');
+        return;
+    }
+
+    const btn = document.querySelector('#forgotPasswordForm .auth-btn-primary');
+    btn.disabled = true;
+    btn.textContent = '⏳ Sending...';
+
+    try {
+        const result = await resetPassword(email);
+        
+        if (result.success) {
+            showAuthSuccess('✅ ' + result.message);
+            setTimeout(() => {
+                switchToLogin();
+            }, 2000);
+        } else {
+            showAuthError('❌ ' + result.error);
+        }
+    } catch (error) {
+        showAuthError('❌ Something went wrong. Please try again.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+}
+
+// ============================================================
+// EXPOSE ALL FUNCTIONS GLOBALLY
+// ============================================================
+
+window.openLoginModal = openLoginModal;
+window.openRegisterModal = openRegisterModal;
+window.closeAuthModal = closeAuthModal;
+window.switchToLogin = switchToLogin;
+window.switchToRegister = switchToRegister;
+window.showForgotPassword = showForgotPassword;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleResetPassword = handleResetPassword;
+window.handleLogout = handleLogout;
+window.updateAuthUI = updateAuthUI;
+window.checkSession = checkSession;
+window.restoreProgress = restoreProgress;
+window.showToast = showToast;
+window.showAuthError = showAuthError;
+window.showAuthSuccess = showAuthSuccess;
+window.clearAuthErrors = clearAuthErrors;
+window.openAffiliateDashboard = openAffiliateDashboard;
+window.closeAffiliateDashboard = closeAffiliateDashboard;
 window.loadAffiliateDashboard = loadAffiliateDashboard;
 window.registerAffiliateFromDashboard = registerAffiliateFromDashboard;
 window.copyAffiliateLink = copyAffiliateLink;
 window.shareAffiliateLink = shareAffiliateLink;
+window.getAffiliateData = getAffiliateData;
+window.registerAffiliateAccount = registerAffiliateAccount;
+window.generateReferralCode = generateReferralCode;
+window.trackPageVisit = trackPageVisit;
 
-console.log('✅ Affiliate functions loaded!');
-console.log('✅ Auth.js loaded!');
+console.log('✅ Auth.js loaded successfully!');
+console.log('✅ All auth functions exposed globally');

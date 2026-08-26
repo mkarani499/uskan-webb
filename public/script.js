@@ -292,32 +292,6 @@ function determineBrainType(results) {
 }
 
 // ============================================================
-// RESTORE PROGRESS
-// ============================================================
-
-function restoreProgress() {
-    const progressData = localStorage.getItem('testProgress');
-    if (progressData) {
-        try {
-            const data = JSON.parse(progressData);
-            console.log('📦 Restoring progress from:', new Date(data.timestamp).toLocaleString());
-            
-            // Restore results
-            localStorage.setItem('testResults', JSON.stringify(data.results));
-            localStorage.setItem('testAnswers', JSON.stringify(data.answers));
-            localStorage.setItem('testTime', JSON.stringify(data.time));
-            localStorage.setItem('testSlug', 'brain');
-            
-            return true;
-        } catch (e) {
-            console.error('❌ Error restoring progress:', e);
-            return false;
-        }
-    }
-    return false;
-}
-
-// ============================================================
 // INITIALIZE
 // ============================================================
 
@@ -327,13 +301,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if brainQuestions is defined
         if (typeof brainQuestions !== 'undefined' && brainQuestions.length > 0) {
             console.log('📊 Test page loaded, questions:', brainQuestions.length);
-            
-            // Check for saved progress
-            const hasProgress = restoreProgress();
-            if (hasProgress) {
-                console.log('📦 Progress restored successfully');
-            }
-            
             startTest();
         } else {
             console.error('❌ brainQuestions not loaded! Check that questions.js is included.');

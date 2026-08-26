@@ -242,10 +242,49 @@ app.post('/api/verify-payment', async (req, res) => {
 });
 
 // ============================================================
+// AUTH API ROUTES
+// ============================================================
+import registerHandler from './api/register.js';
+import loginHandler from './api/login.js';
+import logoutHandler from './api/logout.js';
+import verifyUserHandler from './api/verify-user.js';
+
+app.post('/api/register', async (req, res) => {
+    console.log('📝 Register request received');
+    console.log('  Email:', req.body.email);
+    console.log('  Username:', req.body.username);
+    await registerHandler(req, res);
+});
+
+app.post('/api/login', async (req, res) => {
+    console.log('🔑 Login request received');
+    console.log('  Email:', req.body.email);
+    await loginHandler(req, res);
+});
+
+app.post('/api/logout', async (req, res) => {
+    console.log('🚪 Logout request received');
+    await logoutHandler(req, res);
+});
+
+app.get('/api/verify-user', async (req, res) => {
+    console.log('🔍 Verify user request received');
+    await verifyUserHandler(req, res);
+});
+
+// ============================================================
 // SERVE HTML PAGES
 // ============================================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/register.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 app.get('*', (req, res) => {

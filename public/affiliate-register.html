@@ -6,181 +6,455 @@
     <title>Register as Affiliate - USKAN</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
-        .affiliate-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #EDF2F7; margin-bottom: 24px; }
-        .affiliate-nav .brand { font-size: 20px; font-weight: 700; color: var(--navy); }
-        .affiliate-nav .brand span { color: var(--primary-orange); }
-        .affiliate-nav .back-link { color: var(--medium-grey); text-decoration: none; font-size: 14px; }
-        .affiliate-nav .back-link:hover { color: var(--navy); }
-        .affiliate-header { text-align: center; margin-bottom: 24px; }
-        .affiliate-header .affiliate-icon { font-size: 48px; display: block; }
-        .affiliate-header h1 { font-size: 28px; color: var(--navy); margin: 8px 0 4px; }
-        .affiliate-header p { color: var(--medium-grey); font-size: 16px; }
-        .earnings-preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; background: var(--off-white); border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: center; }
-        @media (max-width: 600px) { .earnings-preview { grid-template-columns: 1fr; } }
-        .earnings-preview .stat-number { font-size: 28px; font-weight: 800; color: var(--navy); }
-        .earnings-preview .stat-label { font-size: 14px; color: var(--medium-grey); }
-        .affiliate-form { display: flex; flex-direction: column; gap: 16px; max-width: 500px; margin: 0 auto 24px; }
-        .btn-affiliate-register { width: 100%; padding: 16px; font-size: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--primary-orange), #DD6B20); color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
-        .btn-affiliate-register:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(237, 137, 54, 0.4); }
-        .btn-affiliate-register:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-        #referralSection { display: none; max-width: 500px; margin: 0 auto; }
-        .referral-link-box { background: var(--off-white); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
-        .referral-link-box h3 { font-size: 20px; color: var(--navy); margin-bottom: 12px; }
-        .link-display { display: flex; gap: 8px; margin-bottom: 12px; }
-        .link-display input { flex: 1; padding: 12px 16px; border: 2px solid #E2E8F0; border-radius: 10px; font-size: 14px; background: var(--white); color: var(--navy); font-weight: 600; }
-        .link-display .btn-copy { padding: 12px 20px; border: none; border-radius: 10px; background: var(--logic-blue); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .link-display .btn-copy:hover { background: #2B6CB0; }
-        .share-quick { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
-        .share-quick .share-btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .share-quick .share-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .share-quick .share-btn.facebook { background: #1877F2; color: white; }
-        .share-quick .share-btn.whatsapp { background: #25D366; color: white; }
-        .share-quick .share-btn.twitter { background: #000000; color: white; }
-        .referral-stats { background: var(--white); border-radius: 16px; padding: 20px; border: 1px solid #E2E8F0; }
-        .referral-stats h4 { font-size: 16px; color: var(--navy); margin-bottom: 8px; }
-        .referral-stats p { font-size: 14px; color: var(--dark-grey); margin: 4px 0; }
-        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: var(--medium-grey); }
+        .affiliate-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 24px;
+        }
+        .affiliate-nav .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .affiliate-nav .brand span {
+            color: var(--primary-orange);
+        }
+        .affiliate-nav .back-link {
+            color: var(--medium-grey);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .affiliate-nav .back-link:hover {
+            color: var(--navy);
+        }
+        .affiliate-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .affiliate-header .affiliate-icon {
+            font-size: 48px;
+            display: block;
+        }
+        .affiliate-header h1 {
+            font-size: 28px;
+            color: var(--navy);
+            margin: 8px 0 4px;
+        }
+        .affiliate-header p {
+            color: var(--medium-grey);
+            font-size: 16px;
+        }
+        .earnings-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background: var(--off-white);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .earnings-preview {
+                grid-template-columns: 1fr;
+            }
+        }
+        .earnings-preview .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+        .earnings-preview .stat-label {
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
+        .affiliate-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 500px;
+            margin: 0 auto 24px;
+        }
+        .btn-affiliate-register {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-orange), #DD6B20);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-affiliate-register:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(237, 137, 54, 0.4);
+        }
+        .btn-affiliate-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #referralSection {
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .referral-link-box {
+            background: var(--off-white);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .referral-link-box h3 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 12px;
+        }
+        .link-display {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .link-display input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            background: var(--white);
+            color: var(--navy);
+            font-weight: 600;
+        }
+        .link-display .btn-copy {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: var(--logic-blue);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .link-display .btn-copy:hover {
+            background: #2B6CB0;
+        }
+        .share-quick {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .share-quick .share-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .share-quick .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .share-quick .share-btn.facebook {
+            background: #1877F2;
+            color: white;
+        }
+        .share-quick .share-btn.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .share-quick .share-btn.twitter {
+            background: #000000;
+            color: white;
+        }
+        .referral-stats {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #E2E8F0;
+        }
+        .referral-stats h4 {
+            font-size: 16px;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .referral-stats p {
+            font-size: 14px;
+            color: var(--dark-grey);
+            margin: 4px 0;
+        }
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #EDF2F7;
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
     </style>
 </head>
 <body>
-    <div id="pageContent" style="display:none;">
-        <div class="container affiliate-container">
-            <div class="affiliate-nav">
-                <div class="brand">🇰🇪 US<span>KAN</span></div>
-                <a href="results-full.html" class="back-link">← Back to Results</a>
-            </div>
-
-            <div class="affiliate-header">
-                <span class="affiliate-icon">💰</span>
-                <h1>Start Earning Money!</h1>
-                <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
-            </div>
-
-            <div class="earnings-preview">
-                <div><div class="stat-number" id="totalReferrals">0</div><div class="stat-label">People Referred</div></div>
-                <div><div class="stat-number" id="totalEarnings">KSh 0</div><div class="stat-label">Total Earned</div></div>
-                <div><div class="stat-number" id="pendingEarnings">KSh 0</div><div class="stat-label">Pending</div></div>
-            </div>
-
-            <form id="affiliateForm" class="affiliate-form">
-                <div class="form-group">
-                    <label for="mpesaPhone">📱 Your M-Pesa Number</label>
-                    <div class="phone-input">
-                        <span class="country-code">+254</span>
-                        <input type="tel" id="mpesaPhone" placeholder="712345678" required maxlength="9" pattern="[0-9]{9}" />
-                    </div>
-                    <small>This is where we'll send your referral earnings</small>
-                </div>
-                <button type="submit" class="btn-affiliate-register" id="registerBtn">🔗 Get My Referral Link</button>
-            </form>
-
-            <div id="referralSection">
-                <div class="referral-link-box">
-                    <h3>🔗 Your Unique Referral Link</h3>
-                    <div class="link-display">
-                        <input type="text" id="referralLink" readonly />
-                        <button onclick="copyReferralLink()" class="btn-copy">📋 Copy</button>
-                    </div>
-                    <p style="font-size:14px; color:var(--medium-grey);">Share this link on Facebook, WhatsApp, Instagram, or anywhere else!</p>
-                </div>
-
-                <div class="share-quick">
-                    <button onclick="shareReferral('facebook')" class="share-btn facebook">📘 Facebook</button>
-                    <button onclick="shareReferral('whatsapp')" class="share-btn whatsapp">💬 WhatsApp</button>
-                    <button onclick="shareReferral('twitter')" class="share-btn twitter">🐦 Twitter</button>
-                </div>
-
-                <div class="referral-stats">
-                    <h4>📊 Your Referral Stats</h4>
-                    <p>Total Referrals: <span id="statReferrals">0</span></p>
-                    <p>Total Earnings: <span id="statEarnings">KSh 0</span></p>
-                    <p>Pending: <span id="statPending">KSh 0</span></p>
-                </div>
-            </div>
-
-            <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
+    <div class="container affiliate-container">
+        <div class="affiliate-nav">
+            <div class="brand">🇰🇪 US<span>KAN</span></div>
+            <a href="results-full.html" class="back-link">← Back to Results</a>
         </div>
+
+        <div class="affiliate-header">
+            <span class="affiliate-icon">💰</span>
+            <h1>Start Earning Money!</h1>
+            <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
+        </div>
+
+        <div class="earnings-preview">
+            <div><div class="stat-number" id="totalReferrals">0</div><div class="stat-label">People Referred</div></div>
+            <div><div class="stat-number" id="totalEarnings">KSh 0</div><div class="stat-label">Total Earned</div></div>
+            <div><div class="stat-number" id="pendingEarnings">KSh 0</div><div class="stat-label">Pending</div></div>
+        </div>
+
+        <form id="affiliateForm" class="affiliate-form">
+            <div class="form-group">
+                <label for="mpesaPhone">📱 Your M-Pesa Number</label>
+                <div class="phone-input">
+                    <span class="country-code">+254</span>
+                    <input type="tel" id="mpesaPhone" placeholder="712345678" required maxlength="9" pattern="[0-9]{9}" />
+                </div>
+                <small>This is where we'll send your referral earnings</small>
+            </div>
+            <button type="submit" class="btn-affiliate-register" id="registerBtn">🔗 Get My Referral Link</button>
+        </form>
+
+        <div id="referralSection">
+            <div class="referral-link-box">
+                <h3>🔗 Your Unique Referral Link</h3>
+                <div class="link-display">
+                    <input type="text" id="referralLink" readonly />
+                    <button onclick="copyReferralLink()" class="btn-copy">📋 Copy</button>
+                </div>
+                <p style="font-size:14px; color:var(--medium-grey);">Share this link on Facebook, WhatsApp, Instagram, or anywhere else!</p>
+            </div>
+
+            <div class="share-quick">
+                <button onclick="shareReferral('facebook')" class="share-btn facebook">📘 Facebook</button>
+                <button onclick="shareReferral('whatsapp')" class="share-btn whatsapp">💬 WhatsApp</button>
+                <button onclick="shareReferral('twitter')" class="share-btn twitter">🐦 Twitter</button>
+            </div>
+
+            <div class="referral-stats">
+                <h4>📊 Your Referral Stats</h4>
+                <p>Total Referrals: <span id="statReferrals">0</span></p>
+                <p>Total Earnings: <span id="statEarnings">KSh 0</span></p>
+                <p>Pending: <span id="statPending">KSh 0</span></p>
+            </div>
+        </div>
+
+        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <script src="script.js"></script>
-    <script src="auth.js"></script>
-    
     <!-- ============================================================
-    LOGIN CHECK
+    SCRIPTS
     ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script>
-        // Check if user is logged in
+        // ============================================================
+        // SUPABASE CONFIG
+        // ============================================================
+        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
+        
+        if (typeof supabaseJs !== 'undefined') {
+            var supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            var supabase = null;
+        }
+    </script>
+    <script src="auth.js"></script>
+    <script src="user-progress.js"></script>
+
+    <script>
+        // ============================================================
+        // LOGIN CHECK - Redirect if not logged in
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             checkSession().then(session => {
                 if (!session.loggedIn) {
-                    // Redirect to home with login prompt
                     alert('Please login or register to access affiliate features.');
                     window.location.href = 'index.html';
                     return;
                 }
-                // If logged in, show the page content
-                document.getElementById('pageContent').style.display = 'block';
+                // Load affiliate data if logged in
+                loadAffiliateData();
             });
         });
-    </script>
 
-    <!-- ============================================================
-    TRACK PAGE VISITS
-    ============================================================ -->
-    <script>
-        async function trackPageVisit() {
+        // ============================================================
+        // AFFILIATE REGISTRATION
+        // ============================================================
+        document.getElementById('affiliateForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phoneInput = document.getElementById('mpesaPhone');
+            const phone = phoneInput.value.trim();
+            
+            if (!phone || phone.length !== 9) {
+                alert('Please enter a valid 9-digit M-Pesa number (e.g., 712345678)');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Registering...';
+
             try {
-                // Get the current page
-                const page = window.location.pathname;
-
-                // Get IP (using a free API)
-                let ip = '';
-                try {
-                    const ipResponse = await fetch('https://api.ipify.org?format=json');
-                    const ipData = await ipResponse.json();
-                    ip = ipData.ip;
-                } catch (e) {
-                    console.log('Could not get IP:', e);
+                const session = await checkSession();
+                if (!session.loggedIn) {
+                    alert('Please login first.');
+                    btn.disabled = false;
+                    btn.textContent = '🔗 Get My Referral Link';
+                    return;
                 }
 
-                // Get user if logged in
-                let userId = null;
-                const user = localStorage.getItem('user');
-                if (user) {
-                    try {
-                        const userData = JSON.parse(user);
-                        userId = userData.id;
-                    } catch (e) {}
+                const formattedPhone = `254${phone}`;
+                const referralCode = generateReferralCode();
+
+                const { data: existing, error: checkError } = await supabase
+                    .from('affiliates')
+                    .select('id')
+                    .eq('user_id', session.profile?.id)
+                    .single();
+
+                if (existing) {
+                    alert('You already have an affiliate account.');
+                    btn.disabled = false;
+                    btn.textContent = '🔗 Get My Referral Link';
+                    return;
                 }
 
-                // Get referrer
-                const referrer = document.referrer || '';
-
-                // Save visit to Supabase
                 const { error } = await supabase
-                    .from('visits')
+                    .from('affiliates')
                     .insert({
-                        page: page,
-                        ip: ip || null,
-                        user_id: userId || null,
-                        referrer: referrer,
-                        user_agent: navigator.userAgent
+                        user_id: session.profile?.id,
+                        auth_user_id: session.user.id,
+                        referral_code: referralCode,
+                        mpesa_phone: formattedPhone,
+                        total_earnings: 0,
+                        total_referrals: 0,
+                        is_active: true
                     });
 
-                if (error) {
-                    console.error('Error tracking visit:', error);
-                }
+                if (error) throw error;
+
+                alert('✅ Affiliate account created successfully!');
+                document.getElementById('affiliateForm').style.display = 'none';
+                document.getElementById('referralSection').style.display = 'block';
+                document.getElementById('referralLink').value = `${window.location.origin}/?ref=${referralCode}`;
+                loadAffiliateStats();
+
             } catch (error) {
-                console.error('Error in trackPageVisit:', error);
+                console.error('Error registering affiliate:', error);
+                alert('❌ ' + (error.message || 'Something went wrong.'));
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🔗 Get My Referral Link';
+        });
+
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        window.copyReferralLink = function() {
+            const input = document.getElementById('referralLink');
+            if (input) {
+                input.select();
+                document.execCommand('copy');
+                alert('✅ Referral link copied to clipboard!');
+            }
+        };
+
+        window.shareReferral = function(platform) {
+            const input = document.getElementById('referralLink');
+            if (!input) return;
+            const link = input.value;
+            const text = '🧠 Take the USKAN Brain Test and earn KSh 20 per referral! Use my link:';
+
+            const shareUrls = {
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}&quote=${encodeURIComponent(text)}`,
+                whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + link)}`,
+                twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`
+            };
+
+            if (shareUrls[platform]) {
+                window.open(shareUrls[platform], '_blank', 'width=600,height=500');
+            }
+        };
+
+        async function loadAffiliateData() {
+            const session = await checkSession();
+            if (!session.loggedIn) return;
+
+            const { data: affiliate } = await supabase
+                .from('affiliates')
+                .select('*')
+                .eq('user_id', session.profile?.id)
+                .single();
+
+            if (affiliate) {
+                document.getElementById('affiliateForm').style.display = 'none';
+                document.getElementById('referralSection').style.display = 'block';
+                document.getElementById('referralLink').value = `${window.location.origin}/?ref=${affiliate.referral_code}`;
+                loadAffiliateStats();
             }
         }
 
-        // Track the visit when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Delay tracking to not impact page load
-            setTimeout(trackPageVisit, 1000);
-        });
+        async function loadAffiliateStats() {
+            const session = await checkSession();
+            if (!session.loggedIn) return;
+
+            const { data: affiliate } = await supabase
+                .from('affiliates')
+                .select('*')
+                .eq('user_id', session.profile?.id)
+                .single();
+
+            if (affiliate) {
+                const { data: referrals } = await supabase
+                    .from('referrals')
+                    .select('*')
+                    .eq('affiliate_id', affiliate.id);
+
+                const total = referrals?.length || 0;
+                const earnings = referrals?.filter(r => r.payout_status === 'completed' || r.manually_paid)
+                    .reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+                const pending = referrals?.filter(r => r.payout_status === 'pending' || r.payout_status === 'processing')
+                    .reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
+
+                document.getElementById('totalReferrals').textContent = total;
+                document.getElementById('totalEarnings').textContent = `KSh ${earnings}`;
+                document.getElementById('pendingEarnings').textContent = `KSh ${pending}`;
+                document.getElementById('statReferrals').textContent = total;
+                document.getElementById('statEarnings').textContent = `KSh ${earnings}`;
+                document.getElementById('statPending').textContent = `KSh ${pending}`;
+            }
+        }
     </script>
 </body>
 </html>
