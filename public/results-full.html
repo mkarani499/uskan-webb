@@ -6,89 +6,468 @@
     <title>Your Complete Brain Report - USKAN</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
-        .report-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #EDF2F7; margin-bottom: 24px; }
-        .report-nav .brand { font-size: 20px; font-weight: 700; color: var(--navy); }
-        .report-nav .brand span { color: var(--primary-orange); }
-        .report-header { text-align: center; margin-bottom: 32px; }
-        .report-header h1 { font-size: 32px; color: var(--navy); }
-        .report-header .congrats { font-size: 18px; color: var(--success-green); font-weight: 600; }
-        .overall-score-section { display: flex; align-items: center; justify-content: center; gap: 32px; padding: 24px; background: var(--off-white); border-radius: 16px; margin-bottom: 32px; flex-wrap: wrap; }
-        .score-circle { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--logic-blue)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--white); }
-        .score-circle .score-number { font-size: 36px; font-weight: 800; }
-        .score-circle .score-label { font-size: 12px; opacity: 0.8; }
-        .score-details { text-align: center; }
-        .score-details .score-rating { display: block; font-size: 20px; font-weight: 700; color: var(--success-green); }
-        .score-details .score-comparison { font-size: 14px; color: var(--medium-grey); }
-        .fingerprint-section { margin-bottom: 24px; }
-        .fingerprint-section h2 { font-size: 20px; color: var(--navy); margin-bottom: 16px; }
-        .score-bars { display: flex; flex-direction: column; gap: 12px; }
-        .brain-type-section { background: linear-gradient(135deg, #6C3483, #AF7AC5); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
-        .brain-type-badge { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.2); padding: 8px 24px; border-radius: 30px; }
-        .brain-type-badge .brain-type-icon { font-size: 24px; }
-        .brain-type-badge .brain-type-name { font-size: 24px; font-weight: 700; color: var(--white); }
-        .brain-type-tagline { color: rgba(255,255,255,0.9); font-size: 16px; margin-top: 8px; }
-        .strengths-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        @media (max-width: 600px) { .strengths-section { grid-template-columns: 1fr; } }
-        .strength-card { padding: 20px; border-radius: 16px; }
-        .strength-card.superpower { background: #F0FFF4; border-left: 4px solid var(--success-green); }
-        .strength-card.blindspot { background: #FFF5F5; border-left: 4px solid var(--warning-red); }
-        .strength-card .strength-icon { font-size: 32px; display: block; margin-bottom: 4px; }
-        .strength-card h3 { font-size: 16px; color: var(--navy); }
-        .strength-card p { font-size: 14px; color: var(--medium-grey); margin: 0; }
-        .action-plan { margin-bottom: 24px; }
-        .action-plan h2 { font-size: 20px; color: var(--navy); margin-bottom: 8px; }
-        .action-plan .action-intro { font-size: 16px; margin-bottom: 16px; }
-        .action-table { display: flex; flex-direction: column; gap: 12px; }
-        .action-row { display: grid; grid-template-columns: 50px 1fr 80px 1fr; gap: 12px; padding: 12px 16px; background: var(--off-white); border-radius: 12px; align-items: center; font-size: 14px; }
-        @media (max-width: 600px) { .action-row { grid-template-columns: 1fr; gap: 4px; } }
-        .action-row .action-step { font-weight: 700; color: var(--navy); }
-        .action-row .action-exercise { font-weight: 600; }
-        .action-row .action-time { color: var(--medium-grey); }
-        .action-row .action-why { color: var(--medium-grey); }
-        .comparison-section { margin-bottom: 24px; }
-        .comparison-section h2 { font-size: 20px; color: var(--navy); margin-bottom: 16px; }
-        .comparison-bars { display: flex; flex-direction: column; gap: 8px; }
-        .comparison-row { display: flex; align-items: center; gap: 12px; }
-        .comparison-row .comparison-label { width: 160px; font-size: 14px; font-weight: 500; }
-        .comparison-row .comparison-track { flex: 1; height: 20px; background: #EDF2F7; border-radius: 10px; overflow: hidden; }
-        .comparison-row .comparison-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
-        .comparison-row .comparison-fill.self { background: linear-gradient(90deg, var(--logic-blue), var(--speed-gold)); }
-        .comparison-row .comparison-fill.comparison { background: #CBD5E0; }
-        .comparison-row .comparison-value { font-size: 12px; font-weight: 600; min-width: 60px; text-align: right; }
-        .comparison-row .comparison-value.positive { color: var(--success-green); }
-        .comparison-row .comparison-value.negative { color: var(--warning-red); }
-        .affiliate-cta { text-align: center; background: linear-gradient(135deg, #1A2A3A, #2C3E50); border-radius: 16px; padding: 32px; color: white; margin: 24px 0; }
-        .affiliate-cta h2 { font-size: 22px; margin-bottom: 8px; }
-        .affiliate-cta p { opacity: 0.9; margin-bottom: 16px; }
-        .affiliate-cta .btn-affiliate { background: linear-gradient(135deg, #00A651, #00843D); color: white; padding: 14px 32px; border: none; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
-        .affiliate-cta .btn-affiliate:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 166, 81, 0.4); }
-        .share-section { text-align: center; padding: 24px; background: var(--off-white); border-radius: 16px; margin: 24px 0; }
-        .share-section h2 { font-size: 20px; color: var(--navy); margin-bottom: 8px; }
-        .share-section .share-subtitle { font-size: 14px; color: var(--medium-grey); margin-bottom: 16px; }
-        .share-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-        .share-btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .share-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .share-btn.facebook { background: #1877F2; color: white; }
-        .share-btn.twitter { background: #000000; color: white; }
-        .share-btn.whatsapp { background: #25D366; color: white; }
-        .share-btn.copy { background: var(--white); color: var(--dark-grey); border: 2px solid #E2E8F0; }
-        .share-btn.copy:hover { border-color: var(--logic-blue); }
-        .email-section { margin: 24px 0; }
-        .email-section h2 { font-size: 20px; color: var(--navy); margin-bottom: 8px; }
-        .email-section p { color: var(--medium-grey); font-size: 14px; }
-        .email-form { display: flex; gap: 12px; margin-top: 8px; }
-        @media (max-width: 600px) { .email-form { flex-direction: column; } }
-        .email-form input { flex: 1; padding: 12px 16px; border: 2px solid #E2E8F0; border-radius: 12px; font-size: 16px; outline: none; }
-        .email-form input:focus { border-color: var(--logic-blue); }
-        .data-safety { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 24px; background: var(--off-white); border-radius: 16px; margin: 24px 0; }
-        @media (max-width: 600px) { .data-safety { grid-template-columns: 1fr; } }
-        .data-safety .safety-item { font-size: 14px; color: var(--dark-grey); text-align: center; }
-        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: var(--medium-grey); }
+        .report-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 24px;
+        }
+        .report-nav .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .report-nav .brand span {
+            color: var(--primary-orange);
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .report-header h1 {
+            font-size: 32px;
+            color: var(--navy);
+        }
+        .report-header .congrats {
+            font-size: 18px;
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .overall-score-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            padding: 24px;
+            background: var(--off-white);
+            border-radius: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--navy), var(--logic-blue));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+        .score-circle .score-number {
+            font-size: 36px;
+            font-weight: 800;
+        }
+        .score-circle .score-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .score-details {
+            text-align: center;
+        }
+        .score-details .score-rating {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success-green);
+        }
+        .score-details .score-comparison {
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
+
+        .fingerprint-section {
+            margin-bottom: 24px;
+        }
+        .fingerprint-section h2 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 16px;
+        }
+        .score-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .score-bar .score-bar-label {
+            width: 140px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .score-bar .score-bar-track {
+            flex: 1;
+            height: 24px;
+            background: #EDF2F7;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .score-bar .score-bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 1s ease;
+            box-shadow: var(--shadow-3d);
+        }
+        .score-bar .score-bar-fill.logic {
+            background: linear-gradient(180deg, #4A90D9, #1A3A6B);
+        }
+        .score-bar .score-bar-fill.memory {
+            background: linear-gradient(180deg, #E67E22, #C0392B);
+        }
+        .score-bar .score-bar-fill.spatial {
+            background: linear-gradient(180deg, #58D68D, #1E8449);
+        }
+        .score-bar .score-bar-fill.verbal {
+            background: linear-gradient(180deg, #AF7AC5, #6C3483);
+        }
+        .score-bar .score-bar-fill.speed {
+            background: linear-gradient(180deg, #F1C40F, #B7950B);
+        }
+        .score-bar .score-bar-percent {
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .brain-type-section {
+            background: linear-gradient(135deg, #6C3483, #AF7AC5);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .brain-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 24px;
+            border-radius: 30px;
+        }
+        .brain-type-badge .brain-type-icon {
+            font-size: 24px;
+        }
+        .brain-type-badge .brain-type-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--white);
+        }
+        .brain-type-tagline {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        .strengths-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 600px) {
+            .strengths-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        .strength-card {
+            padding: 20px;
+            border-radius: 16px;
+        }
+        .strength-card.superpower {
+            background: #F0FFF4;
+            border-left: 4px solid var(--success-green);
+        }
+        .strength-card.blindspot {
+            background: #FFF5F5;
+            border-left: 4px solid var(--warning-red);
+        }
+        .strength-card .strength-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .strength-card h3 {
+            font-size: 16px;
+            color: var(--navy);
+        }
+        .strength-card p {
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin: 0;
+        }
+
+        .action-plan {
+            margin-bottom: 24px;
+        }
+        .action-plan h2 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .action-plan .action-intro {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .action-table {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .action-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 80px 1fr;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--off-white);
+            border-radius: 12px;
+            align-items: center;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            .action-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+        }
+        .action-row .action-step {
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .action-row .action-exercise {
+            font-weight: 600;
+        }
+        .action-row .action-time {
+            color: var(--medium-grey);
+        }
+        .action-row .action-why {
+            color: var(--medium-grey);
+        }
+
+        .comparison-section {
+            margin-bottom: 24px;
+        }
+        .comparison-section h2 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 16px;
+        }
+        .comparison-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .comparison-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .comparison-row .comparison-label {
+            width: 160px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .comparison-row .comparison-track {
+            flex: 1;
+            height: 20px;
+            background: #EDF2F7;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .comparison-row .comparison-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        .comparison-row .comparison-fill.self {
+            background: linear-gradient(90deg, var(--logic-blue), var(--speed-gold));
+        }
+        .comparison-row .comparison-fill.comparison {
+            background: #CBD5E0;
+        }
+        .comparison-row .comparison-value {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: right;
+        }
+        .comparison-row .comparison-value.positive {
+            color: var(--success-green);
+        }
+        .comparison-row .comparison-value.negative {
+            color: var(--warning-red);
+        }
+
+        .affiliate-cta {
+            text-align: center;
+            background: linear-gradient(135deg, #1A2A3A, #2C3E50);
+            border-radius: 16px;
+            padding: 32px;
+            color: white;
+            margin: 24px 0;
+        }
+        .affiliate-cta h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .affiliate-cta p {
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        .affiliate-cta .btn-affiliate {
+            background: linear-gradient(135deg, #00A651, #00843D);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .affiliate-cta .btn-affiliate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 166, 81, 0.4);
+        }
+
+        .share-section {
+            text-align: center;
+            padding: 24px;
+            background: var(--off-white);
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+        .share-section h2 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .share-section .share-subtitle {
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-bottom: 16px;
+        }
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .share-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .share-btn.facebook {
+            background: #1877F2;
+            color: white;
+        }
+        .share-btn.twitter {
+            background: #000000;
+            color: white;
+        }
+        .share-btn.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .share-btn.copy {
+            background: var(--white);
+            color: var(--dark-grey);
+            border: 2px solid #E2E8F0;
+        }
+        .share-btn.copy:hover {
+            border-color: var(--logic-blue);
+        }
+
+        .email-section {
+            margin: 24px 0;
+        }
+        .email-section h2 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .email-section p {
+            color: var(--medium-grey);
+            font-size: 14px;
+        }
+        .email-form {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        @media (max-width: 600px) {
+            .email-form {
+                flex-direction: column;
+            }
+        }
+        .email-form input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+        .email-form input:focus {
+            border-color: var(--logic-blue);
+        }
+
+        .data-safety {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            padding: 24px;
+            background: var(--off-white);
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+        @media (max-width: 600px) {
+            .data-safety {
+                grid-template-columns: 1fr;
+            }
+        }
+        .data-safety .safety-item {
+            font-size: 14px;
+            color: var(--dark-grey);
+            text-align: center;
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #EDF2F7;
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
     </style>
 </head>
 <body>
     <div class="container report-container">
-        <div class="report-nav"><div class="brand">🇰🇪 US<span>KAN</span></div></div>
+        <div class="report-nav">
+            <div class="brand">🇰🇪 US<span>KAN</span></div>
+        </div>
 
         <div class="report-header">
             <h1>🧠 Your Complete Brain Profile</h1>
@@ -97,12 +476,12 @@
 
         <div class="overall-score-section">
             <div class="score-circle">
-                <span class="score-number" id="overallScore">72%</span>
+                <span class="score-number" id="overallScore">0%</span>
                 <span class="score-label">Overall Score</span>
             </div>
             <div class="score-details">
                 <span class="score-rating">⬆ Above Average</span>
-                <span class="score-comparison" id="scoreComparison">Higher than 68% of test-takers</span>
+                <span class="score-comparison" id="scoreComparison">Higher than 0% of test-takers</span>
             </div>
         </div>
 
@@ -114,21 +493,21 @@
         <div class="brain-type-section" id="brainTypeSection">
             <div class="brain-type-badge">
                 <span class="brain-type-icon">🧬</span>
-                <span class="brain-type-name" id="brainType">Speed Logician</span>
+                <span class="brain-type-name" id="brainType">Loading...</span>
             </div>
-            <p class="brain-type-tagline" id="brainTypeTagline">"Fast. Sharp. Unstoppable."</p>
+            <p class="brain-type-tagline" id="brainTypeTagline">"Your results are being prepared."</p>
         </div>
 
         <div class="strengths-section">
             <div class="strength-card superpower">
                 <span class="strength-icon">🦸</span>
                 <h3>Your Superpower</h3>
-                <p id="superpowerText">You solve problems faster than almost anyone</p>
+                <p id="superpowerText">Loading...</p>
             </div>
             <div class="strength-card blindspot">
                 <span class="strength-icon">🕳️</span>
                 <h3>Your Blind Spot</h3>
-                <p id="blindspotText">Memory recall could use improvement</p>
+                <p id="blindspotText">Loading...</p>
             </div>
         </div>
 
@@ -175,9 +554,284 @@
             <div class="safety-item">🗑️ You can request data deletion at any time</div>
         </div>
 
-        <footer><a href="index.html" class="btn-secondary" style="display:inline-block;">⬅ Back to Home</a></footer>
+        <footer>
+            <a href="index.html" class="btn-secondary" style="display:inline-block;">⬅ Back to Home</a>
+        </footer>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // RESULTS DISPLAY - Everything in one place
+        // ============================================================
+
+        console.log('📊 Results page loaded');
+
+        // Get results from localStorage
+        const results = JSON.parse(localStorage.getItem('testResults') || '{}');
+        console.log('📊 Results data:', results);
+
+        // Category data
+        const categoryNames = {
+            abstract: 'Logic & Reasoning',
+            memory: 'Memory & Recall',
+            spatial: 'Spatial Awareness',
+            verbal: 'Verbal Reasoning',
+            speed: 'Processing Speed'
+        };
+
+        const categoryEmojis = {
+            abstract: '🧩',
+            memory: '🧠',
+            spatial: '🌀',
+            verbal: '📝',
+            speed: '⚡'
+        };
+
+        const categoryColors = {
+            abstract: 'logic',
+            memory: 'memory',
+            spatial: 'spatial',
+            verbal: 'verbal',
+            speed: 'speed'
+        };
+
+        // ============================================================
+        // DISPLAY FUNCTIONS
+        // ============================================================
+
+        function displayResults() {
+            // Overall score
+            const overall = results.overall || 0;
+            document.getElementById('overallScore').textContent = overall + '%';
+
+            const comparison = Math.floor(Math.random() * 30 + 60);
+            document.getElementById('scoreComparison').textContent = `Higher than ${comparison}% of test-takers`;
+
+            // Score bars
+            const barsContainer = document.getElementById('scoreBars');
+            barsContainer.innerHTML = '';
+
+            const categories = ['abstract', 'memory', 'spatial', 'verbal', 'speed'];
+            categories.forEach(cat => {
+                const score = results[cat] || 0;
+                const rating = getRating(score);
+
+                const row = document.createElement('div');
+                row.className = 'score-bar';
+                row.innerHTML = `
+                    <span class="score-bar-label">${categoryEmojis[cat]} ${categoryNames[cat]}</span>
+                    <div class="score-bar-track">
+                        <div class="score-bar-fill ${categoryColors[cat]}" style="width: ${score}%"></div>
+                    </div>
+                    <span class="score-bar-percent">${score}% ${rating}</span>
+                `;
+                barsContainer.appendChild(row);
+            });
+
+            // Brain type
+            const brainType = results.brainType || 'Balanced Thinker';
+            document.getElementById('brainType').textContent = brainType;
+            document.getElementById('brainTypeTagline').textContent = getBrainTypeTagline(brainType);
+
+            // Superpower & Blind spot
+            document.getElementById('superpowerText').textContent = getSuperpower(results);
+            document.getElementById('blindspotText').textContent = getBlindspot(results);
+
+            // Action plan
+            displayActionPlan(results);
+
+            // Comparison chart
+            displayComparison(results);
+        }
+
+        function getRating(score) {
+            if (score >= 90) return '⭐ Genius';
+            if (score >= 75) return '✅ Strong';
+            if (score >= 60) return '✅ Solid';
+            if (score >= 40) return '⚠️ Average';
+            return '⚠️ Needs Work';
+        }
+
+        function getBrainTypeTagline(type) {
+            const taglines = {
+                'Logic Master': '"You see patterns others miss."',
+                'Memory Pro': '"You remember what others forget."',
+                'Visual Thinker': '"You think in pictures and spaces."',
+                'Word Wizard': '"You have a way with words."',
+                'Speed Demon': '"You think faster than most."',
+                'Balanced Thinker': '"You\'re a well-rounded thinker."'
+            };
+            return taglines[type] || '"You\'re a unique thinker."';
+        }
+
+        function getSuperpower(results) {
+            const categories = [
+                { key: 'abstract', text: 'You excel at solving complex puzzles and spotting patterns.' },
+                { key: 'memory', text: 'You have an exceptional ability to remember details and sequences.' },
+                { key: 'spatial', text: 'You can visualize objects in 3D and navigate spaces effortlessly.' },
+                { key: 'verbal', text: 'You have a natural gift for language and communication.' },
+                { key: 'speed', text: 'You process information and make decisions faster than most.' }
+            ];
+
+            let highest = { key: 'abstract', score: 0 };
+            categories.forEach(cat => {
+                const score = results[cat.key] || 0;
+                if (score > highest.score) {
+                    highest = { key: cat.key, score: score };
+                }
+            });
+
+            const found = categories.find(c => c.key === highest.key);
+            return found ? found.text : 'You have a unique combination of strengths.';
+        }
+
+        function getBlindspot(results) {
+            const categories = [
+                { key: 'abstract', text: 'Complex patterns and abstract logic can sometimes feel overwhelming.' },
+                { key: 'memory', text: 'Remembering details, names, or step-by-step instructions might be challenging.' },
+                { key: 'spatial', text: 'Visualizing objects in 3D or navigating new spaces could use improvement.' },
+                { key: 'verbal', text: 'Finding the right words or expressing complex ideas might take extra effort.' },
+                { key: 'speed', text: 'Making quick decisions under pressure might be an area for growth.' }
+            ];
+
+            let lowest = { key: 'abstract', score: 100 };
+            categories.forEach(cat => {
+                const score = results[cat.key] || 0;
+                if (score < lowest.score) {
+                    lowest = { key: cat.key, score: score };
+                }
+            });
+
+            const found = categories.find(c => c.key === lowest.key);
+            return found ? found.text : 'Every brain has room for growth—keep challenging yourself!';
+        }
+
+        function displayActionPlan(results) {
+            const table = document.getElementById('actionTable');
+            if (!table) return;
+
+            const categories = [
+                { key: 'abstract', name: 'Logic & Reasoning', exercise: 'Sudoku or Logic Puzzles', why: 'Trains pattern recognition and deductive reasoning' },
+                { key: 'memory', name: 'Memory & Recall', exercise: 'Dual N-Back Training', why: 'Trains working memory and focus simultaneously' },
+                { key: 'spatial', name: 'Spatial Awareness', exercise: 'Mental Rotation Exercises', why: 'Improves visualization and spatial thinking' },
+                { key: 'verbal', name: 'Verbal Processing', exercise: 'Word Association Games', why: 'Builds vocabulary and verbal fluency' },
+                { key: 'speed', name: 'Processing Speed', exercise: 'Quick Math Drills', why: 'Trains rapid decision-making' }
+            ];
+
+            let lowest = { key: 'abstract', score: 100 };
+            categories.forEach(cat => {
+                const score = results[cat.key] || 0;
+                if (score < lowest.score) {
+                    lowest = { key: cat.key, score: score };
+                }
+            });
+
+            const target = categories.find(c => c.key === lowest.key) || categories[0];
+
+            table.innerHTML = `
+                <div class="action-row">
+                    <span class="action-step">1</span>
+                    <span class="action-exercise">${target.exercise}</span>
+                    <span class="action-time">5 min/day</span>
+                    <span class="action-why">${target.why}</span>
+                </div>
+                <div class="action-row">
+                    <span class="action-step">2</span>
+                    <span class="action-exercise">Visual Association Method</span>
+                    <span class="action-time">3 min/day</span>
+                    <span class="action-why">Connects new information to images you already know</span>
+                </div>
+                <div class="action-row">
+                    <span class="action-step">3</span>
+                    <span class="action-exercise">Spaced Repetition Flashcards</span>
+                    <span class="action-time">5 min/day</span>
+                    <span class="action-why">Forces your brain to recall information just before it forgets</span>
+                </div>
+            `;
+        }
+
+        function displayComparison(results) {
+            const container = document.getElementById('comparisonBars');
+            if (!container) return;
+
+            const comparisons = [
+                { label: 'General Population', diff: '+8%' },
+                { label: 'People Your Age', diff: '+12%' },
+                { label: 'College Graduates', diff: '+3%' },
+                { label: 'Engineers/Analysts', diff: '-5%' }
+            ];
+
+            container.innerHTML = '';
+
+            comparisons.forEach(comp => {
+                const isPositive = comp.diff.startsWith('+');
+                const value = parseInt(comp.diff);
+                const width = 50 + value * 2;
+
+                const row = document.createElement('div');
+                row.className = 'comparison-row';
+                row.innerHTML = `
+                    <span class="comparison-label">${comp.label}</span>
+                    <div class="comparison-track">
+                        <div class="comparison-fill ${isPositive ? 'self' : 'comparison'}" style="width: ${Math.min(Math.max(width, 10), 95)}%"></div>
+                    </div>
+                    <span class="comparison-value ${isPositive ? 'positive' : 'negative'}">${comp.diff}</span>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // ============================================================
+        // SHARE RESULTS
+        // ============================================================
+
+        function shareResults(platform) {
+            const score = results.overall || 72;
+            const brainType = results.brainType || 'Balanced Thinker';
+            const baseUrl = window.location.origin;
+            const shareUrl = `${baseUrl}/?ref=${platform}&score=${score}&type=${encodeURIComponent(brainType)}`;
+
+            const shareText = `🧠 I scored ${score}% on the USKAN Brain Test! My brain type is "${brainType}". Can you beat my score? Take the test here:`;
+
+            let shareLink = '';
+            switch (platform) {
+                case 'facebook':
+                    shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+                    break;
+                case 'twitter':
+                    shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'whatsapp':
+                    shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                        alert('✅ Link copied to clipboard!');
+                    });
+                    return;
+                default:
+                    return;
+            }
+
+            if (shareLink) {
+                window.open(shareLink, '_blank', 'width=600,height=500');
+            }
+        }
+
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayResults();
+            console.log('✅ Results displayed');
+        });
+
+        // Make share function global
+        window.shareResults = shareResults;
+
+        console.log('✅ Results script loaded');
+    </script>
 </body>
 </html>

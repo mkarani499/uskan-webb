@@ -40,5 +40,38 @@
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.classList.remove('show');
+            
+            try {
+                const response = await fetch('/api/admin-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('adminSession', 'true');
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Incorrect password');
+                    errorDiv.classList.add('show');
+                    document.getElementById('adminPassword').value = '';
+                    document.getElementById('adminPassword').focus();
+                }
+            } catch (error) {
+                errorDiv.textContent = '❌ Network error. Please try again.';
+                errorDiv.classList.add('show');
+            }
+        });
+    </script>
 </body>
 </html>

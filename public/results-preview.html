@@ -6,86 +6,319 @@
     <title>Your Results Preview - USKAN</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
-        .results-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #EDF2F7; margin-bottom: 24px; }
-        .results-nav .brand { font-size: 20px; font-weight: 700; color: var(--navy); }
-        .results-nav .brand span { color: var(--primary-orange); }
-        .results-preview h1 { text-align: center; font-size: 32px; color: var(--navy); margin-bottom: 8px; }
-        .results-preview .subtitle { text-align: center; color: var(--medium-grey); font-size: 16px; margin-bottom: 32px; }
-        .teaser-box { background: var(--off-white); border-radius: 16px; padding: 24px; margin-bottom: 32px; }
-        .teaser-box h2 { font-size: 20px; color: var(--navy); margin-bottom: 16px; }
-        .teaser-hints { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
-        .hint-card { padding: 16px; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; }
-        .hint-card.positive { background: #F0FFF4; border-left: 4px solid var(--success-green); }
-        .hint-card.negative { background: #FFF5F5; border-left: 4px solid var(--warning-red); }
-        .hint-icon { font-size: 24px; }
-        .hint-card p { margin: 0; font-size: 16px; }
-        .teaser-message { text-align: center; padding: 16px 0; }
-        .teaser-question { font-size: 18px; color: var(--navy); margin-top: 8px; }
-        .report-contents { margin-bottom: 32px; }
-        .report-contents h3 { font-size: 20px; color: var(--navy); margin-bottom: 16px; }
-        .content-grid { display: grid; gap: 12px; }
-        .content-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: var(--off-white); border-radius: 12px; }
-        .content-icon { font-size: 24px; }
-        .content-item strong { display: block; color: var(--navy); }
-        .content-item p { margin: 0; font-size: 14px; color: var(--medium-grey); }
-        .payment-cta { text-align: center; background: linear-gradient(135deg, var(--navy), #2C3E50); border-radius: 16px; padding: 32px; color: var(--white); }
-        .payment-cta h3 { font-size: 24px; margin-bottom: 8px; }
-        .payment-price { margin: 16px 0; }
-        .payment-price .price { font-size: 48px; font-weight: 800; }
-        .payment-price .price-label { display: block; font-size: 14px; opacity: 0.8; }
-        .btn-mpesa-cta { background: linear-gradient(135deg, #00A651, #00843D) !important; box-shadow: 0 4px 16px rgba(0, 166, 81, 0.4); display: inline-block; padding: 16px 40px; color: var(--white); border: none; border-radius: 12px; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
-        .btn-mpesa-cta:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 166, 81, 0.6) !important; }
-        .payment-note { font-size: 14px; opacity: 0.8; margin-top: 12px; }
-        .testimonial-results { display: grid; gap: 20px; margin-bottom: 32px; }
-        .testimonial-card { background: var(--off-white); border-radius: 16px; padding: 20px; }
-        .testimonial-text { font-style: italic; font-size: 16px; margin-bottom: 4px; }
-        .testimonial-author { font-size: 14px; color: var(--medium-grey); margin-bottom: 12px; }
-        .mini-results { background: var(--white); border-radius: 12px; padding: 16px; }
-        .mini-results h4 { font-size: 14px; color: var(--medium-grey); margin-bottom: 8px; }
-        .mini-score-row { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; }
-        .mini-brain-type { margin-top: 8px; font-size: 14px; }
-        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #EDF2F7; text-align: center; font-size: 14px; color: var(--medium-grey); }
+        .results-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 24px;
+        }
+        .results-nav .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .results-nav .brand span {
+            color: var(--primary-orange);
+        }
+
+        .results-preview h1 {
+            text-align: center;
+            font-size: 32px;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+        .results-preview .subtitle {
+            text-align: center;
+            color: var(--medium-grey);
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        .results-preview .earn-note {
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-bottom: 32px;
+        }
+        .results-preview .earn-note strong {
+            color: var(--success-green);
+        }
+
+        /* ===== TEASER SECTION (3D Style) ===== */
+        .teaser-box {
+            background: linear-gradient(145deg, #ffffff, #f7f9fc);
+            border-radius: 20px;
+            padding: 32px 28px;
+            margin-bottom: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        .teaser-box::before {
+            content: '🧠';
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 80px;
+            opacity: 0.04;
+        }
+        .teaser-message {
+            text-align: center;
+            padding: 4px 0 12px;
+        }
+        .teaser-message .big-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .teaser-message p {
+            font-size: 17px;
+            color: var(--dark-grey);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .teaser-message .highlight {
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .teaser-question {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-top: 12px;
+        }
+
+        /* ===== REPORT CONTENTS ===== */
+        .report-contents {
+            margin-bottom: 32px;
+        }
+        .report-contents h3 {
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 16px;
+        }
+        .content-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .content-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 18px;
+            background: var(--off-white);
+            border-radius: 14px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .content-item:hover {
+            transform: translateX(6px);
+            border-color: #E2E8F0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .content-icon {
+            font-size: 26px;
+            width: 40px;
+            text-align: center;
+        }
+        .content-item strong {
+            display: block;
+            color: var(--navy);
+            font-size: 15px;
+        }
+        .content-item p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonial-results {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .testimonial-card {
+            background: var(--off-white);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #EDF2F7;
+            transition: transform 0.2s;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-2px);
+        }
+        .testimonial-text {
+            font-style: italic;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--dark-grey);
+        }
+        .testimonial-author {
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-bottom: 12px;
+        }
+        .mini-results {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #EDF2F7;
+        }
+        .mini-results h4 {
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-bottom: 8px;
+        }
+        .mini-score-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            font-size: 14px;
+        }
+        .mini-brain-type {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        /* ===== PAYMENT CTA ===== */
+        .payment-cta {
+            text-align: center;
+            background: linear-gradient(135deg, var(--navy), #2C3E50);
+            border-radius: 16px;
+            padding: 32px;
+            color: var(--white);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        .payment-cta h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .payment-price {
+            margin: 16px 0;
+        }
+        .payment-price .price {
+            font-size: 48px;
+            font-weight: 800;
+        }
+        .payment-price .price-label {
+            display: block;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .btn-mpesa-cta {
+            background: linear-gradient(135deg, #00A651, #00843D) !important;
+            box-shadow: 0 4px 16px rgba(0, 166, 81, 0.4);
+            display: inline-block;
+            padding: 16px 40px;
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-mpesa-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 166, 81, 0.6) !important;
+        }
+        .payment-note {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 12px;
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #EDF2F7;
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
     </style>
 </head>
 <body>
     <div class="container results-preview">
+        <!-- Navigation -->
         <div class="results-nav">
             <div class="brand">🇰🇪 US<span>KAN</span></div>
         </div>
 
         <h1>🧠 Your Brain Test Results Are In!</h1>
         <p class="subtitle">See a sneak peek of your results below. Pay KSh 50 to unlock your full report.</p>
+        <p class="earn-note">💡 After unlocking, you can <strong>earn KSh 20</strong> for every friend you refer!</p>
 
+        <!-- Teaser Section -->
         <div class="teaser-box">
-            <h2>🤔 Here's What We Discovered...</h2>
-            <div class="teaser-hints">
-                <div class="hint-card positive">
-                    <span class="hint-icon">🔥</span>
-                    <p>Your <strong>logic</strong> and <strong>speed</strong> scores are exceptional—you're a quick thinker who loves solving problems.</p>
-                </div>
-                <div class="hint-card negative">
-                    <span class="hint-icon">⚠️</span>
-                    <p>Your <strong>memory</strong> score is significantly lower than your other areas.</p>
-                </div>
-            </div>
             <div class="teaser-message">
-                <p>Most people have one <strong>superpower</strong> 🦸 and one <strong>blind spot</strong> 🕳️.</p>
-                <p class="teaser-question"><strong>Which area is actually your superpower?</strong><br />And is your memory holding you back more than you realize?</p>
+                <span class="big-icon">🦸</span>
+                <p>
+                    Most people have one <span class="highlight">superpower</span> 🦸 and one
+                    <span class="highlight">blind spot</span> 🕳️.
+                </p>
+                <p class="teaser-question">
+                    Which area is actually your superpower?<br />
+                    And is your memory holding you back more than you realize?
+                </p>
             </div>
         </div>
 
+        <!-- What's Inside the Full Report -->
         <div class="report-contents">
             <h3>🔓 Your Full Report Reveals:</h3>
             <div class="content-grid">
-                <div class="content-item"><span class="content-icon">🦸</span><div><strong>Your #1 Superpower</strong><p>The exact cognitive strength that makes you unique</p></div></div>
-                <div class="content-item"><span class="content-icon">🕳️</span><div><strong>Your Hidden Blind Spot</strong><p>The one area quietly holding you back</p></div></div>
-                <div class="content-item"><span class="content-icon">🧬</span><div><strong>Your Brain Type</strong><p>Discover if you're a Logic Master, Speed Demon, or something else</p></div></div>
-                <div class="content-item"><span class="content-icon">📊</span><div><strong>Your Exact Scores</strong><p>See your logic, memory, speed, spatial, and verbal scores in full detail</p></div></div>
-                <div class="content-item"><span class="content-icon">🎯</span><div><strong>Personalized Action Plan</strong><p>Simple daily exercises to boost your weak areas</p></div></div>
-                <div class="content-item"><span class="content-icon">📱</span><div><strong>Share Your Results</strong><p>Post your brain profile on Facebook, Instagram, or anywhere else</p></div></div>
+                <div class="content-item">
+                    <span class="content-icon">🦸</span>
+                    <div>
+                        <strong>Your #1 Superpower</strong>
+                        <p>The exact cognitive strength that makes you unique</p>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <span class="content-icon">🕳️</span>
+                    <div>
+                        <strong>Your Hidden Blind Spot</strong>
+                        <p>The one area quietly holding you back</p>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <span class="content-icon">🧬</span>
+                    <div>
+                        <strong>Your Brain Type</strong>
+                        <p>Discover if you're a Logic Master, Speed Demon, or something else</p>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <span class="content-icon">📊</span>
+                    <div>
+                        <strong>Your Exact Scores</strong>
+                        <p>See your logic, memory, speed, spatial, and verbal scores in full detail</p>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <span class="content-icon">🎯</span>
+                    <div>
+                        <strong>Personalized Action Plan</strong>
+                        <p>Simple daily exercises to boost your weak areas</p>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <span class="content-icon">📱</span>
+                    <div>
+                        <strong>Share Your Results</strong>
+                        <p>Post your brain profile on Facebook, Instagram, or anywhere else</p>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Testimonials -->
         <div class="testimonial-results">
             <div class="testimonial-card">
                 <p class="testimonial-text">"I thought I was a 'logic person'—turns out my real superpower was speed. The report blew my mind."</p>
@@ -93,24 +326,34 @@
                 <div class="mini-results">
                     <h4>📊 Jake's Results:</h4>
                     <div class="mini-score-row">
-                        <span>🧩 Logic: 78%</span><span>🧠 Memory: 52%</span><span>🌀 Spatial: 81%</span><span>📝 Verbal: 65%</span><span>⚡ Speed: 94%</span>
+                        <span>🧩 Logic: 78%</span>
+                        <span>🧠 Memory: 52%</span>
+                        <span>🌀 Spatial: 81%</span>
+                        <span>📝 Verbal: 65%</span>
+                        <span>⚡ Speed: 94%</span>
                     </div>
                     <div class="mini-brain-type">⚡ Brain Type: <strong>Speed Demon</strong></div>
                 </div>
             </div>
+
             <div class="testimonial-card">
                 <p class="testimonial-text">"The memory exercises alone were worth the KSh 50. I've already noticed a difference."</p>
                 <p class="testimonial-author">– Emily, 27</p>
                 <div class="mini-results">
                     <h4>📊 Emily's Results:</h4>
                     <div class="mini-score-row">
-                        <span>🧩 Logic: 88%</span><span>🧠 Memory: 73%</span><span>🌀 Spatial: 59%</span><span>📝 Verbal: 91%</span><span>⚡ Speed: 67%</span>
+                        <span>🧩 Logic: 88%</span>
+                        <span>🧠 Memory: 73%</span>
+                        <span>🌀 Spatial: 59%</span>
+                        <span>📝 Verbal: 91%</span>
+                        <span>⚡ Speed: 67%</span>
                     </div>
                     <div class="mini-brain-type">🧩 Brain Type: <strong>Logic Master</strong></div>
                 </div>
             </div>
         </div>
 
+        <!-- Payment CTA -->
         <div class="payment-cta">
             <h3>⚡ Unlock Your Full Brain Report</h3>
             <div class="payment-price">
@@ -124,6 +367,7 @@
 
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

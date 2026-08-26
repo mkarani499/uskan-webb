@@ -35,12 +35,18 @@
         table td { padding: 10px 14px; border-bottom: 1px solid #EDF2F7; vertical-align: middle; }
         table tr:hover { background: #FAFBFC; }
         table .no-data { text-align: center; padding: 40px; color: var(--medium-grey); }
-        .btn-manual-pay { background: var(--primary-orange); color: white; border: none; padding: 4px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; }
-        .btn-manual-pay:hover { background: var(--primary-orange-hover); }
-        .btn-manual-pay:disabled { opacity: 0.5; cursor: not-allowed; }
         .search-box { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
         .search-box input { flex: 1; min-width: 150px; padding: 8px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; }
         .search-box select { padding: 8px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; background: var(--white); }
+        .status-badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-badge.pending { background: #FFF3CD; color: #856404; }
+        .status-badge.processing { background: #CCE5FF; color: #004085; }
+        .status-badge.completed { background: #D4EDDA; color: #155724; }
+        .status-badge.failed { background: #F8D7DA; color: #721C24; }
+        .status-badge.manual_paid { background: #D1ECF1; color: #0C5460; }
+        .btn-manual-pay { background: var(--primary-orange); color: white; border: none; padding: 4px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; }
+        .btn-manual-pay:hover { background: var(--primary-orange-hover); }
+        .btn-manual-pay:disabled { opacity: 0.5; cursor: not-allowed; }
         .manual-payout-box { background: var(--white); padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0; max-width: 500px; }
         .manual-payout-box h3 { font-size: 20px; color: var(--navy); margin-bottom: 4px; }
         .manual-payout-box p { color: var(--medium-grey); font-size: 14px; margin-bottom: 16px; }
@@ -48,7 +54,6 @@
         .manual-payout-box .form-group label { display: block; font-weight: 600; font-size: 14px; color: var(--dark-grey); margin-bottom: 4px; }
         .manual-payout-box .form-group input { width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; }
         .btn-manual-pay-large { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--primary-orange), #DD6B20); color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-top: 8px; }
-        .btn-manual-pay-large:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(237, 137, 54, 0.3); }
         .manual-result { margin-top: 12px; padding: 12px 16px; border-radius: 8px; display: none; }
         .manual-result.success { display: block; background: #D4EDDA; color: #155724; border-left: 4px solid #38A169; }
         .manual-result.error { display: block; background: #F8D7DA; color: #721C24; border-left: 4px solid #E53E3E; }
@@ -59,6 +64,7 @@
 </head>
 <body>
     <div class="container admin-container">
+        <!-- Header -->
         <div class="admin-header">
             <h1>📊 US<span>KAN</span> Admin</h1>
             <div class="admin-header-right">
@@ -68,6 +74,7 @@
             </div>
         </div>
         
+        <!-- Stats -->
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-number" id="statUsers">0</div><span class="stat-label">Total Users</span></div>
             <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-number" id="statPayments">0</div><span class="stat-label">Total Payments</span></div>
@@ -75,6 +82,7 @@
             <div class="stat-card"><span class="stat-icon">💸</span><div class="stat-number" id="statCommissions">KSh 0</div><span class="stat-label">Total Commissions Paid</span><span class="stat-sub" id="statPendingCommission"></span></div>
         </div>
         
+        <!-- Tabs -->
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="referrals">📋 Referrals</button>
             <button class="admin-tab" data-tab="affiliates">👥 Affiliates</button>
@@ -82,6 +90,7 @@
             <button class="admin-tab" data-tab="manual">📤 Manual Payout</button>
         </div>
         
+        <!-- Tab: Referrals -->
         <div class="tab-content active" id="tab-referrals">
             <div class="search-box">
                 <input type="text" id="searchReferrals" placeholder="🔍 Search phone or referral code..." />
@@ -102,6 +111,7 @@
             </div>
         </div>
         
+        <!-- Tab: Affiliates -->
         <div class="tab-content" id="tab-affiliates">
             <div class="table-container">
                 <table>
@@ -111,6 +121,7 @@
             </div>
         </div>
         
+        <!-- Tab: Payments -->
         <div class="tab-content" id="tab-payments">
             <div class="table-container">
                 <table>
@@ -120,6 +131,7 @@
             </div>
         </div>
         
+        <!-- Tab: Manual Payout -->
         <div class="tab-content" id="tab-manual">
             <div class="manual-payout-box">
                 <h3>📤 Manual Payout</h3>
@@ -134,7 +146,63 @@
         
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <script src="script.js"></script>
+
+    <script>
+        // ============================================================
+        // LOGOUT FUNCTION - DEFINED HERE
+        // ============================================================
+        function logout() {
+            console.log('🚪 Logging out...');
+            localStorage.removeItem('adminSession');
+            localStorage.removeItem('adminLoginTime');
+            window.location.href = 'admin.html';
+        }
+
+        // ============================================================
+        // SESSION CHECK
+        // ============================================================
+        const session = localStorage.getItem('adminSession');
+        if (!session) {
+            console.log('🔒 No session found, redirecting to login...');
+            window.location.href = 'admin.html';
+        }
+
+        // ============================================================
+        // MAKE LOGOUT GLOBAL
+        // ============================================================
+        window.logout = logout;
+
+        console.log('✅ Admin dashboard loaded');
+        console.log('✅ Logout function available:', typeof logout === 'function');
+
+        // ============================================================
+        // TABS
+        // ============================================================
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ============================================================
+        // LOAD ADMIN DATA (Placeholder)
+        // ============================================================
+        async function loadAdminData() {
+            try {
+                // This will be populated with real data from Supabase
+                console.log('📊 Loading admin data...');
+                document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdminData();
+        });
+    </script>
 </body>
 </html>
