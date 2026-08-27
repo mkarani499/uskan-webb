@@ -100,9 +100,25 @@ function showAuthSuccess(message) {
 // ============================================================
 
 async function checkSession() {
+    // ✅ First check localStorage (fast and reliable)
+    const localUser = localStorage.getItem('user');
+    if (localUser) {
+        try {
+            const user = JSON.parse(localUser);
+            console.log('✅ User found in localStorage:', user.email);
+            return {
+                loggedIn: true,
+                user: user,
+                profile: user.profile || null
+            };
+        } catch (e) {
+            console.warn('⚠️ Invalid user in localStorage');
+        }
+    }
+    
+    // Fallback to Supabase (if needed)
     try {
         if (!supabase) {
-            console.warn('⚠️ Supabase not available');
             return { loggedIn: false, user: null, profile: null };
         }
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -110,39 +126,24 @@ async function checkSession() {
         
         if (session) {
             const user = session.user;
-            console.log('✅ User logged in:', user.email);
-            
-            const { data: profile, error: profileError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('auth_user_id', user.id)
-                .single();
-            
-            if (profileError && profileError.code !== 'PGRST116') {
-                console.error('Error fetching profile:', profileError);
-            }
-            
+            console.log('✅ User logged in via Supabase:', user.email);
+            // Save to localStorage for next time
+            localStorage.setItem('user', JSON.stringify({
+                id: user.id,
+                email: user.email,
+                username: user.user_metadata?.username || user.email.split('@')[0]
+            }));
             return {
                 loggedIn: true,
                 user: user,
-                profile: profile || null
-            };
-        } else {
-            console.log('🔓 No active session');
-            return {
-                loggedIn: false,
-                user: null,
                 profile: null
             };
         }
     } catch (error) {
-        console.error('Session check error:', error);
-        return {
-            loggedIn: false,
-            user: null,
-            profile: null
-        };
+        console.warn('⚠️ Supabase session check failed:', error);
     }
+    
+    return { loggedIn: false, user: null, profile: null };
 }
 
 // ============================================================

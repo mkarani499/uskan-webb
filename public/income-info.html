@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Earn Money - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* ===== INCOME INFO PAGE - Professional Blue Theme ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #EBF4FF, #D6EAF8, #AED6F1);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .income-page {
+            max-width: 720px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 50, 100, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .income-page::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(49, 130, 206, 0.08), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .income-page::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -20%;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(49, 130, 206, 0.06), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4A5568;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+        .back-link:hover {
+            color: #2B6CB0;
+        }
+        
+        .page-icon {
+            font-size: 56px;
+            display: block;
+            text-align: center;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1A2A3A;
+            text-align: center;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #4A5568;
+            font-size: 16px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            margin: 8px auto 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .status-badge.info {
+            background: #EBF8FF;
+            color: #3182CE;
+        }
+        .status-badge.warning {
+            background: #FFF5F5;
+            color: #E53E3E;
+        }
+        .status-badge.success {
+            background: #F0FFF4;
+            color: #38A169;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #EBF8FF, #D6EAF8);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-left: 4px solid #3182CE;
+            position: relative;
+            z-index: 1;
+        }
+        .highlight-box h3 {
+            font-size: 18px;
+            color: #1A2A3A;
+            margin-bottom: 8px;
+        }
+        .highlight-box p {
+            color: #4A5568;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .highlight-box .amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: #38A169;
+        }
+        
+        .steps-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px 20px;
+            background: #F7FAFC;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            transition: all 0.2s;
+        }
+        .step-item:hover {
+            border-color: #3182CE;
+            background: #EBF8FF;
+        }
+        .step-item.completed {
+            border-color: #38A169;
+            background: #F0FFF4;
+        }
+        .step-item.completed .step-number {
+            background: #38A169;
+        }
+        
+        .step-number {
+            background: #3182CE;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .step-number.done {
+            background: #38A169;
+        }
+        
+        .step-content h4 {
+            font-size: 15px;
+            color: #1A2A3A;
+            margin-bottom: 2px;
+        }
+        .step-content p {
+            font-size: 14px;
+            color: #4A5568;
+            margin: 0;
+        }
+        .step-content .highlight-text {
+            color: #3182CE;
+            font-weight: 600;
+        }
+        .step-content .check-mark {
+            color: #38A169;
+            font-weight: 700;
+        }
+        
+        .warning-box {
+            background: #FFF5F5;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border-left: 4px solid #E53E3E;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .warning-box p {
+            font-size: 14px;
+            color: #4A5568;
+            margin: 0;
+        }
+        .warning-box strong {
+            color: #E53E3E;
+        }
+        
+        .success-box {
+            background: #F0FFF4;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border-left: 4px solid #38A169;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .success-box p {
+            font-size: 14px;
+            color: #4A5568;
+            margin: 0;
+        }
+        .success-box strong {
+            color: #38A169;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-primary-blue {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #3182CE, #2B6CB0);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(49, 130, 206, 0.25);
+        }
+        .btn-primary-blue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(49, 130, 206, 0.35);
+        }
+        
+        .btn-secondary-blue {
+            padding: 14px 32px;
+            background: transparent;
+            color: #3182CE;
+            border: 2px solid #3182CE;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .btn-secondary-blue:hover {
+            background: #EBF8FF;
+        }
+        
+        .btn-success-green {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #38A169, #2F855A);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(56, 161, 105, 0.25);
+        }
+        .btn-success-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(56, 161, 105, 0.35);
+        }
+        
+        .btn-outline-green {
+            padding: 14px 32px;
+            background: transparent;
+            color: #38A169;
+            border: 2px solid #38A169;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .btn-outline-green:hover {
+            background: #F0FFF4;
+        }
+        
+        @media (max-width: 600px) {
+            .income-page {
+                padding: 24px 20px;
+            }
+            h1 {
+                font-size: 26px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .step-item {
+                padding: 12px 16px;
+            }
+            .highlight-box .amount {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="income-page" id="incomePage">
+        <!-- Back Button -->
+        <a href="javascript:history.back()" class="back-link">← Back</a>
+        
+        <!-- Icon -->
+        <span class="page-icon">💰</span>
+        
+        <!-- Title -->
+        <h1>Track Your Income</h1>
+        <p class="subtitle" id="pageSubtitle">Learn how to start earning money with USKAN</p>
+        
+        <!-- Status Badge -->
+        <div id="statusBadge" class="status-badge info">💡 Get Started</div>
+        
+        <!-- Main Content -->
+        <div id="pageContent">
+            <!-- This will be dynamically filled based on user status -->
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons" id="actionButtons">
+            <!-- Dynamically filled -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script>
+        // ============================================================
+        // SUPABASE CONFIG
+        // ============================================================
+        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
+        
+        if (typeof supabaseJs !== 'undefined') {
+            var supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase client initialized');
+        } else {
+            console.error('❌ supabaseJs not loaded');
+            var supabase = null;
+        }
+        
+        // ============================================================
+        // MAIN LOGIC
+        // ============================================================
+        
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const isLoggedIn = user !== null;
+        let hasAffiliate = false;
+        let affiliateData = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn) {
+                checkAffiliateStatus();
+            } else {
+                renderNotLoggedIn();
+            }
+        });
+        
+        // ============================================================
+        // CHECK AFFILIATE STATUS
+        // ============================================================
+        
+        async function checkAffiliateStatus() {
+            try {
+                // ✅ Use the API instead of direct Supabase
+                const response = await fetch('/api/check-affiliate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+                
+                const data = await response.json();
+                
+                if (data.hasAffiliate) {
+                    hasAffiliate = true;
+                    affiliateData = data.affiliate;
+                    // Redirect to dashboard
+                    window.location.href = 'affiliate-dashboard.html';
+                } else {
+                    hasAffiliate = false;
+                    renderLoggedInNoAffiliate();
+                }
+            } catch (error) {
+                console.error('Error checking affiliate status:', error);
+                renderLoggedInNoAffiliate();
+            }
+        }
+        
+        // ============================================================
+        // RENDER: Not Logged In
+        // ============================================================
+        
+        function renderNotLoggedIn() {
+            document.getElementById('pageSubtitle').textContent = 'Login to start earning money!';
+            document.getElementById('statusBadge').className = 'status-badge warning';
+            document.getElementById('statusBadge').textContent = '🔒 Login Required';
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="highlight-box">
+                    <h3>💰 Earn <span class="amount">KSh 20</span> Per Referral</h3>
+                    <p>
+                        USKAN pays you <strong>KSh 20</strong> for every friend who takes a test using your referral link.
+                        It's that simple!
+                    </p>
+                </div>
+                
+                <div class="steps-grid">
+                    <div class="step-item">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Login or Register</h4>
+                            <p>Create your account or login to get started</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Take a Test</h4>
+                            <p>Complete any test and pay <span class="highlight-text">KSh 50</span> to unlock your results</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Get Your Referral Link</h4>
+                            <p>Register your <span class="highlight-text">M-Pesa number</span> and get your unique link</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h4>Share & Earn</h4>
+                            <p>Share your link and earn <span class="highlight-text">KSh 20</span> per referral</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <p><strong>⚠️ Important:</strong> You must be logged in to track your referrals and earnings.</p>
+                </div>
+            `;
+            
+            document.getElementById('actionButtons').innerHTML = `
+                <a href="login.html" class="btn-primary-blue">🔐 Login</a>
+                <a href="register.html" class="btn-secondary-blue">📝 Register</a>
+            `;
+        }
+        
+        // ============================================================
+        // RENDER: Logged In, No Affiliate
+        // ============================================================
+        
+        function renderLoggedInNoAffiliate() {
+            const username = user.username || user.email?.split('@')[0] || 'User';
+            
+            document.getElementById('pageSubtitle').textContent = `Welcome, ${username}! Let's get you set up.`;
+            document.getElementById('statusBadge').className = 'status-badge info';
+            document.getElementById('statusBadge').textContent = '📋 Complete These Steps';
+            
+            document.getElementById('pageContent').innerHTML = `
+                <div class="highlight-box">
+                    <h3>🚀 You're Almost There!</h3>
+                    <p>
+                        You're logged in! Now complete these steps to start earning 
+                        <strong>KSh 20</strong> per referral.
+                    </p>
+                </div>
+                
+                <div class="steps-grid" id="stepsGrid">
+                    <!-- Step 1: Take a Test -->
+                    <div class="step-item" id="stepTest">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Take a Test</h4>
+                            <p>Complete the <a href="brain-test.html" style="color:#3182CE; font-weight:600;">Brain Test</a> (33 puzzles, ~10 minutes)</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Pay for Results -->
+                    <div class="step-item" id="stepPayment">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Pay for Your Results</h4>
+                            <p>Pay <span class="highlight-text">KSh 50</span> to unlock your full brain profile</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Register as Affiliate -->
+                    <div class="step-item" id="stepAffiliate">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Register as Affiliate</h4>
+                            <p>Enter your <span class="highlight-text">M-Pesa number</span> to get your referral link</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Share & Earn -->
+                    <div class="step-item" id="stepShare">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h4>Share & Earn</h4>
+                            <p>Share your link and earn <span class="highlight-text">KSh 20</span> per referral! 💰</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <p><strong>💡 Tip:</strong> After you complete a test, you'll see an option to register as an affiliate on your results page.</p>
+                </div>
+            `;
+            
+            document.getElementById('actionButtons').innerHTML = `
+                <a href="brain-test.html" class="btn-primary-blue">🧠 Take the Test</a>
+                <a href="index.html" class="btn-secondary-blue">🏠 Home</a>
+            `;
+            
+            // Check which steps are completed
+            checkUserProgress();
+        }
+        
+        // ============================================================
+        // CHECK USER PROGRESS (For Logged In, No Affiliate)
+        // ============================================================
+        
+        async function checkUserProgress() {
+            try {
+                if (!supabase || !user) return;
+                
+                // Check if user has test results (has taken a test)
+                const { data: results, error: resultsError } = await supabase
+                    .from('test_results')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .limit(1);
+                
+                // Check if user has payments (has paid)
+                const { data: payments, error: paymentsError } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('status', 'completed')
+                    .limit(1);
+                
+                const hasTest = results && results.length > 0;
+                const hasPaid = payments && payments.length > 0;
+                
+                // Update step items
+                const stepTest = document.getElementById('stepTest');
+                const stepPayment = document.getElementById('stepPayment');
+                const stepAffiliate = document.getElementById('stepAffiliate');
+                
+                if (stepTest && hasTest) {
+                    stepTest.className = 'step-item completed';
+                    stepTest.querySelector('.step-number').textContent = '✓';
+                    stepTest.querySelector('.step-number').className = 'step-number done';
+                    stepTest.querySelector('.step-content h4').innerHTML = '✅ Test Completed!';
+                }
+                
+                if (stepPayment && hasPaid) {
+                    stepPayment.className = 'step-item completed';
+                    stepPayment.querySelector('.step-number').textContent = '✓';
+                    stepPayment.querySelector('.step-number').className = 'step-number done';
+                    stepPayment.querySelector('.step-content h4').innerHTML = '✅ Payment Completed!';
+                }
+                
+                // If they have done steps 1 & 2, show a special message
+                if (hasTest && hasPaid) {
+                    const highlightBox = document.querySelector('.highlight-box');
+                    if (highlightBox) {
+                        highlightBox.innerHTML = `
+                            <h3>🎉 You're Ready to Register!</h3>
+                            <p>
+                                You've taken the test and paid for your results. 
+                                Now <strong>register as an affiliate</strong> to get your referral link and start earning!
+                            </p>
+                            <br>
+                            <a href="affiliate-register.html" class="btn-success-green" style="display:inline-flex; text-decoration:none; padding:12px 28px; border-radius:10px; color:white; font-weight:700;">
+                                🔗 Register as Affiliate Now
+                            </a>
+                        `;
+                        
+                        // Hide the action buttons since we have a CTA in the box
+                        document.getElementById('actionButtons').innerHTML = `
+                            <a href="index.html" class="btn-secondary-blue">🏠 Home</a>
+                        `;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error checking progress:', error);
+            }
+        }
+        
+        console.log('✅ Income info page loaded');
+    </script>
+</body>
+</html>

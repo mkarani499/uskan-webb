@@ -342,6 +342,14 @@
             box-shadow: 0 8px 24px rgba(0, 166, 81, 0.4);
         }
 
+        /* Affiliate Login Buttons */
+        .btn-affiliate-login:hover {
+            background: rgba(255,255,255,0.25) !important;
+        }
+        .btn-affiliate-register:hover {
+            background: #F0F0F0 !important;
+        }
+
         .share-section {
             text-align: center;
             padding: 24px;
@@ -526,6 +534,24 @@
             <h2>💰 Start Earning Money!</h2>
             <p>Register your M-Pesa number and get your unique referral link.<br />Earn <strong>KSh 20</strong> for every friend who takes the test!</p>
             <button onclick="handleAffiliateAccess()" class="btn-affiliate">🔗 Get Your Referral Link</button>
+            
+            <!-- ===== LOGIN/REGISTER SECTION (Shown only when not logged in) ===== -->
+            <div id="affiliateLoginPrompt" style="display:none; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <p style="font-size: 15px; opacity: 0.9; margin-bottom: 12px;">
+                    🔐 Please login or register to access affiliate features.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <a href="login.html?intent=affiliate" class="btn-affiliate-login" style="background: rgba(255,255,255,0.15); color: white; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;">
+                        🔐 Login
+                    </a>
+                    <a href="register.html" class="btn-affiliate-register" style="background: white; color: #1A2A3A; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
+                        📝 Register
+                    </a>
+                </div>
+                <p style="font-size: 13px; opacity: 0.6; margin-top: 10px;">
+                    💡 Your progress will be saved. Login/Register and continue where you left off.
+                </p>
+            </div>
         </div>
 
         <div class="share-section">
@@ -804,16 +830,30 @@
         // AFFILIATE ACCESS HANDLER
         // ============================================================
         
-        async function handleAffiliateAccess() {
-            const session = await checkSession();
-            
-            if (session.loggedIn) {
-                openAffiliateDashboard();
+        function handleAffiliateAccess() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const loginPrompt = document.getElementById('affiliateLoginPrompt');
+
+            console.log('🔍 Affiliate access - User:', user ? 'Logged in' : 'Not logged in');
+
+            if (user) {
+                // ✅ User is logged in - go directly to affiliate register
+                window.location.href = 'affiliate-register.html';
             } else {
+                // ❌ User is NOT logged in - show login prompt
+                if (loginPrompt) {
+                    loginPrompt.style.display = 'block';
+                    loginPrompt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Store intended action for after login
+                localStorage.setItem('intendedAction', 'affiliate');
+
+                // Save progress (same as before)
                 const results = localStorage.getItem('testResults');
                 const answers = localStorage.getItem('testAnswers');
                 const time = localStorage.getItem('testTime');
-                
+
                 if (results || answers || time) {
                     const progressData = {
                         results: results ? JSON.parse(results) : null,
@@ -822,14 +862,8 @@
                         timestamp: Date.now()
                     };
                     localStorage.setItem('testProgress', JSON.stringify(progressData));
-                    console.log('📦 Progress saved before login:', progressData);
+                    console.log('📦 Progress saved:', progressData);
                 }
-                
-                localStorage.setItem('intendedAction', 'affiliate');
-                showToast('🔐 Please login or register to access affiliate features.');
-                setTimeout(() => {
-                    openLoginModal();
-                }, 500);
             }
         }
         

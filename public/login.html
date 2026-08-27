@@ -61,6 +61,16 @@
     </div>
 
     <script>
+        // Check for intent in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const intent = urlParams.get('intent');
+            if (intent === 'affiliate') {
+                localStorage.setItem('intendedAction', 'affiliate');
+                console.log('📌 Affiliate intent detected, will redirect back to results after login');
+            }
+        });
+
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -94,9 +104,21 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('accessToken', data.accessToken);
 
+                    // ===== CHECK FOR INTENDED ACTION =====
+                    const intendedAction = localStorage.getItem('intendedAction');
+                    
+                    if (intendedAction === 'affiliate') {
+                        localStorage.removeItem('intendedAction');
+                        successDiv.textContent = '✅ Login successful! Redirecting...';
+                        successDiv.style.display = 'block';
+                        setTimeout(() => {
+                            window.location.href = 'results-full.html';
+                        }, 1000);
+                        return;
+                    }
+
                     successDiv.textContent = '✅ Login successful! Redirecting...';
                     successDiv.style.display = 'block';
-                    
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1000);

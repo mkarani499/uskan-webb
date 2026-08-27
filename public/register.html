@@ -28,6 +28,7 @@
         .username-check { font-size: 12px; margin-top: 4px; display: none; }
         .username-check.available { color: #27ae60; }
         .username-check.taken { color: #e74c3c; }
+        #progressBar { width: 0%; height: 100%; background: linear-gradient(90deg, #3182CE, #2B6CB0); border-radius: 4px; transition: width 0.1s linear; }
     </style>
 </head>
 <body>
@@ -101,21 +102,51 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    successDiv.textContent = '✅ ' + data.message;
-                    successDiv.style.display = 'block';
-                    btn.disabled = false;
-                    btn.textContent = 'Register';
-                    
+                    document.querySelector('.auth-box').innerHTML = `
+                        <div style="text-align:center; padding:30px 10px;">
+                            <div style="font-size:48px; margin-bottom:12px;">✅</div>
+                            <p style="color:#1A2A3A; font-size:20px; font-weight:700; margin-bottom:12px; line-height:1.4;">
+                                Registration successful!<br />
+                                Please check your email for verification.
+                            </p>
+                            <p style="color:#4A5568; font-size:16px; margin-bottom:4px;">
+                                🔄 Then come back and login
+                            </p>
+                            <p style="color:#718096; font-size:14px; margin-top:16px;">
+                                We've sent a verification link to <strong>${email}</strong>
+                            </p>
+                            <p style="color:#A0AEC0; font-size:13px; margin-top:12px;">
+                                ⏳ Redirecting to login in 6 seconds...
+                            </p>
+                            <div style="margin-top:16px; width:100%; height:4px; background:#EDF2F7; border-radius:4px; overflow:hidden;">
+                                <div id="progressBar" style="width:0%; height:100%; background:linear-gradient(90deg, #3182CE, #2B6CB0); border-radius:4px; transition:width 0.1s linear;"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Animate progress bar for 6 seconds
+                    let progress = 0;
+                    const progressBar = document.getElementById('progressBar');
+                    const interval = setInterval(() => {
+                        progress += 1;
+                        if (progressBar) {
+                            progressBar.style.width = progress + '%';
+                        }
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            const intendedAction = localStorage.getItem('intendedAction');
+                            const redirectUrl = intendedAction === 'affiliate' ? 'login.html?intent=affiliate' : 'login.html';
+                            window.location.href = redirectUrl;
+                        }
+                    }, 60);
+
+                    // Fallback redirect after 6 seconds
                     setTimeout(() => {
-                        document.querySelector('.auth-box').innerHTML = `
-                            <h2>📧 Check Your Email</h2>
-                            <p style="color:#666;">We've sent a verification link to <strong>${email}</strong>.</p>
-                            <p style="color:#666; margin-top:12px;">Please check your inbox and click the link.</p>
-                            <p style="color:#666;">After verification, you can <strong>login</strong>.</p>
-                            <a href="login.html" style="display:inline-block; width:100%; text-align:center; padding:14px; background:#27ae60; color:white; border:none; border-radius:8px; font-size:18px; font-weight:bold; text-decoration:none; margin-top:16px;">Go to Login</a>
-                            <a href="index.html" style="display:block; text-align:center; margin-top:12px; color:#888; text-decoration:none;">← Back to Home</a>
-                        `;
-                    }, 1500);
+                        clearInterval(interval);
+                        const intendedAction = localStorage.getItem('intendedAction');
+                        const redirectUrl = intendedAction === 'affiliate' ? 'login.html?intent=affiliate' : 'login.html';
+                        window.location.href = redirectUrl;
+                    }, 6000);
                 } else {
                     errorDiv.textContent = '❌ ' + (data.error || 'Registration failed');
                     errorDiv.style.display = 'block';

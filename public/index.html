@@ -24,19 +24,11 @@
         /* ===== NAVIGATION BAR ===== */
         .test-nav {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid #EDF2F7;
             margin-bottom: 24px;
-        }
-        .test-nav .brand {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--navy);
-        }
-        .test-nav .brand span {
-            color: var(--primary-orange);
         }
 
         /* ===== AUTH BUTTONS ===== */
@@ -55,6 +47,7 @@
             font-weight: 600;
             transition: all 0.2s;
             text-decoration: none;
+            font-size: 14px;
         }
         .btn-login:hover {
             border-color: var(--primary-orange);
@@ -70,6 +63,7 @@
             font-weight: 600;
             transition: all 0.2s;
             text-decoration: none;
+            font-size: 14px;
         }
         .btn-register:hover {
             transform: translateY(-2px);
@@ -100,24 +94,30 @@
             font-size: 14px;
         }
 
-        /* Affiliate Dashboard Button */
-        #affiliateDashboardBtn {
-            display: none;
-            align-items: center;
-            gap: 6px;
-            background: var(--off-white);
-            padding: 8px 16px;
+        /* ===== TRACK YOUR INCOME BUTTON ===== */
+        .btn-track-income {
+            padding: 8px 18px;
+            background: #3182CE;
+            color: white;
+            border: none;
             border-radius: 8px;
-            border: 1px solid #E2E8F0;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
-            color: var(--navy);
             transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.25);
         }
-        #affiliateDashboardBtn:hover {
-            border-color: var(--primary-orange);
-            background: var(--primary-orange-light);
+        .btn-track-income:hover {
+            background: #2B6CB0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35);
+        }
+        .btn-track-income:active {
+            transform: translateY(0);
         }
 
         /* ============================================================
@@ -466,11 +466,11 @@
     <div class="container">
         <!-- Navigation Bar -->
         <div class="test-nav">
-            <div class="brand">🇰🇪 US<span>KAN</span></div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <button id="affiliateDashboardBtn" onclick="window.location.href='affiliate-dashboard.html'" style="display:none; align-items:center; gap:6px; background:var(--off-white); padding:8px 16px; border-radius:8px; border:1px solid #E2E8F0; cursor:pointer; font-weight:600; font-size:14px; color:var(--navy); transition:all 0.2s;">
-                    📊 Affiliate
+            <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                <button onclick="handleTrackIncome()" class="btn-track-income">
+                    📊 Track Your Income
                 </button>
+                <div style="flex:1;"></div>
                 <div id="authButtons">
                     <a href="login.html" class="btn-login">Login</a>
                     <a href="register.html" class="btn-register">Register</a>
@@ -563,14 +563,15 @@
     SCRIPTS
     ============================================================ -->
     <script>
-        // Check if user is logged in and update UI
+        // ============================================================
+        // CHECK LOGIN STATE ON PAGE LOAD
+        // ============================================================
+
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user') || 'null');
             const authButtons = document.getElementById('authButtons');
-            const affiliateBtn = document.getElementById('affiliateDashboardBtn');
 
             if (user && authButtons) {
-                // Get username from localStorage
                 const username = user.username || user.email?.split('@')[0] || 'User';
                 authButtons.innerHTML = `
                     <span class="auth-user">
@@ -578,9 +579,9 @@
                         <button onclick="handleLogout()" class="btn-logout">Logout</button>
                     </span>
                 `;
-                if (affiliateBtn) affiliateBtn.style.display = 'flex';
+                console.log('✅ User is logged in:', username);
             } else {
-                if (affiliateBtn) affiliateBtn.style.display = 'none';
+                console.log('🔓 User is not logged in');
             }
         });
 
@@ -588,10 +589,52 @@
             localStorage.removeItem('user');
             localStorage.removeItem('userProfile');
             localStorage.removeItem('adminSession');
+            localStorage.removeItem('accessToken');
             window.location.href = 'index.html';
         }
 
-        // Track page visit
+        // ============================================================
+        // TRACK YOUR INCOME BUTTON HANDLER
+        // ============================================================
+        
+        async function handleTrackIncome() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            
+            if (!user) {
+                // Not logged in → go to income-info
+                window.location.href = 'income-info.html';
+                return;
+            }
+            
+            // Logged in → check if they have an affiliate account
+            try {
+                // ✅ Use the API to check affiliate status
+                const response = await fetch('/api/check-affiliate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+                
+                const data = await response.json();
+                
+                if (data.hasAffiliate) {
+                    // Has affiliate account → go to dashboard
+                    window.location.href = 'affiliate-dashboard.html';
+                } else {
+                    // No affiliate account → go to income-info
+                    window.location.href = 'income-info.html';
+                }
+            } catch (error) {
+                console.error('Error checking affiliate:', error);
+                // Fallback: go to income-info
+                window.location.href = 'income-info.html';
+            }
+        }
+
+        // ============================================================
+        // TRACK PAGE VISITS
+        // ============================================================
+        
         async function trackPageVisit() {
             try {
                 if (!supabase) return;
@@ -618,6 +661,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(trackPageVisit, 1000);
         });
+        
+        window.handleLogout = handleLogout;
+        window.handleTrackIncome = handleTrackIncome;
     </script>
     <script src="user-progress.js"></script>
     <script src="script.js"></script>

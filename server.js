@@ -248,6 +248,9 @@ import registerHandler from './api/register.js';
 import loginHandler from './api/login.js';
 import logoutHandler from './api/logout.js';
 import verifyUserHandler from './api/verify-user.js';
+import checkAffiliateHandler from './api/check-affiliate.js';
+import registerAffiliateHandler from './api/register-affiliate.js';
+import getAffiliateDataHandler from './api/get-affiliate-data.js';
 
 app.post('/api/register', async (req, res) => {
     console.log('📝 Register request received');
@@ -270,6 +273,31 @@ app.post('/api/logout', async (req, res) => {
 app.get('/api/verify-user', async (req, res) => {
     console.log('🔍 Verify user request received');
     await verifyUserHandler(req, res);
+});
+
+// ============================================================
+// AFFILIATE CHECK API
+// ============================================================
+app.post('/api/check-affiliate', async (req, res) => {
+    console.log('📥 Check affiliate request received');
+    await checkAffiliateHandler(req, res);
+});
+
+// ============================================================
+// REGISTER AFFILIATE API
+// ============================================================
+app.post('/api/register-affiliate', async (req, res) => {
+    console.log('📥 Register affiliate request received');
+    await registerAffiliateHandler(req, res);
+});
+
+// ============================================================
+// GET AFFILIATE DATA API
+// ============================================================
+app.post('/api/get-affiliate-data', async (req, res) => {
+    console.log('📥 Get affiliate data request received');
+    console.log('  User:', req.body.authUserId);
+    await getAffiliateDataHandler(req, res);
 });
 
 // ============================================================
