@@ -6,11 +6,19 @@
             "use": "@vercel/node"
         },
         {
+            "src": "api/**/*.js",
+            "use": "@vercel/node"
+        },
+        {
             "src": "public/**",
             "use": "@vercel/static"
         }
     ],
     "routes": [
+        {
+            "src": "/api/og-image",
+            "dest": "/api/og-image.js"
+        },
         {
             "src": "/api/(.*)",
             "dest": "/server.js"

@@ -6,6 +6,54 @@
     <title>USKAN - Test Your Skills & Earn Money</title>
     <link rel="stylesheet" href="styles.css" />
     
+    <!-- ============================================================
+         SOCIAL SHARING META TAGS (Dynamic)
+         ============================================================ -->
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref') || '';
+        const score = urlParams.get('score') || '';
+        const brainType = urlParams.get('type') || '';
+
+        // Build dynamic meta tags
+        const ogTitle = refCode ? '🧠 Take the USKAN Brain Test & Make Money!' : 'USKAN - Test Your Skills & Earn Money';
+        const ogDescription = refCode 
+            ? 'Join Me, You Might Be Good At This! Take the test now.' 
+            : 'Take tests, get your results, and start earning by sharing your links.';
+
+        // Build the OG image URL
+        let ogImageUrl = 'https://uskan-webb.vercel.app/api/og-image';
+        if (refCode) {
+            ogImageUrl += `?ref=${encodeURIComponent(refCode)}`;
+            if (score) ogImageUrl += `&score=${encodeURIComponent(score)}`;
+            if (brainType) ogImageUrl += `&type=${encodeURIComponent(brainType)}`;
+        }
+
+        // Create and inject meta tags
+        const metaTags = [
+            { property: 'og:title', content: ogTitle },
+            { property: 'og:description', content: ogDescription },
+            { property: 'og:image', content: ogImageUrl },
+            { property: 'og:url', content: window.location.href },
+            { property: 'og:type', content: 'website' },
+            { name: 'twitter:card', content: 'summary_large_image' },
+            { name: 'twitter:title', content: ogTitle },
+            { name: 'twitter:description', content: ogDescription },
+            { name: 'twitter:image', content: ogImageUrl },
+        ];
+
+        metaTags.forEach(tag => {
+            const meta = document.createElement('meta');
+            if (tag.property) meta.setAttribute('property', tag.property);
+            if (tag.name) meta.setAttribute('name', tag.name);
+            meta.setAttribute('content', tag.content);
+            document.head.appendChild(meta);
+        });
+
+        console.log('✅ OG Tags injected:', { ogTitle, ogDescription, ogImageUrl });
+    </script>
+    
     <!-- Supabase CDN + Config -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script>
