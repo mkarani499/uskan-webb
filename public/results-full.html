@@ -440,6 +440,11 @@
         .email-form input:focus {
             border-color: var(--logic-blue);
         }
+        #emailStatus {
+            margin-top: 8px;
+            font-size: 14px;
+            display: none;
+        }
 
         .data-safety {
             display: grid;
@@ -570,8 +575,9 @@
             <p>Enter your email below and we'll send you a PDF copy of this report:</p>
             <div class="email-form">
                 <input type="email" id="emailInput" placeholder="you@email.com" />
-                <button id="sendEmailBtn" class="btn-secondary">📧 Send My Report</button>
+                <button onclick="sendReport()" class="btn-secondary">📧 Send My Report</button>
             </div>
+            <div id="emailStatus" style="margin-top: 8px; font-size: 14px; display: none;"></div>
         </div>
 
         <div class="data-safety">
@@ -868,6 +874,76 @@
         }
         
         window.handleAffiliateAccess = handleAffiliateAccess;
+
+        // ============================================================
+        // SEND REPORT VIA EMAIL
+        // ============================================================
+
+        async function sendReport() {
+            const emailInput = document.getElementById('emailInput');
+            const statusDiv = document.getElementById('emailStatus');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#E53E3E';
+                statusDiv.textContent = '❌ Please enter your email address.';
+                return;
+            }
+            
+            // Validate email format
+            if (!email.includes('@') || !email.includes('.')) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#E53E3E';
+                statusDiv.textContent = '❌ Please enter a valid email address.';
+                return;
+            }
+            
+            // Get results from localStorage
+            const results = JSON.parse(localStorage.getItem('testResults') || '{}');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const username = user?.username || user?.email?.split('@')[0] || 'User';
+            
+            if (!results || Object.keys(results).length === 0) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#E53E3E';
+                statusDiv.textContent = '❌ No results found. Please take the test first.';
+                return;
+            }
+            
+            // Show loading
+            statusDiv.style.display = 'block';
+            statusDiv.style.color = '#3182CE';
+            statusDiv.textContent = '⏳ Sending your report...';
+            
+            try {
+                const response = await fetch('/api/send-pdf-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        results: results,
+                        username: username
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.style.color = '#38A169';
+                    statusDiv.textContent = '✅ Report sent successfully! Please check your email.';
+                } else {
+                    statusDiv.style.color = '#E53E3E';
+                    statusDiv.textContent = '❌ ' + (data.error || 'Failed to send report. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error sending report:', error);
+                statusDiv.style.color = '#E53E3E';
+                statusDiv.textContent = '❌ Network error. Please try again.';
+            }
+        }
+        
+        window.sendReport = sendReport;
         
         document.addEventListener('DOMContentLoaded', function() {
             displayResults();

@@ -251,6 +251,8 @@ import verifyUserHandler from './api/verify-user.js';
 import checkAffiliateHandler from './api/check-affiliate.js';
 import registerAffiliateHandler from './api/register-affiliate.js';
 import getAffiliateDataHandler from './api/get-affiliate-data.js';
+import sendPdfReportHandler from './api/send-pdf-report.js';
+import sendMassEmailHandler from './api/send-mass-email.js';
 
 app.post('/api/register', async (req, res) => {
     console.log('📝 Register request received');
@@ -298,6 +300,19 @@ app.post('/api/get-affiliate-data', async (req, res) => {
     console.log('📥 Get affiliate data request received');
     console.log('  User:', req.body.authUserId);
     await getAffiliateDataHandler(req, res);
+});
+
+// ============================================================
+// EMAIL API ROUTES
+// ============================================================
+app.post('/api/send-pdf-report', async (req, res) => {
+    console.log('📧 Send PDF report request received');
+    await sendPdfReportHandler(req, res);
+});
+
+app.post('/api/send-mass-email', async (req, res) => {
+    console.log('📧 Send mass email request received');
+    await sendMassEmailHandler(req, res);
 });
 
 // ============================================================

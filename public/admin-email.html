@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send Mass Email - USKAN Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .admin-email-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .admin-email-container h1 {
+            font-size: 28px;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+        .admin-email-container .subtitle {
+            color: var(--medium-grey);
+            margin-bottom: 24px;
+        }
+        
+        .email-form .form-group {
+            margin-bottom: 20px;
+        }
+        .email-form .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark-grey);
+            margin-bottom: 4px;
+        }
+        .email-form .form-group input,
+        .email-form .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .email-form .form-group input:focus,
+        .email-form .form-group textarea:focus {
+            border-color: var(--logic-blue);
+        }
+        .email-form .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .email-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background: var(--off-white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+        .email-stats .stat {
+            text-align: center;
+        }
+        .email-stats .stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .email-stats .stat .label {
+            font-size: 13px;
+            color: var(--medium-grey);
+        }
+        
+        .btn-send-email {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #3182CE, #2B6CB0);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-send-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+        }
+        .btn-send-email:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .progress-container.active {
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #EDF2F7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3182CE, #2B6CB0);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .progress-status {
+            font-size: 14px;
+            color: var(--medium-grey);
+            margin-top: 8px;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: none;
+        }
+        .result-box.success {
+            display: block;
+            background: #F0FFF4;
+            border-left: 4px solid #38A169;
+            color: #155724;
+        }
+        .result-box.error {
+            display: block;
+            background: #FFF5F5;
+            border-left: 4px solid #E53E3E;
+            color: #721C24;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--medium-grey);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            color: var(--navy);
+        }
+        
+        @media (max-width: 600px) {
+            .email-stats {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container admin-email-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:16px; border-bottom:1px solid #EDF2F7; margin-bottom:24px;">
+            <h1>📧 Compose & Send Email</h1>
+            <a href="admin-dashboard.html" class="back-link">← Back to Admin</a>
+        </div>
+        
+        <p class="subtitle">Send a mass email to all registered users.</p>
+        
+        <div class="email-stats" id="emailStats">
+            <div class="stat">
+                <div class="number" id="totalUsers">0</div>
+                <div class="label">👥 Total Recipients</div>
+            </div>
+            <div class="stat">
+                <div class="number" id="emailsSent">0</div>
+                <div class="label">✅ Emails Sent</div>
+            </div>
+            <div class="stat">
+                <div class="number" id="emailsFailed">0</div>
+                <div class="label">❌ Failed</div>
+            </div>
+        </div>
+        
+        <form id="emailForm" class="email-form">
+            <div class="form-group">
+                <label for="emailSubject">📝 Subject</label>
+                <input type="text" id="emailSubject" placeholder="Enter email subject..." required />
+            </div>
+            
+            <div class="form-group">
+                <label for="emailBody">✍️ Message</label>
+                <textarea id="emailBody" placeholder="Write your email message here..." required></textarea>
+            </div>
+            
+            <button type="submit" class="btn-send-email" id="sendBtn">
+                📤 Send to All Users
+            </button>
+        </form>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="fill" id="progressFill"></div>
+            </div>
+            <p class="progress-status" id="progressStatus">Sending emails...</p>
+        </div>
+        
+        <div class="result-box" id="resultBox"></div>
+        
+        <footer>
+            <p>© 2025 USKAN. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script>
+        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
+        
+        if (typeof supabaseJs !== 'undefined') {
+            var supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            var supabase = null;
+        }
+        
+        const adminSession = localStorage.getItem('adminSession');
+        if (!adminSession) {
+            window.location.href = 'admin.html';
+        }
+        
+        async function loadUserCount() {
+            try {
+                if (!supabase) return;
+                const { count, error } = await supabase
+                    .from('users')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (!error) {
+                    document.getElementById('totalUsers').textContent = count || 0;
+                }
+            } catch (error) {
+                console.error('Error loading user count:', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadUserCount);
+        
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('emailSubject').value.trim();
+            const body = document.getElementById('emailBody').value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressStatus = document.getElementById('progressStatus');
+            const resultBox = document.getElementById('resultBox');
+            
+            if (!subject || !body) {
+                resultBox.className = 'result-box error';
+                resultBox.textContent = '❌ Please fill in both subject and body.';
+                resultBox.style.display = 'block';
+                return;
+            }
+            
+            if (!confirm(`Send this email to ALL registered users?\n\nSubject: ${subject}\nRecipients: ${document.getElementById('totalUsers').textContent} users`)) {
+                return;
+            }
+            
+            resultBox.style.display = 'none';
+            resultBox.className = 'result-box';
+            
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '⏳ Sending...';
+            
+            progressContainer.classList.add('active');
+            progressFill.style.width = '0%';
+            progressStatus.textContent = '⏳ Starting...';
+            
+            try {
+                const response = await fetch('/api/send-mass-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, body })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    progressFill.style.width = '100%';
+                    progressStatus.textContent = `✅ Sent to ${data.sentCount} users. Failed: ${data.failedCount || 0}`;
+                    
+                    resultBox.className = 'result-box success';
+                    resultBox.innerHTML = `
+                        ✅ Email sent successfully!<br />
+                        📧 Sent to: <strong>${data.sentCount}</strong> users<br />
+                        ❌ Failed: <strong>${data.failedCount || 0}</strong>
+                    `;
+                    resultBox.style.display = 'block';
+                    
+                    document.getElementById('emailsSent').textContent = data.sentCount || 0;
+                    document.getElementById('emailsFailed').textContent = data.failedCount || 0;
+                    
+                } else {
+                    resultBox.className = 'result-box error';
+                    resultBox.textContent = '❌ Error: ' + (data.error || 'Unknown error');
+                    resultBox.style.display = 'block';
+                    progressStatus.textContent = '❌ Failed to send emails';
+                }
+                
+            } catch (error) {
+                console.error('Error sending email:', error);
+                resultBox.className = 'result-box error';
+                resultBox.textContent = '❌ Network error. Please try again.';
+                resultBox.style.display = 'block';
+                progressStatus.textContent = '❌ Error occurred';
+            }
+            
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '📤 Send to All Users';
+        });
+    </script>
+</body>
+</html>
