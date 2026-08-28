@@ -26,13 +26,30 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { password, accessToken } = req.body;
+        const { password, accessToken, refreshToken } = req.body;
 
         if (!password || !accessToken) {
             return res.status(400).json({ error: 'Password and access token are required' });
         }
 
-        // ✅ Update password using Supabase Auth (server-side)
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        console.log('🔑 Updating password with access token:', accessToken.substring(0, 20) + '...');
+
+        // ✅ Set the auth session using the access token
+        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || ''
+        });
+
+        if (sessionError) {
+            console.error('❌ Session error:', sessionError);
+            return res.status(401).json({ error: 'Invalid or expired reset link. Please request a new one.' });
+        }
+
+        // ✅ Update the password
         const { data, error } = await supabase.auth.updateUser({
             password: password
         });
@@ -42,7 +59,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: error.message });
         }
 
-        console.log('✅ Password updated successfully');
+        console.log('✅ Password updated successfully for user:', sessionData?.user?.email);
         return res.status(200).json({
             success: true,
             message: 'Password updated successfully!'

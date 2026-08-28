@@ -33,8 +33,9 @@ export default async function handler(req, res) {
         }
 
         // ✅ Send password reset email via Supabase (server-side)
+        const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${process.env.BASE_URL || 'https://uskan-webb.vercel.app'}/update-password.html`
+            redirectTo: `${baseUrl}/update-password.html`
         });
 
         if (error) {
