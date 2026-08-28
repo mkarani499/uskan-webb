@@ -214,7 +214,7 @@
             btn.textContent = '⏳ Sending...';
 
             try {
-                // ✅ Call the backend API instead of Supabase directly
+                // ✅ Call the backend API (NO supabase here!)
                 const response = await fetch('/api/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -229,7 +229,6 @@
                     btn.disabled = false;
                     btn.textContent = 'Send Reset Link';
 
-                    // Show login form after 3 seconds
                     setTimeout(() => {
                         hideForgotPassword();
                     }, 3000);
