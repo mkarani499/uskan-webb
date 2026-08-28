@@ -253,6 +253,8 @@ import registerAffiliateHandler from './api/register-affiliate.js';
 import getAffiliateDataHandler from './api/get-affiliate-data.js';
 import sendPdfReportHandler from './api/send-pdf-report.js';
 import sendMassEmailHandler from './api/send-mass-email.js';
+import resetPasswordHandler from './api/reset-password.js';
+import updatePasswordHandler from './api/update-password.js';
 
 app.post('/api/register', async (req, res) => {
     console.log('📝 Register request received');
@@ -313,6 +315,23 @@ app.post('/api/send-pdf-report', async (req, res) => {
 app.post('/api/send-mass-email', async (req, res) => {
     console.log('📧 Send mass email request received');
     await sendMassEmailHandler(req, res);
+});
+
+// ============================================================
+// RESET PASSWORD API
+// ============================================================
+app.post('/api/reset-password', async (req, res) => {
+    console.log('🔑 Reset password request received');
+    console.log('  Email:', req.body.email);
+    await resetPasswordHandler(req, res);
+});
+
+// ============================================================
+// UPDATE PASSWORD API
+// ============================================================
+app.post('/api/update-password', async (req, res) => {
+    console.log('🔑 Update password request received');
+    await updatePasswordHandler(req, res);
 });
 
 // ============================================================
