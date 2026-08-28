@@ -367,11 +367,8 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('✅ Affiliate account created successfully!');
-                    document.getElementById('affiliateForm').style.display = 'none';
-                    document.getElementById('referralSection').style.display = 'block';
-                    document.getElementById('referralLink').value = `${window.location.origin}/?ref=${referralCode}`;
-                    loadAffiliateStats();
+                    // ✅ Redirect to affiliate dashboard
+                    window.location.href = 'affiliate-dashboard.html';
                 } else {
                     alert('❌ ' + (data.error || 'Failed to register affiliate.'));
                 }

@@ -398,6 +398,10 @@
             background: #25D366;
             color: white;
         }
+        .share-btn.instagram {
+            background: radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            color: white;
+        }
         .share-btn.copy {
             background: var(--white);
             color: var(--dark-grey);
@@ -566,6 +570,7 @@
                 <button class="share-btn facebook" onclick="shareResults('facebook')">📘 Facebook</button>
                 <button class="share-btn twitter" onclick="shareResults('twitter')">🐦 Twitter/X</button>
                 <button class="share-btn whatsapp" onclick="shareResults('whatsapp')">💬 WhatsApp</button>
+                <button class="share-btn instagram" onclick="shareResults('instagram')">📸 Instagram</button>
                 <button class="share-btn copy" onclick="shareResults('copy')">📋 Copy Link</button>
             </div>
         </div>
@@ -807,7 +812,9 @@
             const brainType = results.brainType || 'Balanced Thinker';
             const baseUrl = window.location.origin;
             const shareUrl = `${baseUrl}/?ref=${platform}&score=${score}&type=${encodeURIComponent(brainType)}`;
+            
             const shareText = `🧠 I scored ${score}% on the USKAN Brain Test! My brain type is "${brainType}". Can you beat my score? Take the test here:`;
+
             let shareLink = '';
             switch (platform) {
                 case 'facebook':
@@ -819,14 +826,19 @@
                 case 'whatsapp':
                     shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
                     break;
+                case 'instagram':
+                    // ✅ Instagram Story share
+                    shareLink = `https://www.instagram.com/create/story/?url=${encodeURIComponent(shareUrl)}`;
+                    break;
                 case 'copy':
                     navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-                        alert('✅ Link copied to clipboard!');
+                        showToast('✅ Link copied to clipboard!');
                     });
                     return;
                 default:
                     return;
             }
+            
             if (shareLink) {
                 window.open(shareLink, '_blank', 'width=600,height=500');
             }

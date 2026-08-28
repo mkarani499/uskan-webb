@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verified - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #EBF4FF, #D6EAF8, #AED6F1);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .verification-page {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 50, 100, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .verification-page::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(49, 130, 206, 0.06), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A2A3A;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #4A5568;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .message strong {
+            color: #1A2A3A;
+        }
+        
+        .footer-text {
+            font-size: 13px;
+            color: #A0AEC0;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (max-width: 480px) {
+            .verification-page {
+                padding: 32px 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .icon {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-page">
+        <span class="icon">✅</span>
+        <h1>Email Verified!</h1>
+        <p class="message">
+            You can now go back to your session and login.<br />
+            Use your email and the password you created.
+        </p>
+        <p class="footer-text">© 2025 USKAN</p>
+    </div>
+</body>
+</html>

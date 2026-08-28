@@ -60,6 +60,7 @@ export default async function handler(req, res) {
         }
 
         // 3. Register user with Supabase Auth
+        const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -67,7 +68,8 @@ export default async function handler(req, res) {
                 data: {
                     username: username,
                     email: email
-                }
+                },
+                emailRedirectTo: `${baseUrl}/verified.html`
             }
         });
 

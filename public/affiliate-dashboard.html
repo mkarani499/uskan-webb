@@ -228,6 +228,10 @@
         .share-btn.whatsapp { background: #25D366; color: white; }
         .share-btn.facebook { background: #1877F2; color: white; }
         .share-btn.twitter { background: #000000; color: white; }
+        .share-btn.instagram {
+            background: radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            color: white;
+        }
         .share-btn.copy { background: #EDF2F7; color: #1A2A3A; border: 1px solid #E2E8F0; }
         
         /* M-Pesa Info */
@@ -433,6 +437,7 @@
                 <button onclick="shareLink('whatsapp')" class="share-btn whatsapp">💬 WhatsApp</button>
                 <button onclick="shareLink('facebook')" class="share-btn facebook">📘 Facebook</button>
                 <button onclick="shareLink('twitter')" class="share-btn twitter">🐦 Twitter/X</button>
+                <button onclick="shareLink('instagram')" class="share-btn instagram">📸 Instagram</button>
                 <button onclick="copyLink()" class="share-btn copy">📋 Copy</button>
             </div>
         </div>
@@ -580,7 +585,8 @@
             const urls = {
                 whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + link)}`,
                 facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}&quote=${encodeURIComponent(text)}`,
-                twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`
+                twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`,
+                instagram: `https://www.instagram.com/create/story/?url=${encodeURIComponent(link)}`
             };
             
             if (urls[platform]) {
