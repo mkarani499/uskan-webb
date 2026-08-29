@@ -1,4 +1,4 @@
-{
+echo '{
     "version": 2,
     "builds": [
         {
@@ -12,10 +12,6 @@
     ],
     "routes": [
         {
-            "src": "/api/og-image",
-            "dest": "/api/og-image.js"
-        },
-        {
             "src": "/api/(.*)",
             "dest": "/api/$1"
         },
@@ -24,4 +20,4 @@
             "dest": "/public/$1"
         }
     ]
-}
+}' > vercel.json
