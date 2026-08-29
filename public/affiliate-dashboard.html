@@ -6,7 +6,6 @@
     <title>Affiliate Dashboard - USKAN</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
-        /* ===== AFFILIATE DASHBOARD STYLES ===== */
         * {
             margin: 0;
             padding: 0;
@@ -503,10 +502,10 @@
         
         async function loadAffiliateData() {
             try {
-                const response = await fetch('/api/get-affiliate-data', {
+                const response = await fetch('/api/affiliate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ authUserId: user.id })
+                    body: JSON.stringify({ action: 'get-affiliate-data', authUserId: user.id })
                 });
                 
                 const data = await response.json();

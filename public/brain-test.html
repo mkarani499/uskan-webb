@@ -293,10 +293,10 @@
             // Logged in → check if they have an affiliate account
             try {
                 // ✅ Use the API to check affiliate status
-                const response = await fetch('/api/check-affiliate', {
+                const response = await fetch('/api/affiliate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id })
+                    body: JSON.stringify({ action: 'check-affiliate', userId: user.id })
                 });
                 
                 const data = await response.json();

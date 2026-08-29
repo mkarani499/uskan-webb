@@ -607,11 +607,11 @@
         const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
         
-        if (typeof supabaseJs !== 'undefined') {
-            var supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (typeof supabase !== 'undefined') {
+            var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } else {
-            console.warn('⚠️ supabaseJs not loaded');
-            var supabase = null;
+            console.warn('⚠️ Supabase library not loaded');
+            var supabaseClient = null;
         }
     </script>
     <script>

@@ -50,10 +50,10 @@
             errorDiv.classList.remove('show');
             
             try {
-                const response = await fetch('/api/admin-verify', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
+                    body: JSON.stringify({ action: 'admin-verify', password })
                 });
                 
                 const data = await response.json();
