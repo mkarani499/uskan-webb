@@ -182,44 +182,53 @@
                 // REAL MPESA PAYMENT - NO TEST MODE
                 // ============================================================
 
-                // 1. Get or create user
+                // 1. Get or create user (wrapped so a browser→Supabase failure never blocks payment)
                 let user = null;
-                if (supabaseClient) {
-                    let { data: existingUser } = await supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('phone_number', formattedPhone)
-                        .single();
-
-                    if (!existingUser) {
-                        const { data: newUser } = await supabaseClient
+                try {
+                    if (supabaseClient) {
+                        let { data: existingUser } = await supabaseClient
                             .from('users')
-                            .insert({
-                                phone_number: formattedPhone,
-                                email: email
-                            })
-                            .select()
+                            .select('*')
+                            .eq('phone_number', formattedPhone)
                             .single();
-                        user = newUser;
-                    } else {
-                        user = existingUser;
+
+                        if (!existingUser) {
+                            const { data: newUser } = await supabaseClient
+                                .from('users')
+                                .insert({
+                                    phone_number: formattedPhone,
+                                    email: email
+                                })
+                                .select()
+                                .single();
+                            user = newUser;
+                        } else {
+                            user = existingUser;
+                        }
                     }
+                } catch (userLookupError) {
+                    console.warn('⚠️ Could not reach Supabase from browser, continuing without it:', userLookupError);
+                    user = null;
+                }
+
+                if (user) {
                     userId = user.id;
                     localStorage.setItem('userId', userId);
                 }
 
                 // 2. Get test data
-                let testData = null;
-                if (supabaseClient) {
-                    const { data } = await supabaseClient
-                        .from('tests')
-                        .select('*')
-                        .eq('slug', 'brain')
-                        .single();
-                    testData = data;
-                } else {
-                    // Fallback if Supabase isn't loaded
-                    testData = { id: 1, name: 'Brain Test', price: 50 };
+                let testData = { id: 1, name: 'Brain Test', price: 50 };
+                try {
+                    if (supabaseClient) {
+                        const { data } = await supabaseClient
+                            .from('tests')
+                            .select('*')
+                            .eq('slug', 'brain')
+                            .single();
+                        if (data) testData = data;
+                    }
+                } catch (testLookupError) {
+                    console.warn('⚠️ Could not reach Supabase for test data, using fallback:', testLookupError);
                 }
 
                 // 3. Initiate STK Push
@@ -243,7 +252,7 @@
                     checkoutRequestID = data.checkoutRequestID;
 
                     // Save payment record
-                    if (supabaseClient && testData) {
+                    if (supabaseClient && testData && user) {
                         await supabaseClient
                             .from('payments')
                             .insert({
