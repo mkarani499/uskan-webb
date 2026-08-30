@@ -127,7 +127,7 @@
             // ============================================================
             // TEST MODE - Skip real M-Pesa (Remove this when going live!)
             // ============================================================
-            const TEST_MODE = false; // Set to false for real payments
+            const TEST_MODE = true; // Set to false for real payments
 
             if (TEST_MODE) {
                 console.log('🧪 TEST MODE: Payment bypassed');
@@ -266,6 +266,12 @@
                 const data = await response.json();
                 showToast(`Status: ${data.status} - ${data.resultDesc || ''}`);
                 console.log('Payment status:', data);
+
+                if (data.status === 'failed') {
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 10000);
+                }
             } catch (error) {
                 console.error('Status check error:', error);
                 showToast('❌ Error checking status');
