@@ -269,7 +269,14 @@
                 showToast(`Status: ${data.status} - ${data.resultDesc || ''}`);
                 console.log('Payment status:', data);
 
-                if (data.status === 'failed') {
+                if (data.status === 'completed') {
+                    document.getElementById('paymentStatus').style.display = 'none';
+                    document.getElementById('paymentSuccess').style.display = 'block';
+                    localStorage.setItem('paymentCompleted', 'true');
+                    setTimeout(function() {
+                        window.location.href = 'results-full.html';
+                    }, 2000);
+                } else if (data.status === 'failed') {
                     setTimeout(function() {
                         window.location.reload();
                     }, 10000);

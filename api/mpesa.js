@@ -147,10 +147,15 @@ async function handleVerifyPayment(req, res) {
     const data = await response.json();
 
     if (data.ResultCode === '0') {
+      // Payment confirmed - make sure the database reflects this,
+      // in case the automatic callback hasn't arrived yet
+      await updatePaymentStatus(checkoutRequestID, 'completed', data.ResultCode, data.ResultDesc);
+      await createReferralIfApplicable(checkoutRequestID);
       res.status(200).json({ success: true, status: 'completed' });
     } else if (data.ResultCode === '1') {
       res.status(200).json({ success: false, status: 'pending' });
     } else {
+      await updatePaymentStatus(checkoutRequestID, 'failed', data.ResultCode, data.ResultDesc);
       res.status(200).json({ success: false, status: 'failed' });
     }
   } catch (error) {
