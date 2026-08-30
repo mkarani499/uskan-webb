@@ -107,29 +107,11 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
-    </script>
     <script>
         // ============================================================
-        // SUPABASE CLIENT
-        // ============================================================
-        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
-
-        // Check if Supabase library is loaded
-        if (typeof supabase !== 'undefined') {
-            var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('✅ Supabase connected');
-        } else {
-            console.warn('⚠️ Supabase library not loaded, using fetch fallback');
-            var supabaseClient = null;
-        }
-
-        // ============================================================
-        // PAYMENT HANDLER - REAL MPESA
+        // PAYMENT HANDLER - REAL MPESA (backend-only, no browser->Supabase calls)
         // ============================================================
         let checkoutRequestID = null;
-        let userId = null;
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -178,60 +160,7 @@
             payBtn.textContent = '⏳ Processing...';
 
             try {
-                // ============================================================
-                // REAL MPESA PAYMENT - NO TEST MODE
-                // ============================================================
-
-                // 1. Get or create user (wrapped so a browser→Supabase failure never blocks payment)
-                let user = null;
-                try {
-                    if (supabaseClient) {
-                        let { data: existingUser } = await supabaseClient
-                            .from('users')
-                            .select('*')
-                            .eq('phone_number', formattedPhone)
-                            .single();
-
-                        if (!existingUser) {
-                            const { data: newUser } = await supabaseClient
-                                .from('users')
-                                .insert({
-                                    phone_number: formattedPhone,
-                                    email: email
-                                })
-                                .select()
-                                .single();
-                            user = newUser;
-                        } else {
-                            user = existingUser;
-                        }
-                    }
-                } catch (userLookupError) {
-                    console.warn('⚠️ Could not reach Supabase from browser, continuing without it:', userLookupError);
-                    user = null;
-                }
-
-                if (user) {
-                    userId = user.id;
-                    localStorage.setItem('userId', userId);
-                }
-
-                // 2. Get test data
-                let testData = { id: 1, name: 'Brain Test', price: 50 };
-                try {
-                    if (supabaseClient) {
-                        const { data } = await supabaseClient
-                            .from('tests')
-                            .select('*')
-                            .eq('slug', 'brain')
-                            .single();
-                        if (data) testData = data;
-                    }
-                } catch (testLookupError) {
-                    console.warn('⚠️ Could not reach Supabase for test data, using fallback:', testLookupError);
-                }
-
-                // 3. Initiate STK Push
+                // Initiate STK Push (backend handles all Supabase access)
                 const response = await fetch('/api/mpesa?action=stk', {
                     method: 'POST',
                     headers: {
@@ -239,6 +168,7 @@
                     },
                     body: JSON.stringify({
                         phoneNumber: formattedPhone,
+                        email: email,
                         amount: 50,
                         accountReference: `USKAN-${Date.now()}`,
                         transactionDesc: 'USKAN Brain Test'
@@ -250,21 +180,6 @@
 
                 if (data.success) {
                     checkoutRequestID = data.checkoutRequestID;
-
-                    // Save payment record
-                    if (supabaseClient && testData && user) {
-                        await supabaseClient
-                            .from('payments')
-                            .insert({
-                                user_id: userId,
-                                test_id: testData.id,
-                                phone_number: formattedPhone,
-                                amount: 50,
-                                checkout_request_id: checkoutRequestID,
-                                merchant_request_id: data.merchantRequestID,
-                                status: 'pending'
-                            });
-                    }
 
                     // Store for polling
                     localStorage.setItem('checkoutRequestID', checkoutRequestID);
@@ -316,36 +231,6 @@
                         document.getElementById('paymentStatus').style.display = 'none';
                         document.getElementById('paymentSuccess').style.display = 'block';
 
-                        // Save results to Supabase
-                        if (supabaseClient && userId) {
-                            const results = JSON.parse(localStorage.getItem('testResults') || '{}');
-                            const answers = JSON.parse(localStorage.getItem('testAnswers') || '[]');
-                            const timeTaken = parseInt(localStorage.getItem('testTime') || '0');
-
-                            const { data: testData } = await supabaseClient
-                                .from('tests')
-                                .select('*')
-                                .eq('slug', 'brain')
-                                .single();
-
-                            await supabaseClient
-                                .from('test_results')
-                                .insert({
-                                    user_id: userId,
-                                    test_id: testData.id,
-                                    overall_score: results.overallCorrect || 0,
-                                    overall_percentage: results.overall || 0,
-                                    abstract_score: results.abstract || 0,
-                                    memory_score: results.memory || 0,
-                                    spatial_score: results.spatial || 0,
-                                    verbal_score: results.verbal || 0,
-                                    speed_score: results.speed || 0,
-                                    brain_type: results.brainType || 'Balanced Thinker',
-                                    time_taken: Math.floor(timeTaken / 1000) || 0,
-                                    answers: answers || []
-                                });
-                        }
-
                         // Set payment completed flag
                         localStorage.setItem('paymentCompleted', 'true');
 
@@ -387,68 +272,7 @@
             }
         });
 
-        console.log('✅ Payment page ready (TEST MODE ENABLED)');
-        console.log('🔧 TEST_MODE = true - No real money will be deducted.');
-        console.log('⚠️ Set TEST_MODE = false when going live!');
-
-        // ============================================================
-        // TRACK PAGE VISITS
-        // ============================================================
-
-        async function trackPageVisit() {
-            try {
-                if (!supabaseClient) return;
-
-                // Get the current page
-                const page = window.location.pathname;
-
-                // Get IP (using a free API)
-                let ip = '';
-                try {
-                    const ipResponse = await fetch('https://api.ipify.org?format=json');
-                    const ipData = await ipResponse.json();
-                    ip = ipData.ip;
-                } catch (e) {
-                    console.log('Could not get IP:', e);
-                }
-
-                // Get user if logged in
-                let userId = null;
-                const user = localStorage.getItem('user');
-                if (user) {
-                    try {
-                        const userData = JSON.parse(user);
-                        userId = userData.id;
-                    } catch (e) {}
-                }
-
-                // Get referrer
-                const referrer = document.referrer || '';
-
-                // Save visit to Supabase
-                const { error } = await supabaseClient
-                    .from('visits')
-                    .insert({
-                        page: page,
-                        ip: ip || null,
-                        user_id: userId || null,
-                        referrer: referrer,
-                        user_agent: navigator.userAgent
-                    });
-
-                if (error) {
-                    console.error('Error tracking visit:', error);
-                }
-            } catch (error) {
-                console.error('Error in trackPageVisit:', error);
-            }
-        }
-
-        // Track the visit when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Delay tracking to not impact page load
-            setTimeout(trackPageVisit, 1000);
-        });
+        console.log('✅ Payment page ready (backend-only mode)');
     </script>
 </body>
 </html>
