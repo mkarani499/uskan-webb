@@ -319,5 +319,26 @@
     </script>
     <script src="user-progress.js"></script>
     <script src="script.js"></script>
+    <script>
+        async function trackPageVisit() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page: window.location.pathname,
+                        userId: user?.id || null,
+                        referrer: document.referrer || ''
+                    })
+                });
+            } catch (error) {
+                console.error('Error tracking visit:', error);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(trackPageVisit, 1000);
+        });
+    </script>
 </body>
 </html>

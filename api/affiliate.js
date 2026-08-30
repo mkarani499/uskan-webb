@@ -34,6 +34,8 @@ export default async function handler(req, res) {
     case 'register-affiliate': return handleRegisterAffiliate(req, res);
     case 'check-affiliate': return handleCheckAffiliate(req, res);
     case 'get-affiliate-data': return handleGetAffiliateData(req, res);
+    case 'admin-data': return handleAdminData(req, res);
+    case 'admin-mark-paid': return handleAdminMarkPaid(req, res);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
 }
@@ -165,6 +167,145 @@ async function handleGetAffiliateData(req, res) {
     });
   } catch (error) {
     console.error('❌ Get affiliate data error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// ============================================================
+// ADMIN FUNCTIONS
+// ============================================================
+
+async function handleAdminData(req, res) {
+  try {
+    const { count: registeredUsers } = await supabaseAdmin
+      .from('users').select('*', { count: 'exact', head: true }).eq('email_verified', true);
+
+    const { count: totalPayments } = await supabaseAdmin
+      .from('payments').select('*', { count: 'exact', head: true }).eq('status', 'completed');
+
+    const { count: totalAffiliates } = await supabaseAdmin
+      .from('affiliates').select('*', { count: 'exact', head: true });
+
+    const { data: referrals } = await supabaseAdmin
+      .from('referrals')
+      .select('id, affiliate_id, referred_phone, commission_amount, payout_status, manually_paid, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    const { data: affiliates } = await supabaseAdmin
+      .from('affiliates')
+      .select('id, mpesa_phone, referral_code, is_active, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    const affiliateMap = {};
+    (affiliates || []).forEach(a => { affiliateMap[a.id] = a; });
+
+    const referralsWithAffiliate = (referrals || []).map(r => ({
+      ...r,
+      affiliate_phone: affiliateMap[r.affiliate_id]?.mpesa_phone || 'Unknown',
+      referral_code: affiliateMap[r.affiliate_id]?.referral_code || ''
+    }));
+
+    const totalCommissions = (referrals || [])
+      .filter(r => r.payout_status === 'completed' || r.manually_paid)
+      .reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+
+    const pendingCommissions = (referrals || [])
+      .filter(r => !(r.payout_status === 'completed' || r.manually_paid))
+      .reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+
+    const { data: payments } = await supabaseAdmin
+      .from('payments')
+      .select('id, phone_number, amount, status, referral_code, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
+    const { data: visits } = await supabaseAdmin
+      .from('visits')
+      .select('ip')
+      .gte('created_at', cutoff);
+
+    const totalViews = visits?.length || 0;
+    const uniqueVisitors = new Set((visits || []).map(v => v.ip).filter(Boolean)).size;
+
+    const affiliatesWithStats = (affiliates || []).map(a => {
+      const theirReferrals = (referrals || []).filter(r => r.affiliate_id === a.id);
+      const earned = theirReferrals
+        .filter(r => r.payout_status === 'completed' || r.manually_paid)
+        .reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+      return { ...a, total_referrals: theirReferrals.length, total_earnings: earned };
+    });
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        registeredUsers: registeredUsers || 0,
+        totalPayments: totalPayments || 0,
+        totalAffiliates: totalAffiliates || 0,
+        totalCommissions,
+        pendingCommissions,
+        totalViews,
+        uniqueVisitors
+      },
+      referrals: referralsWithAffiliate,
+      affiliates: affiliatesWithStats,
+      payments: payments || []
+    });
+  } catch (error) {
+    console.error('❌ Admin data error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+async function handleAdminMarkPaid(req, res) {
+  try {
+    const { mpesaPhone, referralId } = req.body;
+    let targetReferral = null;
+
+    if (referralId) {
+      const { data } = await supabaseAdmin
+        .from('referrals').select('*').eq('id', referralId).single();
+      targetReferral = data;
+    } else if (mpesaPhone) {
+      const { data: affiliate } = await supabaseAdmin
+        .from('affiliates').select('id').eq('mpesa_phone', mpesaPhone).single();
+
+      if (!affiliate) {
+        return res.status(404).json({ error: 'No affiliate found with that M-Pesa number' });
+      }
+
+      const { data: pendingReferrals } = await supabaseAdmin
+        .from('referrals')
+        .select('*')
+        .eq('affiliate_id', affiliate.id)
+        .eq('manually_paid', false)
+        .neq('payout_status', 'completed')
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      targetReferral = pendingReferrals?.[0] || null;
+    } else {
+      return res.status(400).json({ error: 'Provide either mpesaPhone or referralId' });
+    }
+
+    if (!targetReferral) {
+      return res.status(404).json({ error: 'No pending referral found to mark as paid' });
+    }
+
+    await supabaseAdmin
+      .from('referrals')
+      .update({
+        manually_paid: true,
+        payout_status: 'manual_paid',
+        completed_at: new Date().toISOString()
+      })
+      .eq('id', targetReferral.id);
+
+    return res.status(200).json({ success: true, message: 'Marked as paid', referralId: targetReferral.id });
+  } catch (error) {
+    console.error('❌ Admin mark-paid error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
 async function handleStkPush(req, res) {
   try {
-    const { phoneNumber, amount, accountReference, transactionDesc } = req.body;
+    const { phoneNumber, amount, accountReference, transactionDesc, referralCode, email } = req.body;
     let cleanPhone = phoneNumber.replace(/\s/g, '');
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '254' + cleanPhone.substring(1);
@@ -89,6 +89,21 @@ async function handleStkPush(req, res) {
     const data = await response.json();
 
     if (data.ResponseCode === '0') {
+      // Create the pending payment record server-side (avoids browser->Supabase issues)
+      try {
+        await supabase.from('payments').insert({
+          phone_number: cleanPhone,
+          email: email || null,
+          amount: parseInt(amount) || 50,
+          checkout_request_id: data.CheckoutRequestID,
+          merchant_request_id: data.MerchantRequestID,
+          referral_code: referralCode || null,
+          status: 'pending'
+        });
+      } catch (insertError) {
+        console.error('⚠️ Could not save pending payment record:', insertError);
+      }
+
       res.status(200).json({
         success: true,
         checkoutRequestID: data.CheckoutRequestID,
@@ -156,6 +171,7 @@ async function handleCallback(req, res) {
     if (resultCode === '0') {
       await updatePaymentStatus(checkoutRequestID, 'completed', resultCode, resultDesc);
       console.log('✅ Payment successful');
+      await createReferralIfApplicable(checkoutRequestID);
     } else {
       await updatePaymentStatus(checkoutRequestID, 'failed', resultCode, resultDesc);
       console.log('❌ Payment failed');
@@ -183,4 +199,57 @@ async function updatePaymentStatus(checkoutRequestId, status, resultCode = null,
 
   if (error) throw error;
   return data;
+}
+
+// ============================================================
+// CREATE REFERRAL RECORD (only runs after a successful payment)
+// ============================================================
+async function createReferralIfApplicable(checkoutRequestId) {
+  try {
+    const { data: payment, error: paymentError } = await supabase
+      .from('payments')
+      .select('referral_code, phone_number')
+      .eq('checkout_request_id', checkoutRequestId)
+      .single();
+
+    if (paymentError || !payment || !payment.referral_code) {
+      return; // No referral code on this payment - nothing to do
+    }
+
+    // Prevent duplicates if Safaricom retries the callback
+    const { data: existingReferral } = await supabase
+      .from('referrals')
+      .select('id')
+      .eq('checkout_request_id', checkoutRequestId)
+      .single();
+
+    if (existingReferral) {
+      console.log('ℹ️ Referral already recorded for this payment, skipping');
+      return;
+    }
+
+    const { data: affiliate, error: affiliateError } = await supabase
+      .from('affiliates')
+      .select('id')
+      .eq('referral_code', payment.referral_code)
+      .single();
+
+    if (affiliateError || !affiliate) {
+      console.warn('⚠️ No affiliate found for referral code:', payment.referral_code);
+      return;
+    }
+
+    await supabase.from('referrals').insert({
+      affiliate_id: affiliate.id,
+      referred_phone: payment.phone_number,
+      commission_amount: 20,
+      payout_status: 'pending',
+      manually_paid: false,
+      checkout_request_id: checkoutRequestId
+    });
+
+    console.log('✅ Referral created for affiliate:', affiliate.id);
+  } catch (error) {
+    console.error('❌ Error creating referral:', error);
+  }
 }

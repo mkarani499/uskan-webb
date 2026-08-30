@@ -19,30 +19,9 @@
         .btn-secondary { padding: 8px 20px; background: transparent; color: #3182CE; border: 2px solid #3182CE; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; text-decoration: none; display: inline-block; }
         .btn-secondary:hover { background: #EBF8FF; }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .stats-grid .stat-card:last-child {
-                grid-column: span 2;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .stats-grid .stat-card:last-child {
-                grid-column: span 1;
-            }
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } .stats-grid .stat-card:last-child { grid-column: span 2; } }
+        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } .stats-grid .stat-card:last-child { grid-column: span 1; } }
 
         .stat-card { background: var(--white); padding: 16px 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); }
         .stat-card .stat-number { font-size: 32px; font-weight: 800; color: var(--navy); }
@@ -72,8 +51,7 @@
         .status-badge.failed { background: #F8D7DA; color: #721C24; }
         .status-badge.manual_paid { background: #D1ECF1; color: #0C5460; }
         .btn-manual-pay { background: var(--primary-orange); color: white; border: none; padding: 4px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; }
-        .btn-manual-pay:hover { background: var(--primary-orange-hover); }
-        .btn-manual-pay:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-manual-pay:hover { opacity: 0.9; }
         .manual-payout-box { background: var(--white); padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0; max-width: 500px; }
         .manual-payout-box h3 { font-size: 20px; color: var(--navy); margin-bottom: 4px; }
         .manual-payout-box p { color: var(--medium-grey); font-size: 14px; margin-bottom: 16px; }
@@ -92,17 +70,15 @@
 </head>
 <body>
     <div class="container admin-container">
-        <!-- Header -->
         <div class="admin-header">
             <h1>📊 US<span>KAN</span> Admin</h1>
             <div class="admin-header-right">
                 <span class="last-refresh" id="lastRefresh">Loading...</span>
-                <button onclick="location.reload()" class="btn-refresh-small">🔄 Refresh</button>
+                <button onclick="loadAdminData()" class="btn-refresh-small">🔄 Refresh</button>
                 <button onclick="logout()" class="admin-logout-btn">🚪 Logout</button>
             </div>
         </div>
-        
-        <!-- Stats -->
+
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <span class="stat-icon">👥</span>
@@ -138,20 +114,18 @@
                     </div>
                 </div>
                 <span class="stat-sub" style="display:block; margin-top:4px; font-size:11px; color:var(--medium-grey);">
-                    ⏱️ Auto-deletes data older than 72 hours
+                    ⏱️ Tracks only Home & Brain Test pages · Auto-deletes after 72 hours
                 </span>
             </div>
         </div>
-        
-        <!-- Tabs -->
+
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="referrals">📋 Referrals</button>
             <button class="admin-tab" data-tab="affiliates">👥 Affiliates</button>
             <button class="admin-tab" data-tab="payments">💳 Payments</button>
-            <button class="admin-tab" data-tab="manual">📤 Manual Payout</button>
+            <button class="admin-tab" data-tab="manual">✅ Mark Paid</button>
         </div>
-        
-        <!-- Tab: Referrals -->
+
         <div class="tab-content active" id="tab-referrals">
             <div class="search-box">
                 <input type="text" id="searchReferrals" placeholder="🔍 Search phone or referral code..." />
@@ -171,8 +145,7 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Tab: Affiliates -->
+
         <div class="tab-content" id="tab-affiliates">
             <div class="table-container">
                 <table>
@@ -181,8 +154,7 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Tab: Payments -->
+
         <div class="tab-content" id="tab-payments">
             <div class="table-container">
                 <table>
@@ -191,67 +163,37 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Tab: Manual Payout -->
+
         <div class="tab-content" id="tab-manual">
             <div class="manual-payout-box">
-                <h3>📤 Manual Payout</h3>
-                <p>Send KSh 20 to an affiliate's M-Pesa if the auto-payout failed.</p>
-                <div class="form-group"><label>📱 Affiliate Phone Number</label><input type="text" id="manualPhone" placeholder="254712345678" /></div>
-                <div class="form-group"><label>🔗 Referral ID (optional - to mark as paid)</label><input type="text" id="manualReferralId" placeholder="Enter referral ID to mark as paid" /></div>
-                <div class="form-group"><label>💰 Amount (KSh)</label><input type="number" id="manualAmount" value="20" readonly /></div>
-                <button onclick="manualPayout()" class="btn-manual-pay-large">📤 Send KSh 20 Manually</button>
+                <h3>✅ Mark Affiliate Payout as Paid</h3>
+                <p>Enter the affiliate's M-Pesa number (the one they registered with) to mark their oldest pending KSh 20 commission as paid.</p>
+                <div class="form-group"><label>📱 Affiliate M-Pesa Number</label><input type="text" id="manualPhone" placeholder="254712345678" /></div>
+                <button onclick="markPaidByPhone()" class="btn-manual-pay-large">✅ Mark as Paid</button>
                 <div id="manualResult" class="manual-result"></div>
             </div>
         </div>
-        
-        <!-- Admin Actions -->
+
         <div class="admin-actions">
             <a href="admin-email.html" class="btn-secondary">📧 Send Mass Email</a>
         </div>
-        
+
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script>
-        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
-
-        if (typeof supabase !== 'undefined') {
-            var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('✅ Supabase client initialized');
-        } else {
-            console.error('❌ Supabase library not loaded');
-            var supabaseClient = null;
-        }
-    </script>
-    <script>
-        // ============================================================
-        // LOGOUT FUNCTION
-        // ============================================================
         function logout() {
-            console.log('🚪 Logging out...');
             localStorage.removeItem('adminSession');
             localStorage.removeItem('adminLoginTime');
             window.location.href = 'admin.html';
         }
         window.logout = logout;
 
-        // ============================================================
-        // SESSION CHECK
-        // ============================================================
         const session = localStorage.getItem('adminSession');
         if (!session) {
-            console.log('🔒 No session found, redirecting to login...');
             window.location.href = 'admin.html';
         }
 
-        console.log('✅ Admin dashboard loaded');
-
-        // ============================================================
-        // TABS
-        // ============================================================
         document.querySelectorAll('.admin-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -261,81 +203,174 @@
             });
         });
 
-        // ============================================================
-        // LOAD ADMIN DATA
-        // ============================================================
+        let allReferrals = [];
+
         async function loadAdminData() {
             try {
-                console.log('📊 Loading admin data...');
-                
-                // 1. Registered Users (email_verified = true)
-                const { count: usersCount } = await supabaseClient
-                    .from('users')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('email_verified', true);
-
-                // 2. Total Payments (completed)
-                const { count: paymentsCount } = await supabaseClient
-                    .from('payments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'completed');
-
-                // 3. Total Affiliates
-                const { count: affiliatesCount } = await supabaseClient
-                    .from('affiliates')
-                    .select('*', { count: 'exact', head: true });
-
-                // 4. Total Commissions Paid
-                const { data: referrals } = await supabaseClient
-                    .from('referrals')
-                    .select('commission_amount, payout_status')
-                    .in('payout_status', ['completed', 'manual_paid']);
-
-                const totalCommissions = referrals?.reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
-
-                const { data: pendingReferrals } = await supabaseClient
-                    .from('referrals')
-                    .select('commission_amount')
-                    .in('payout_status', ['pending', 'processing']);
-
-                const pendingCommissions = pendingReferrals?.reduce((sum, r) => sum + (r.commission_amount || 0), 0) || 0;
-
-                // 5. Site Visits (Last 72 hours)
-                try {
-                    const { data: visitStats, error: visitError } = await supabaseClient
-                        .rpc('get_visits_count');
-
-                    if (visitError) {
-                        console.warn('get_visits_count RPC error:', visitError);
-                    } else if (visitStats && visitStats.length > 0) {
-                        document.getElementById('statTotalViews').textContent = visitStats[0].total_views || 0;
-                        document.getElementById('statUniqueVisitors').textContent = visitStats[0].unique_visitors || 0;
-                    }
-                } catch (visitError) {
-                    console.warn('Visit stats not available:', visitError);
+                const response = await fetch('/api/affiliate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'admin-data' })
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('Admin data error:', data.error);
+                    return;
                 }
 
-                // Update UI
-                document.getElementById('statRegisteredUsers').textContent = usersCount || 0;
-                document.getElementById('statPayments').textContent = paymentsCount || 0;
-                document.getElementById('statAffiliates').textContent = affiliatesCount || 0;
-                document.getElementById('statCommissions').textContent = `KSh ${totalCommissions}`;
-                document.getElementById('statPendingCommission').textContent = `Pending: KSh ${pendingCommissions}`;
+                document.getElementById('statRegisteredUsers').textContent = data.stats.registeredUsers;
+                document.getElementById('statPayments').textContent = data.stats.totalPayments;
+                document.getElementById('statAffiliates').textContent = data.stats.totalAffiliates;
+                document.getElementById('statCommissions').textContent = `KSh ${data.stats.totalCommissions}`;
+                document.getElementById('statPendingCommission').textContent = `Pending: KSh ${data.stats.pendingCommissions}`;
+                document.getElementById('statTotalViews').textContent = data.stats.totalViews;
+                document.getElementById('statUniqueVisitors').textContent = data.stats.uniqueVisitors;
                 document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
 
+                allReferrals = data.referrals;
+                renderReferrals();
+                renderAffiliates(data.affiliates);
+                renderPayments(data.payments);
             } catch (error) {
-                console.error('Error loading stats:', error);
+                console.error('Error loading admin data:', error);
             }
         }
 
-        // ============================================================
-        // INITIALIZE
-        // ============================================================
+        function renderReferrals() {
+            const tbody = document.getElementById('referralsTable');
+            const search = (document.getElementById('searchReferrals').value || '').toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            let rows = allReferrals.filter(r => {
+                const status = r.manually_paid ? 'manual_paid' : (r.payout_status || 'pending');
+                const matchesSearch = !search ||
+                    (r.affiliate_phone || '').toLowerCase().includes(search) ||
+                    (r.referral_code || '').toLowerCase().includes(search) ||
+                    (r.referred_phone || '').toLowerCase().includes(search);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            if (rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">No referrals found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map((r, i) => {
+                const status = r.manually_paid ? 'manual_paid' : (r.payout_status || 'pending');
+                const canMarkPaid = status !== 'completed' && status !== 'manual_paid';
+                return `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${r.referral_code || '—'}</td>
+                        <td>${r.affiliate_phone || 'Unknown'}</td>
+                        <td>${r.referred_phone || 'Unknown'}</td>
+                        <td>KSh ${r.commission_amount || 20}</td>
+                        <td><span class="status-badge ${status}">${status}</span></td>
+                        <td>${new Date(r.created_at).toLocaleDateString()}</td>
+                        <td>${canMarkPaid ? `<button class="btn-manual-pay" onclick="markPaidByReferral('${r.id}')">Mark Paid</button>` : '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAffiliates(affiliates) {
+            const tbody = document.getElementById('affiliatesTable');
+            if (!affiliates || affiliates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-data">No affiliates yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = affiliates.map((a, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${a.mpesa_phone || '—'}</td>
+                    <td>${a.referral_code || '—'}</td>
+                    <td>${a.total_referrals}</td>
+                    <td>KSh ${a.total_earnings}</td>
+                    <td>${new Date(a.created_at).toLocaleDateString()}</td>
+                    <td>${a.is_active ? '🟢 Active' : '⚪ Inactive'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPayments(payments) {
+            const tbody = document.getElementById('paymentsTable');
+            if (!payments || payments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">No payments yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = payments.map((p, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${p.phone_number || '—'}</td>
+                    <td>KSh ${p.amount || 0}</td>
+                    <td><span class="status-badge ${p.status}">${p.status}</span></td>
+                    <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                    <td>${p.referral_code || '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('searchReferrals')?.addEventListener('input', renderReferrals);
+        document.getElementById('filterStatus')?.addEventListener('change', renderReferrals);
+
+        async function markPaidByPhone() {
+            const phone = document.getElementById('manualPhone').value.trim();
+            const resultDiv = document.getElementById('manualResult');
+            if (!phone) {
+                resultDiv.className = 'manual-result error';
+                resultDiv.textContent = '❌ Please enter a phone number.';
+                return;
+            }
+            resultDiv.className = 'manual-result loading';
+            resultDiv.textContent = '⏳ Processing...';
+            try {
+                const response = await fetch('/api/affiliate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'admin-mark-paid', mpesaPhone: phone })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    resultDiv.className = 'manual-result success';
+                    resultDiv.textContent = '✅ Marked as paid successfully.';
+                    document.getElementById('manualPhone').value = '';
+                    loadAdminData();
+                } else {
+                    resultDiv.className = 'manual-result error';
+                    resultDiv.textContent = '❌ ' + (data.error || 'Failed to mark as paid.');
+                }
+            } catch (error) {
+                resultDiv.className = 'manual-result error';
+                resultDiv.textContent = '❌ Network error.';
+            }
+        }
+
+        async function markPaidByReferral(referralId) {
+            if (!confirm('Mark this referral as paid?')) return;
+            try {
+                const response = await fetch('/api/affiliate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'admin-mark-paid', referralId })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    loadAdminData();
+                } else {
+                    alert('❌ ' + (data.error || 'Failed to mark as paid.'));
+                }
+            } catch (error) {
+                alert('❌ Network error.');
+            }
+        }
+
+        window.markPaidByPhone = markPaidByPhone;
+        window.markPaidByReferral = markPaidByReferral;
+
         document.addEventListener('DOMContentLoaded', function() {
             loadAdminData();
         });
-
-        console.log('✅ Admin dashboard ready!');
     </script>
 </body>
 </html>

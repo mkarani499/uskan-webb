@@ -47,7 +47,7 @@ export default async function handler(req, res) {
 
 async function handleRegister(req, res) {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, referralCode } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -85,7 +85,8 @@ async function handleRegister(req, res) {
       await supabaseAdmin.from('users').insert({
         email, username,
         auth_user_id: authData.user.id,
-        email_verified: false
+        email_verified: false,
+        referred_by_code: referralCode || null
       });
       return res.status(200).json({
         success: true,

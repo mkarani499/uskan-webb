@@ -160,6 +160,7 @@
             payBtn.textContent = '⏳ Processing...';
 
             try {
+                const referralCode = localStorage.getItem('referredBy') || null;
                 // Initiate STK Push (backend handles all Supabase access)
                 const response = await fetch('/api/mpesa?action=stk', {
                     method: 'POST',
@@ -169,7 +170,8 @@
                     body: JSON.stringify({
                         phoneNumber: formattedPhone,
                         email: email,
-                        amount: 50,
+                        referralCode: referralCode,
+                        amount: 5,
                         accountReference: `USKAN-${Date.now()}`,
                         transactionDesc: 'USKAN Brain Test'
                     })
