@@ -3,12 +3,12 @@
 // ============================================================
 
 // ============================================================
-// SUPABASE CLIENT - Uses global supabase from HTML config
+// SUPABASE CLIENT - Uses global supabaseClient from HTML config
 // ============================================================
 
-if (typeof supabase === 'undefined') {
-    console.error('❌ supabase is not defined!');
-    var supabase = null;
+if (typeof supabaseClient === 'undefined') {
+    console.error('❌ supabaseClient is not defined!');
+    var supabaseClient = null;
 } else {
     console.log('✅ Supabase client available');
 }
@@ -118,10 +118,10 @@ async function checkSession() {
     
     // Fallback to Supabase (if needed)
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { loggedIn: false, user: null, profile: null };
         }
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error) throw error;
         
         if (session) {
@@ -152,11 +152,11 @@ async function checkSession() {
 
 async function registerUser(email, username, password) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
         
-        const { data: existingUser, error: checkError } = await supabase
+        const { data: existingUser, error: checkError } = await supabaseClient
             .from('users')
             .select('username')
             .eq('username', username)
@@ -166,7 +166,7 @@ async function registerUser(email, username, password) {
             return { success: false, error: 'Username already taken. Please choose another.' };
         }
         
-        const { data: existingEmail, error: emailError } = await supabase
+        const { data: existingEmail, error: emailError } = await supabaseClient
             .from('users')
             .select('email')
             .eq('email', email)
@@ -176,7 +176,7 @@ async function registerUser(email, username, password) {
             return { success: false, error: 'Email already registered. Please login.' };
         }
         
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -192,7 +192,7 @@ async function registerUser(email, username, password) {
         }
         
         if (authData.user) {
-            const { error: profileError } = await supabase
+            const { error: profileError } = await supabaseClient
                 .from('users')
                 .insert({
                     email: email,
@@ -233,11 +233,11 @@ async function registerUser(email, username, password) {
 
 async function loginUser(email, password) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
         
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -248,7 +248,7 @@ async function loginUser(email, password) {
         
         const user = data.user;
         
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await supabaseClient
             .from('users')
             .select('*')
             .eq('auth_user_id', user.id)
@@ -265,7 +265,7 @@ async function loginUser(email, password) {
         }
         
         if (profile && !profile.email_verified) {
-            await supabase
+            await supabaseClient
                 .from('users')
                 .update({ email_verified: true })
                 .eq('auth_user_id', user.id);
@@ -300,10 +300,10 @@ async function loginUser(email, password) {
 
 async function logoutUser() {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
-        const { error } = await supabase.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
         
         localStorage.removeItem('user');
@@ -322,10 +322,10 @@ async function logoutUser() {
 
 async function resetPassword(email) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
-        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/update-password.html`
         });
         
@@ -347,10 +347,10 @@ async function resetPassword(email) {
 
 async function updatePassword(newPassword) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
-        const { data, error } = await supabase.auth.updateUser({
+        const { data, error } = await supabaseClient.auth.updateUser({
             password: newPassword
         });
         
@@ -375,8 +375,8 @@ async function restoreProgress() {
     const pendingEmail = localStorage.getItem('pendingVerificationEmail');
     
     if (progress && pendingEmail) {
-        if (!supabase) return false;
-        const { data: { session } } = await supabase.auth.getSession();
+        if (!supabaseClient) return false;
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (session) {
             if (session.user.email === pendingEmail) {
                 console.log('📦 Restoring progress for:', pendingEmail);
@@ -394,10 +394,10 @@ async function restoreProgress() {
 
 async function checkUsername(username) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { available: true, message: 'Supabase not available' };
         }
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('users')
             .select('username')
             .eq('username', username)
@@ -516,8 +516,8 @@ function showToast(message) {
 
 async function getAffiliateData(userId) {
     try {
-        if (!supabase) return null;
-        const { data: affiliate, error: affiliateError } = await supabase
+        if (!supabaseClient) return null;
+        const { data: affiliate, error: affiliateError } = await supabaseClient
             .from('affiliates')
             .select('*')
             .eq('user_id', userId)
@@ -532,7 +532,7 @@ async function getAffiliateData(userId) {
             return { hasAffiliate: false };
         }
 
-        const { data: referrals, error: referralsError } = await supabase
+        const { data: referrals, error: referralsError } = await supabaseClient
             .from('referrals')
             .select('*')
             .eq('affiliate_id', affiliate.id);
@@ -565,10 +565,10 @@ async function getAffiliateData(userId) {
 
 async function registerAffiliateAccount(userId, mpesaPhone) {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { success: false, error: 'Supabase not available' };
         }
-        const { data: existing, error: checkError } = await supabase
+        const { data: existing, error: checkError } = await supabaseClient
             .from('affiliates')
             .select('id')
             .eq('user_id', userId)
@@ -580,7 +580,7 @@ async function registerAffiliateAccount(userId, mpesaPhone) {
 
         const referralCode = generateReferralCode();
 
-        const { data: affiliate, error } = await supabase
+        const { data: affiliate, error } = await supabaseClient
             .from('affiliates')
             .insert({
                 user_id: userId,
@@ -831,7 +831,7 @@ function closeAffiliateDashboard() {
 
 async function trackPageVisit() {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             console.warn('⚠️ Supabase not available for tracking');
             return;
         }
@@ -849,7 +849,7 @@ async function trackPageVisit() {
         const user = JSON.parse(localStorage.getItem('user') || 'null');
         const referrer = document.referrer || '';
 
-        await supabase
+        await supabaseClient
             .from('visits')
             .insert({
                 page: page,
