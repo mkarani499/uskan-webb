@@ -135,7 +135,7 @@
             color: var(--medium-grey);
         }
 
-        /* ===== TESTIMONIALS ===== */
+        /* ===== BRAIN TYPE TEASER ===== */
         .testimonial-results {
             display: grid;
             gap: 20px;
@@ -151,37 +151,19 @@
         .testimonial-card:hover {
             transform: translateY(-2px);
         }
-        .testimonial-text {
-            font-style: italic;
-            font-size: 16px;
-            margin-bottom: 4px;
-            color: var(--dark-grey);
-        }
-        .testimonial-author {
-            font-size: 14px;
-            color: var(--medium-grey);
-            margin-bottom: 12px;
-        }
-        .mini-results {
+        .category-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
             background: var(--white);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid #EDF2F7;
+            border: 1px solid #E2E8F0;
+            color: var(--navy);
         }
-        .mini-results h4 {
-            font-size: 14px;
-            color: var(--medium-grey);
-            margin-bottom: 8px;
-        }
-        .mini-score-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 16px;
-            font-size: 14px;
-        }
-        .mini-brain-type {
-            margin-top: 8px;
-            font-size: 14px;
+        .category-badge:hover {
+            border-color: var(--primary-orange);
+            background: #FFF8F0;
         }
 
         /* ===== PAYMENT CTA ===== */
@@ -318,38 +300,31 @@
             </div>
         </div>
 
-        <!-- Testimonials -->
+        <!-- Brain Type Teaser -->
         <div class="testimonial-results">
-            <div class="testimonial-card">
-                <p class="testimonial-text">"I thought I was a 'logic person'—turns out my real superpower was speed. The report blew my mind."</p>
-                <p class="testimonial-author">– Jake, 31</p>
-                <div class="mini-results">
-                    <h4>📊 Jake's Results:</h4>
-                    <div class="mini-score-row">
-                        <span>🧩 Logic: 78%</span>
-                        <span>🧠 Memory: 52%</span>
-                        <span>🌀 Spatial: 81%</span>
-                        <span>📝 Verbal: 65%</span>
-                        <span>⚡ Speed: 94%</span>
-                    </div>
-                    <div class="mini-brain-type">⚡ Brain Type: <strong>Speed Demon</strong></div>
-                </div>
-            </div>
+            <div class="testimonial-card" style="text-align:left;">
+                <p style="font-weight:700; color:var(--navy); font-size:18px; margin-bottom:4px;">🧠 Did Your Brain Perform As You Think?</p>
+                <p style="font-size:14px; color:var(--medium-grey); margin-bottom:12px;">Your brain has strengths. Let's find them.</p>
 
-            <div class="testimonial-card">
-                <p class="testimonial-text">"The memory exercises alone were worth the KSh 50. I've already noticed a difference."</p>
-                <p class="testimonial-author">– Emily, 27</p>
-                <div class="mini-results">
-                    <h4>📊 Emily's Results:</h4>
-                    <div class="mini-score-row">
-                        <span>🧩 Logic: 88%</span>
-                        <span>🧠 Memory: 73%</span>
-                        <span>🌀 Spatial: 59%</span>
-                        <span>📝 Verbal: 91%</span>
-                        <span>⚡ Speed: 67%</span>
-                    </div>
-                    <div class="mini-brain-type">🧩 Brain Type: <strong>Logic Master</strong></div>
+                <p style="font-weight:600; color:var(--navy); font-size:14px; margin-bottom:6px;">Test yourself across:</p>
+                <ul style="list-style:none; padding:0; margin:0 0 16px; font-size:14px; color:var(--dark-grey); line-height:1.8;">
+                    <li>🧩 Logic — Can you crack the puzzle?</li>
+                    <li>🧠 Memory — How much can you remember?</li>
+                    <li>🌀 Spatial — Can you see it in your mind?</li>
+                    <li>📝 Verbal — How good are you with words?</li>
+                    <li>⚡ Speed — How fast is your brain?</li>
+                </ul>
+
+                <p style="font-weight:600; color:var(--navy); font-size:14px; margin-bottom:6px;">🔥 What's your Brain Type?</p>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+                    <span class="category-badge">Logic Master 🧩</span>
+                    <span class="category-badge">Memory Wizard 🧠</span>
+                    <span class="category-badge">Speed Demon ⚡</span>
+                    <span class="category-badge">Wordsmith 📝</span>
+                    <span class="category-badge">Spatial Genius 🌀</span>
                 </div>
+
+                <p style="font-weight:700; color:var(--primary-orange); font-size:15px;">This is the last step. 🎯 Get Your Results →</p>
             </div>
         </div>
 
