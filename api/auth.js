@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
+import { createSessionCookie, clearSessionCookie, getVisitorToken } from './_session.js';
 
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
@@ -115,6 +116,23 @@ async function handleLogin(req, res) {
       const { data: profile } = await supabaseAnon
         .from('users').select('*').eq('auth_user_id', data.user.id).single();
 
+      // Merge anonymous test/payment progress into this account
+      const visitorToken = getVisitorToken(req);
+      if (visitorToken && profile) {
+        const { data: vp } = await supabaseAdmin
+          .from('visitor_progress').select('*').eq('visitor_token', visitorToken).single();
+        if (vp) {
+          const updates = {};
+          if (vp.has_taken_test && !profile.has_taken_test) updates.has_taken_test = true;
+          if (vp.has_paid && !profile.has_paid) updates.has_paid = true;
+          if (Object.keys(updates).length > 0) {
+            await supabaseAdmin.from('users').update(updates).eq('id', profile.id);
+          }
+        }
+      }
+
+      res.setHeader('Set-Cookie', createSessionCookie({ userId: profile?.id, isAdmin: false }));
+
       return res.status(200).json({
         success: true,
         user: {
@@ -137,6 +155,7 @@ async function handleLogout(req, res) {
   try {
     const { error } = await supabaseAnon.auth.signOut();
     if (error) return res.status(400).json({ error: error.message });
+    res.setHeader('Set-Cookie', clearSessionCookie());
     return res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
     console.error('Logout Error:', error);
@@ -232,15 +251,19 @@ async function handleUpdatePassword(req, res) {
 
 async function handleAdminVerify(req, res) {
   try {
-    const { password } = req.body;
+    const { email, password } = req.body;
+    const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
-    if (!adminPassword) {
-      return res.status(500).json({ success: false, error: 'Admin password not configured' });
+
+    if (!adminEmail || !adminPassword) {
+      return res.status(500).json({ success: false, error: 'Admin credentials not configured' });
     }
-    if (password === adminPassword) {
-      return res.status(200).json({ success: true, message: 'Login successful' });
+    if (email !== adminEmail || password !== adminPassword) {
+      return res.status(401).json({ success: false, error: 'Incorrect email or password' });
     }
-    return res.status(401).json({ success: false, error: 'Incorrect password' });
+
+    res.setHeader('Set-Cookie', createSessionCookie({ userId: null, isAdmin: true }));
+    return res.status(200).json({ success: true, message: 'Login successful' });
   } catch (error) {
     console.error('Admin verify error:', error);
     return res.status(500).json({ success: false, error: 'Server error' });

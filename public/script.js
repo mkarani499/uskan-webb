@@ -229,7 +229,7 @@ function selectAnswer(index, questions) {
     }, 1500);
 }
 
-function finishTest(questions) {
+async function finishTest(questions) {   // ← add "async"
     clearInterval(timerInterval);
     clearTimeout(sequenceTimer);
     
@@ -265,6 +265,18 @@ function finishTest(questions) {
     localStorage.setItem('testSlug', 'brain');
     
     console.log('📦 Progress saved:', progressData);
+
+    // ↓↓↓ NEW — record completion server-side, tied to a real cookie
+    try {
+        await fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'test-complete', results: result }),
+        });
+        console.log('✅ Test completion recorded server-side');
+    } catch (err) {
+        console.error('Could not record test completion:', err);
+    }
     
     window.location.href = 'results-preview.html';
 }

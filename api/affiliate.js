@@ -79,6 +79,9 @@ async function handleRegisterAffiliate(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
+    // ✅ Update user's is_affiliate flag
+    await supabaseAdmin.from('users').update({ is_affiliate: true }).eq('id', user.id);
+
     console.log('✅ Affiliate created:', affiliate.referral_code);
     return res.status(200).json({ success: true, affiliate, message: 'Affiliate account created successfully!' });
   } catch (error) {

@@ -29,13 +29,15 @@ console.log('MPESA_TILL_NUMBER:', process.env.MPESA_TILL_NUMBER || '❌');
 console.log('ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD ? '✅' : '❌');
 
 // ============================================================
-// API ROUTES (all logic now lives inside these 3 merged files)
+// API ROUTES (all logic now lives inside these merged files)
 // ============================================================
 import authHandler from './api/auth.js';
 import mpesaHandler from './api/mpesa.js';
 import affiliateHandler from './api/affiliate.js';
 import emailHandler from './api/email.js';
 import unsubscribeHandler from './api/unsubscribe.js';
+import trackHandler from './api/track.js';
+import pagesHandler from './api/pages.js';
 
 // auth.js handles: register, login, logout, verify-user, reset-password, update-password, admin-verify
 app.post('/api/auth', async (req, res) => {
@@ -59,7 +61,7 @@ app.post('/api/affiliate', async (req, res) => {
     await affiliateHandler(req, res);
 });
 
-// email.js handles: send-pdf-report, send-mass-email
+// email.js handles: send-report, send-mass-email
 app.post('/api/email', async (req, res) => {
     console.log('📧 Email request:', req.body?.action);
     await emailHandler(req, res);
@@ -69,6 +71,18 @@ app.post('/api/email', async (req, res) => {
 app.get('/api/unsubscribe', async (req, res) => {
     console.log('🚫 Unsubscribe request:', req.query?.email);
     await unsubscribeHandler(req, res);
+});
+
+// track.js handles: page visits, test completion tracking
+app.post('/api/track', async (req, res) => {
+    console.log('📊 Track request:', req.body?.action || 'visit');
+    await trackHandler(req, res);
+});
+
+// pages.js handles: page analytics
+app.get('/api/pages', async (req, res) => {
+    console.log('📄 Pages request');
+    await pagesHandler(req, res);
 });
 
 // ============================================================

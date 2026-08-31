@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
+import { getSession, ensureVisitorToken } from './_session.js';
 
 const consumerKey = process.env.MPESA_CONSUMER_KEY;
 const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
@@ -59,6 +60,11 @@ async function handleStkPush(req, res) {
       cleanPhone = '254' + cleanPhone;
     }
 
+    // Get session and visitor token
+    const session = getSession(req);
+    const { token: visitorToken, cookieHeader } = ensureVisitorToken(req);
+    if (cookieHeader) res.setHeader('Set-Cookie', cookieHeader);
+
     const accessToken = await getMpesaAccessToken();
     const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
     const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
@@ -89,7 +95,7 @@ async function handleStkPush(req, res) {
     const data = await response.json();
 
     if (data.ResponseCode === '0') {
-      // Create the pending payment record server-side (avoids browser->Supabase issues)
+      // Create the pending payment record with session and visitor token
       try {
         await supabase.from('payments').insert({
           phone_number: cleanPhone,
@@ -98,6 +104,8 @@ async function handleStkPush(req, res) {
           checkout_request_id: data.CheckoutRequestID,
           merchant_request_id: data.MerchantRequestID,
           referral_code: referralCode || null,
+          user_id: session?.userId || null,
+          visitor_token: visitorToken,
           status: 'pending'
         });
       } catch (insertError) {
@@ -203,6 +211,17 @@ async function updatePaymentStatus(checkoutRequestId, status, resultCode = null,
     .single();
 
   if (error) throw error;
+
+  if (status === 'completed') {
+    if (data.user_id) {
+      await supabase.from('users').update({ has_paid: true }).eq('id', data.user_id);
+    }
+    if (data.visitor_token) {
+      await supabase.from('visitor_progress')
+        .upsert({ visitor_token: data.visitor_token, has_paid: true }, { onConflict: 'visitor_token' });
+    }
+  }
+
   return data;
 }
 
