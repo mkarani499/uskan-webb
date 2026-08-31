@@ -929,10 +929,11 @@
             statusDiv.textContent = '⏳ Sending your report...';
             
             try {
-                const response = await fetch('/api/send-pdf-report', {
+                const response = await fetch('/api/email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        action: 'send-report',
                         email: email,
                         results: results,
                         username: username
@@ -943,7 +944,7 @@
                 
                 if (data.success) {
                     statusDiv.style.color = '#38A169';
-                    statusDiv.textContent = '✅ Report sent successfully! Please check your email.';
+                    statusDiv.textContent = '✅ Report sent! 📧 Check your (Email 📥 Inbox) OR (Email 📁 Spam) folder.';
                 } else {
                     statusDiv.style.color = '#E53E3E';
                     statusDiv.textContent = '❌ ' + (data.error || 'Failed to send report. Please try again.');

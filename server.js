@@ -34,8 +34,8 @@ console.log('ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD ? '✅' : '❌');
 import authHandler from './api/auth.js';
 import mpesaHandler from './api/mpesa.js';
 import affiliateHandler from './api/affiliate.js';
-import sendPdfReportHandler from './api/send-pdf-report.js';
-import sendMassEmailHandler from './api/send-mass-email.js';
+import emailHandler from './api/email.js';
+import unsubscribeHandler from './api/unsubscribe.js';
 
 // auth.js handles: register, login, logout, verify-user, reset-password, update-password, admin-verify
 app.post('/api/auth', async (req, res) => {
@@ -59,17 +59,16 @@ app.post('/api/affiliate', async (req, res) => {
     await affiliateHandler(req, res);
 });
 
-// ============================================================
-// EMAIL API ROUTES (kept separate, as you decided)
-// ============================================================
-app.post('/api/send-pdf-report', async (req, res) => {
-    console.log('📧 Send PDF report request received');
-    await sendPdfReportHandler(req, res);
+// email.js handles: send-pdf-report, send-mass-email
+app.post('/api/email', async (req, res) => {
+    console.log('📧 Email request:', req.body?.action);
+    await emailHandler(req, res);
 });
 
-app.post('/api/send-mass-email', async (req, res) => {
-    console.log('📧 Send mass email request received');
-    await sendMassEmailHandler(req, res);
+// unsubscribe.js handles: unsubscribe from emails
+app.get('/api/unsubscribe', async (req, res) => {
+    console.log('🚫 Unsubscribe request:', req.query?.email);
+    await unsubscribeHandler(req, res);
 });
 
 // ============================================================
