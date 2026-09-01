@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
-import { createSessionCookie, clearSessionCookie, getVisitorToken } from './_session.js';
+import { createSessionCookie, clearSessionCookie, getVisitorToken, ensureVisitorToken } from './_session.js';
 
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
@@ -49,6 +49,20 @@ export default async function handler(req, res) {
 
 async function handleRegister(req, res) {
   try {
+    const { token, cookieHeader } = ensureVisitorToken(req);
+    if (cookieHeader) res.setHeader('Set-Cookie', cookieHeader);
+
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+    const { count: recentRegistrations } = await supabaseAdmin
+      .from('registration_log')
+      .select('*', { count: 'exact', head: true })
+      .eq('visitor_token', token)
+      .gte('registered_at', twelveHoursAgo);
+
+    if ((recentRegistrations || 0) >= 1) {
+      return res.status(429).json({ error: 'Try again after a few hours.' });
+    }
+
     const { username, email, password, referralCode } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
@@ -60,13 +74,13 @@ async function handleRegister(req, res) {
     const { data: existingUser } = await supabaseAdmin
       .from('users').select('username').eq('username', username).single();
     if (existingUser) {
-      return res.status(400).json({ error: 'Username already taken' });
+      return res.status(400).json({ error: 'Unable to register with these details' });
     }
 
     const { data: existingEmail } = await supabaseAdmin
       .from('users').select('email').eq('email', email).single();
     if (existingEmail) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({ error: 'Unable to register with these details' });
     }
 
     const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
@@ -90,6 +104,9 @@ async function handleRegister(req, res) {
         email_verified: false,
         referred_by_code: referralCode || null
       });
+
+      await supabaseAdmin.from('registration_log').insert({ visitor_token: token });
+
       return res.status(200).json({
         success: true,
         message: 'Account created! Please check your email for verification.',
@@ -252,6 +269,19 @@ async function handleUpdatePassword(req, res) {
 
 async function handleAdminVerify(req, res) {
   try {
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { count: recentAttempts } = await supabaseAdmin
+      .from('admin_login_attempts')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip', ip)
+      .gte('attempted_at', fifteenMinAgo);
+
+    if ((recentAttempts || 0) >= 5) {
+      return res.status(429).json({ success: false, error: 'Too many attempts. Please try again in 15 minutes.' });
+    }
+
     const { email, password } = req.body;
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
@@ -259,7 +289,9 @@ async function handleAdminVerify(req, res) {
     if (!adminEmail || !adminPassword) {
       return res.status(500).json({ success: false, error: 'Admin credentials not configured' });
     }
+
     if (email !== adminEmail || password !== adminPassword) {
+      await supabaseAdmin.from('admin_login_attempts').insert({ ip });
       return res.status(401).json({ success: false, error: 'Incorrect email or password' });
     }
 

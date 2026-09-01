@@ -96,6 +96,7 @@
                 const referralCode = localStorage.getItem('referredBy') || null;
                 const response = await fetch('/api/auth', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'register', username, email, password, referralCode })
                 });

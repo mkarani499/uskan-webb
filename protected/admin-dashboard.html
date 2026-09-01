@@ -182,6 +182,16 @@
     </div>
 
     <script>
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function logout() {
             localStorage.removeItem('adminSession');
             localStorage.removeItem('adminLoginTime');
@@ -262,13 +272,13 @@
                 return `
                     <tr>
                         <td>${i + 1}</td>
-                        <td>${r.referral_code || '—'}</td>
-                        <td>${r.affiliate_phone || 'Unknown'}</td>
-                        <td>${r.referred_phone || 'Unknown'}</td>
-                        <td>KSh ${r.commission_amount || 20}</td>
-                        <td><span class="status-badge ${status}">${status}</span></td>
+                        <td>${escapeHtml(r.referral_code) || '—'}</td>
+                        <td>${escapeHtml(r.affiliate_phone) || 'Unknown'}</td>
+                        <td>${escapeHtml(r.referred_phone) || 'Unknown'}</td>
+                        <td>KSh ${Number(r.commission_amount) || 20}</td>
+                        <td><span class="status-badge ${escapeHtml(status)}">${escapeHtml(status)}</span></td>
                         <td>${new Date(r.created_at).toLocaleDateString()}</td>
-                        <td>${canMarkPaid ? `<button class="btn-manual-pay" onclick="markPaidByReferral('${r.id}')">Mark Paid</button>` : '—'}</td>
+                        <td>${canMarkPaid ? `<button class="btn-manual-pay" onclick="markPaidByReferral('${escapeHtml(r.id)}')">Mark Paid</button>` : '—'}</td>
                     </tr>
                 `;
             }).join('');
@@ -283,10 +293,10 @@
             tbody.innerHTML = affiliates.map((a, i) => `
                 <tr>
                     <td>${i + 1}</td>
-                    <td>${a.mpesa_phone || '—'}</td>
-                    <td>${a.referral_code || '—'}</td>
-                    <td>${a.total_referrals}</td>
-                    <td>KSh ${a.total_earnings}</td>
+                    <td>${escapeHtml(a.mpesa_phone) || '—'}</td>
+                    <td>${escapeHtml(a.referral_code) || '—'}</td>
+                    <td>${Number(a.total_referrals) || 0}</td>
+                    <td>KSh ${Number(a.total_earnings) || 0}</td>
                     <td>${new Date(a.created_at).toLocaleDateString()}</td>
                     <td>${a.is_active ? '🟢 Active' : '⚪ Inactive'}</td>
                 </tr>
@@ -302,11 +312,11 @@
             tbody.innerHTML = payments.map((p, i) => `
                 <tr>
                     <td>${i + 1}</td>
-                    <td>${p.phone_number || '—'}</td>
-                    <td>KSh ${p.amount || 0}</td>
-                    <td><span class="status-badge ${p.status}">${p.status}</span></td>
+                    <td>${escapeHtml(p.phone_number) || '—'}</td>
+                    <td>KSh ${Number(p.amount) || 0}</td>
+                    <td><span class="status-badge ${escapeHtml(p.status)}">${escapeHtml(p.status)}</span></td>
                     <td>${new Date(p.created_at).toLocaleDateString()}</td>
-                    <td>${p.referral_code || '—'}</td>
+                    <td>${escapeHtml(p.referral_code) || '—'}</td>
                 </tr>
             `).join('');
         }

@@ -53,11 +53,21 @@ export default async function handler(req, res) {
 async function handleStkPush(req, res) {
   try {
     const { phoneNumber, amount, accountReference, transactionDesc, referralCode, email } = req.body;
+
+    if (!phoneNumber || typeof phoneNumber !== 'string') {
+      return res.status(400).json({ error: 'A valid phone number is required' });
+    }
+
     let cleanPhone = phoneNumber.replace(/\s/g, '');
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '254' + cleanPhone.substring(1);
     } else if (!cleanPhone.startsWith('254')) {
       cleanPhone = '254' + cleanPhone;
+    }
+
+    // Must be exactly 254 followed by 9 digits, nothing else
+    if (!/^254\d{9}$/.test(cleanPhone)) {
+      return res.status(400).json({ error: 'Please enter a valid 9-digit Kenyan phone number' });
     }
 
     // Get session and visitor token

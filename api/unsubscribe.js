@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
+import { verifyUnsubscribeToken } from './_session.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -23,9 +24,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const email = req.query.email;
+    const token = req.query.token;
+    if (!token) {
+      return res.status(400).send('Missing or invalid unsubscribe link.');
+    }
+
+    const email = verifyUnsubscribeToken(token);
     if (!email) {
-      return res.status(400).send('Missing email address.');
+      return res.status(400).send('This unsubscribe link is invalid or has expired.');
     }
 
     const { error } = await supabase

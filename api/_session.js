@@ -55,3 +55,18 @@ export function ensureVisitorToken(req) {
   const cookieHeader = serializeCookie(VISITOR_COOKIE, token, { maxAge: 60 * 60 * 24 * 365 });
   return { token, cookieHeader };
 }
+
+// ===== Unsubscribe token (proves the request came from a real sent email) =====
+export function createUnsubscribeToken(email) {
+  return jwt.sign({ email, purpose: 'unsubscribe' }, SECRET, { expiresIn: '90d' });
+}
+
+export function verifyUnsubscribeToken(token) {
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    if (decoded.purpose !== 'unsubscribe') return null;
+    return decoded.email;
+  } catch {
+    return null;
+  }
+}

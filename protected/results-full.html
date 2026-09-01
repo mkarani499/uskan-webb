@@ -931,6 +931,7 @@
             try {
                 const response = await fetch('/api/email', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'send-report',
@@ -945,6 +946,9 @@
                 if (data.success) {
                     statusDiv.style.color = '#38A169';
                     statusDiv.textContent = '✅ Report sent! 📧 Check your (Email 📥 Inbox) OR (Email 📁 Spam) folder.';
+                } else if (data.error === 'You\'ve reached the limit of 3 report emails per day. Please try again later.') {
+                    statusDiv.style.color = '#E53E3E';
+                    statusDiv.textContent = '⏳ You\'ve reached the daily limit of 3 report emails. Please try again tomorrow.';
                 } else {
                     statusDiv.style.color = '#E53E3E';
                     statusDiv.textContent = '❌ ' + (data.error || 'Failed to send report. Please try again.');

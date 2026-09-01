@@ -438,8 +438,9 @@
             try {
                 const response = await fetch('/api/affiliate', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'check-affiliate', userId: user.id })
+                    body: JSON.stringify({ action: 'check-affiliate' })
                 });
                 
                 const data = await response.json();

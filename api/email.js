@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
 import emailjs from '@emailjs/nodejs';
-import { getSession, getVisitorToken, ensureVisitorToken } from './_session.js';
+import { getSession, getVisitorToken, ensureVisitorToken, createUnsubscribeToken } from './_session.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -52,6 +52,20 @@ export default async function handler(req, res) {
 // ============================================================
 async function handleSendReport(req, res) {
   try {
+    const { token, cookieHeader } = ensureVisitorToken(req);
+    if (cookieHeader) res.setHeader('Set-Cookie', cookieHeader);
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentSends } = await supabase
+      .from('report_send_log')
+      .select('*', { count: 'exact', head: true })
+      .eq('visitor_token', token)
+      .gte('sent_at', twentyFourHoursAgo);
+
+    if ((recentSends || 0) >= 3) {
+      return res.status(429).json({ error: 'You\'ve reached the limit of 3 report emails per day. Please try again later.' });
+    }
+
     const { email, results, username } = req.body;
     if (!email || !results) {
       return res.status(400).json({ error: 'Email and results are required' });
@@ -68,6 +82,8 @@ async function handleSendReport(req, res) {
         html_body: htmlReport
       }
     );
+
+    await supabase.from('report_send_log').insert({ visitor_token: token });
 
     console.log(`✅ Report sent to ${email}`);
     return res.status(200).json({ success: true, message: 'Report sent successfully!' });
@@ -217,7 +233,8 @@ async function handleSendMassEmail(req, res) {
 // ============================================================
 function generateMassEmailHTML(subject, body, recipientEmail) {
   const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
-  const unsubscribeUrl = `${baseUrl}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+  const unsubscribeToken = createUnsubscribeToken(recipientEmail);
+  const unsubscribeUrl = `${baseUrl}/api/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
   return `
     <!DOCTYPE html>
     <html>

@@ -56,6 +56,14 @@ async function handleRegisterAffiliate(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    if (!/^254\d{9}$/.test(mpesaPhone)) {
+      return res.status(400).json({ error: 'Please provide a valid 9-digit Kenyan phone number' });
+    }
+
+    if (!/^[A-Z0-9]{4,12}$/.test(referralCode)) {
+      return res.status(400).json({ error: 'Invalid referral code format' });
+    }
+
     const { data: user, error: userError } = await supabaseAdmin
       .from('users').select('id').eq('auth_user_id', authUserId).single();
     if (userError || !user) {
@@ -101,17 +109,11 @@ async function handleRegisterAffiliate(req, res) {
 
 async function handleCheckAffiliate(req, res) {
   try {
-    const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
-
-    const { data: user, error: userError } = await supabaseAnon
-      .from('users').select('id').eq('auth_user_id', userId).single();
-    if (userError || !user) {
-      return res.status(404).json({ error: 'User not found in database' });
-    }
+    const session = getSession(req);
+    if (!session?.userId) return res.status(401).json({ error: 'Please log in' });
 
     const { data: affiliate, error } = await supabaseAnon
-      .from('affiliates').select('id').eq('user_id', user.id).single();
+      .from('affiliates').select('id').eq('user_id', session.userId).single();
     if (error && error.code !== 'PGRST116') {
       console.error('Database error:', error);
       return res.status(500).json({ error: 'Database error' });
@@ -126,18 +128,11 @@ async function handleCheckAffiliate(req, res) {
 
 async function handleGetAffiliateData(req, res) {
   try {
-    const { authUserId } = req.body;
-    if (!authUserId) return res.status(400).json({ error: 'User ID required' });
-
-    const { data: user, error: userError } = await supabaseAnon
-      .from('users').select('id').eq('auth_user_id', authUserId).single();
-    if (userError || !user) {
-      console.error('❌ User not found:', userError);
-      return res.status(404).json({ error: 'User not found in database' });
-    }
+    const session = getSession(req);
+    if (!session?.userId) return res.status(401).json({ error: 'Please log in' });
 
     const { data: affiliate, error: affiliateError } = await supabaseAnon
-      .from('affiliates').select('*').eq('user_id', user.id).single();
+      .from('affiliates').select('*').eq('user_id', session.userId).single();
     if (affiliateError && affiliateError.code !== 'PGRST116') {
       console.error('❌ Affiliate fetch error:', affiliateError);
       return res.status(500).json({ error: 'Database error' });
