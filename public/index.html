@@ -346,29 +346,6 @@
             margin: 0;
         }
 
-        /* ===== STATS ===== */
-        .stats-home {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin: 32px 0;
-            text-align: center;
-        }
-        @media (max-width: 600px) {
-            .stats-home {
-                grid-template-columns: 1fr;
-            }
-        }
-        .stat-home .number {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--navy);
-        }
-        .stat-home .label {
-            font-size: 14px;
-            color: var(--medium-grey);
-        }
-
         /* ============================================================
            BACKGROUND WITH STOCK IMAGES
            ============================================================ */
@@ -556,13 +533,6 @@
                 <div class="how-step"><div class="step-num">3</div><h4>Get Your Link</h4><p>Register your M-Pesa number and get a referral link</p></div>
                 <div class="how-step"><div class="step-num">4</div><h4>Share & Earn</h4><p>Share your link and earn KSh 20 per referral</p></div>
             </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-home">
-            <div class="stat-home"><div class="number" id="statUsersHome">0</div><div class="label">Users</div></div>
-            <div class="stat-home"><div class="number" id="statEarnedHome">KSh 0</div><div class="label">Earned by Users</div></div>
-            <div class="stat-home"><div class="number" id="statTestsHome">0</div><div class="label">Tests Taken</div></div>
         </div>
 
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
