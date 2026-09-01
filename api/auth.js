@@ -52,12 +52,13 @@ async function handleRegister(req, res) {
     const { token, cookieHeader } = ensureVisitorToken(req);
     if (cookieHeader) res.setHeader('Set-Cookie', cookieHeader);
 
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+    // ✅ CHANGED: 12 hours → 4 hours
+    const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
     const { count: recentRegistrations } = await supabaseAdmin
       .from('registration_log')
       .select('*', { count: 'exact', head: true })
       .eq('visitor_token', token)
-      .gte('registered_at', twelveHoursAgo);
+      .gte('registered_at', fourHoursAgo);
 
     if ((recentRegistrations || 0) >= 1) {
       return res.status(429).json({ error: 'Try again after a few hours.' });
