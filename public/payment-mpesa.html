@@ -211,9 +211,20 @@
         function startPolling(checkoutID) {
             let attempts = 0;
             const maxAttempts = 30;
+            const pollStartTime = Date.now();
+            const TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
 
             const pollInterval = setInterval(async () => {
                 attempts++;
+
+                if (Date.now() - pollStartTime >= TIMEOUT_MS) {
+                    clearInterval(pollInterval);
+                    showToast('⏳ Payment timed out. Please try again.');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 2000);
+                    return;
+                }
 
                 try {
                     const response = await fetch('/api/mpesa?action=verify-payment', {
