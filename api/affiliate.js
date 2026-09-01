@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
+import { getSession } from './_session.js';
 
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
@@ -12,6 +13,14 @@ const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
+
+function requireAdmin(req, res, handlerFn) {
+  const session = getSession(req);
+  if (!session?.isAdmin) {
+    return res.status(403).json({ error: 'Admin login required' });
+  }
+  return handlerFn(req, res);
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -34,8 +43,8 @@ export default async function handler(req, res) {
     case 'register-affiliate': return handleRegisterAffiliate(req, res);
     case 'check-affiliate': return handleCheckAffiliate(req, res);
     case 'get-affiliate-data': return handleGetAffiliateData(req, res);
-    case 'admin-data': return handleAdminData(req, res);
-    case 'admin-mark-paid': return handleAdminMarkPaid(req, res);
+    case 'admin-data': return requireAdmin(req, res, handleAdminData);
+    case 'admin-mark-paid': return requireAdmin(req, res, handleAdminMarkPaid);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
 }

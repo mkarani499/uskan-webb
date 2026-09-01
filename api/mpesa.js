@@ -128,6 +128,32 @@ async function handleStkPush(req, res) {
   }
 }
 
+// ============================================================
+// Independently ask Safaricom what really happened for a given
+// checkoutRequestID. This is the only source of truth we trust —
+// never the raw body of an incoming request (client or callback).
+// ============================================================
+async function queryTrueStatus(checkoutRequestID) {
+  const accessToken = await getMpesaAccessToken();
+  const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+  const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
+
+  const payload = {
+    BusinessShortCode: shortcode,
+    Password: password,
+    Timestamp: timestamp,
+    CheckoutRequestID: checkoutRequestID
+  };
+
+  const response = await fetch('https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  return await response.json();
+}
+
 async function handleVerifyPayment(req, res) {
   try {
     const { checkoutRequestID } = req.body;
@@ -135,28 +161,9 @@ async function handleVerifyPayment(req, res) {
       return res.status(400).json({ error: 'checkoutRequestID is required' });
     }
 
-    const accessToken = await getMpesaAccessToken();
-    const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
-    const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
-
-    const payload = {
-      BusinessShortCode: shortcode,
-      Password: password,
-      Timestamp: timestamp,
-      CheckoutRequestID: checkoutRequestID
-    };
-
-    const response = await fetch('https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
+    const data = await queryTrueStatus(checkoutRequestID);
 
     if (data.ResultCode === '0') {
-      // Payment confirmed - make sure the database reflects this,
-      // in case the automatic callback hasn't arrived yet
       await updatePaymentStatus(checkoutRequestID, 'completed', data.ResultCode, data.ResultDesc);
       await createReferralIfApplicable(checkoutRequestID);
       res.status(200).json({ success: true, status: 'completed' });
@@ -174,20 +181,29 @@ async function handleVerifyPayment(req, res) {
 
 async function handleCallback(req, res) {
   try {
-    const callbackData = req.body;
-    const resultCode = callbackData.Body?.stkCallback?.ResultCode;
-    const resultDesc = callbackData.Body?.stkCallback?.ResultDesc;
-    const checkoutRequestID = callbackData.Body?.stkCallback?.CheckoutRequestID;
+    // We log what Safaricom (or an impersonator) sent us, but we
+    // NEVER act on it directly — only on what queryTrueStatus()
+    // independently confirms with Safaricom's own systems.
+    const checkoutRequestID = req.body?.Body?.stkCallback?.CheckoutRequestID;
 
-    console.log('📥 M-Pesa Callback:', { checkoutRequestID, resultCode, resultDesc });
+    if (!checkoutRequestID) {
+      console.warn('⚠️ Callback received with no CheckoutRequestID, ignoring');
+      return res.status(200).json({ ResultCode: 0, ResultDesc: 'Success' });
+    }
 
-    if (resultCode === '0') {
-      await updatePaymentStatus(checkoutRequestID, 'completed', resultCode, resultDesc);
-      console.log('✅ Payment successful');
+    console.log('📥 M-Pesa Callback received, verifying independently:', checkoutRequestID);
+
+    const data = await queryTrueStatus(checkoutRequestID);
+
+    if (data.ResultCode === '0') {
+      await updatePaymentStatus(checkoutRequestID, 'completed', data.ResultCode, data.ResultDesc);
+      console.log('✅ Payment independently confirmed successful');
       await createReferralIfApplicable(checkoutRequestID);
+    } else if (data.ResultCode === '1') {
+      console.log('⏳ Payment still pending per Safaricom, leaving as-is');
     } else {
-      await updatePaymentStatus(checkoutRequestID, 'failed', resultCode, resultDesc);
-      console.log('❌ Payment failed');
+      await updatePaymentStatus(checkoutRequestID, 'failed', data.ResultCode, data.ResultDesc);
+      console.log('❌ Payment independently confirmed failed');
     }
 
     res.status(200).json({ ResultCode: 0, ResultDesc: 'Success' });

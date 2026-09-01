@@ -15,6 +15,14 @@ emailjs.init({
   privateKey: process.env.EMAILJS_PRIVATE_KEY,
 });
 
+function requireAdmin(req, res, handlerFn) {
+  const session = getSession(req);
+  if (!session?.isAdmin) {
+    return res.status(403).json({ error: 'Admin login required' });
+  }
+  return handlerFn(req, res);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,7 +41,7 @@ export default async function handler(req, res) {
 
   switch (action) {
     case 'send-report': return handleSendReport(req, res);
-    case 'send-mass-email': return handleSendMassEmail(req, res);
+    case 'send-mass-email': return requireAdmin(req, res, handleSendMassEmail);
     case 'send-feedback': return handleSendFeedback(req, res);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
@@ -140,7 +148,7 @@ async function handleSendFeedback(req, res) {
 }
 
 // ============================================================
-// SEND MASS EMAIL (all registered users)
+// SEND MASS EMAIL (all registered users) - ADMIN ONLY
 // ============================================================
 async function handleSendMassEmail(req, res) {
   try {
