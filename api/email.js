@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
 import emailjs from '@emailjs/nodejs';
+import { getSession, getVisitorToken, ensureVisitorToken } from './_session.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
   switch (action) {
     case 'send-report': return handleSendReport(req, res);
     case 'send-mass-email': return handleSendMassEmail(req, res);
+    case 'send-feedback': return handleSendFeedback(req, res);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
 }
@@ -64,6 +66,76 @@ async function handleSendReport(req, res) {
   } catch (error) {
     console.error('❌ Send report error:', error);
     return res.status(500).json({ error: error.message || 'Failed to send report' });
+  }
+}
+
+// ============================================================
+// SEND FEEDBACK (rate-limited, body-only, from the feedback tab)
+// ============================================================
+async function handleSendFeedback(req, res) {
+  try {
+    const { message, replyEmail } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Feedback message is required' });
+    }
+    const trimmed = message.trim();
+    if (trimmed.length > 200) {
+      return res.status(400).json({ error: 'Feedback must be 200 characters or fewer' });
+    }
+
+    // Identify the sender — logged-in user or anonymous visitor cookie
+    const session = getSession(req);
+    const { token: visitorToken, cookieHeader } = ensureVisitorToken(req);
+    if (cookieHeader) res.setHeader('Set-Cookie', cookieHeader);
+
+    const identifier = session?.userId ? `user:${session.userId}` : `visitor:${visitorToken}`;
+
+    // Rate limit: 2 per rolling 24 hours per identifier
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from('feedback_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('identifier', identifier)
+      .gte('created_at', since);
+
+    if (countError) {
+      console.error('❌ Feedback count error:', countError);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if ((count || 0) >= 2) {
+      return res.status(429).json({ error: 'You can only send 2 feedback messages per day. Please try again later.' });
+    }
+
+    // Log first, so a duplicate double-click can't slip past the limit
+    await supabase.from('feedback_log').insert({
+      identifier,
+      message: trimmed,
+      reply_email: replyEmail || null
+    });
+
+    const htmlBody = `
+      <p><strong>Feedback:</strong></p>
+      <p>${trimmed.replace(/\n/g, '<br />')}</p>
+      ${replyEmail ? `<p><strong>Reply to:</strong> ${replyEmail}</p>` : ''}
+    `;
+
+    await emailjs.send(
+      process.env.EMAILJS_SERVICE_ID,
+      process.env.EMAILJS_TEMPLATE_ID,
+      {
+        to_email: process.env.FEEDBACK_TO_EMAIL,
+        subject: 'customer feed back',
+        from_name: 'brain-app',
+        html_body: htmlBody
+      }
+    );
+
+    console.log('✅ Feedback sent from', identifier);
+    return res.status(200).json({ success: true, message: 'Feedback sent!' });
+  } catch (error) {
+    console.error('❌ Send feedback error:', error);
+    return res.status(500).json({ error: error.message || 'Failed to send feedback' });
   }
 }
 
