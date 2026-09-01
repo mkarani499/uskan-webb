@@ -320,7 +320,7 @@
         });
 
         // ============================================================
-        // FEEDBACK FORM
+        // FEEDBACK FORM - FIXED STATUS DISPLAY
         // ============================================================
         const feedbackTextarea = document.getElementById('feedbackMessage');
         const charCountEl = document.getElementById('charCount');
@@ -339,16 +339,22 @@
             const btn = document.getElementById('sendFeedbackBtn');
             const statusDiv = document.getElementById('feedbackStatus');
 
+            // Reset status properly
             statusDiv.style.display = 'none';
+            statusDiv.className = 'status-msg';
+            statusDiv.textContent = '';
 
+            // Validation
             if (!message) {
                 statusDiv.className = 'status-msg error';
-                statusDiv.textContent = '❌ Please enter your feedback before sending.';
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '❌ Please enter your feedback.';
                 return;
             }
             if (message.length > 200) {
                 statusDiv.className = 'status-msg error';
-                statusDiv.textContent = '❌ Your feedback is over 200 characters — please shorten it.';
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '❌ Your feedback is too long — please shorten it.';
                 return;
             }
 
@@ -368,25 +374,31 @@
 
                 const data = await response.json();
 
+                // Handle all response cases
                 if (response.ok && data.success) {
                     statusDiv.className = 'status-msg success';
+                    statusDiv.style.display = 'block';
                     statusDiv.textContent = '✅ Feedback sent! Thank you for helping us improve USKAN.';
                     document.getElementById('feedbackForm').reset();
                     charCountEl.textContent = '0 / 200 characters';
                     charCountEl.style.color = '#A0AEC0';
                 } else if (response.status === 429) {
                     statusDiv.className = 'status-msg error';
-                    statusDiv.textContent = '⏳ You\'ve reached today\'s limit of 2 feedback messages. Please try again tomorrow.';
+                    statusDiv.style.display = 'block';
+                    statusDiv.textContent = '⏳ You\'ve reached your limit. Please try again tomorrow.';
                 } else if (response.status === 400) {
                     statusDiv.className = 'status-msg error';
-                    statusDiv.textContent = '❌ ' + (data.error || 'Please check your feedback and try again.');
+                    statusDiv.style.display = 'block';
+                    statusDiv.textContent = '❌ Please check your feedback and try again.';
                 } else {
                     statusDiv.className = 'status-msg error';
-                    statusDiv.textContent = '❌ Something went wrong on our end. Please try again shortly.';
+                    statusDiv.style.display = 'block';
+                    statusDiv.textContent = '❌ Something went wrong.';
                 }
             } catch (error) {
                 console.error('Feedback error:', error);
                 statusDiv.className = 'status-msg error';
+                statusDiv.style.display = 'block';
                 statusDiv.textContent = '❌ Network error — check your connection and try again.';
             }
 
@@ -409,6 +421,9 @@
             }
         });
 
+        // ============================================================
+        // DELETE ACCOUNT FORM - FIXED STATUS DISPLAY
+        // ============================================================
         document.getElementById('deleteForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -417,10 +432,15 @@
             const btn = document.getElementById('deleteAccountBtn');
             const statusDiv = document.getElementById('deleteStatus');
 
+            // Reset status properly
             statusDiv.style.display = 'none';
+            statusDiv.className = 'status-msg';
+            statusDiv.textContent = '';
 
+            // Validation
             if (!email || !password) {
                 statusDiv.className = 'status-msg error';
+                statusDiv.style.display = 'block';
                 statusDiv.textContent = '❌ Please enter your email and password.';
                 return;
             }
@@ -447,19 +467,22 @@
                     localStorage.removeItem('adminSession');
 
                     statusDiv.className = 'status-msg success';
+                    statusDiv.style.display = 'block';
                     statusDiv.textContent = '✅ Your account has been deleted. Redirecting...';
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 2000);
                 } else {
                     statusDiv.className = 'status-msg error';
-                    statusDiv.textContent = '❌ ' + (data.error || 'Failed to delete account.');
+                    statusDiv.style.display = 'block';
+                    statusDiv.textContent = '❌ Failed to delete account.';
                     btn.disabled = false;
                     btn.textContent = 'Delete My Account';
                 }
             } catch (error) {
                 console.error('Delete account error:', error);
                 statusDiv.className = 'status-msg error';
+                statusDiv.style.display = 'block';
                 statusDiv.textContent = '❌ Network error. Please try again.';
                 btn.disabled = false;
                 btn.textContent = 'Delete My Account';
