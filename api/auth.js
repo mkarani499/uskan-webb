@@ -42,6 +42,7 @@ export default async function handler(req, res) {
     case 'reset-password': return handleResetPassword(req, res);
     case 'update-password': return handleUpdatePassword(req, res);
     case 'admin-verify': return handleAdminVerify(req, res);
+    case 'delete-account': return handleDeleteAccount(req, res);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
 }
@@ -267,5 +268,98 @@ async function handleAdminVerify(req, res) {
   } catch (error) {
     console.error('Admin verify error:', error);
     return res.status(500).json({ success: false, error: 'Server error' });
+  }
+}
+
+// ============================================================
+// DELETE ACCOUNT - GDPR/Privacy compliance
+// ============================================================
+async function handleDeleteAccount(req, res) {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Re-authenticate right now to confirm this is genuinely them
+    const { data: authData, error: authError } = await supabaseAnon.auth.signInWithPassword({ email, password });
+    if (authError || !authData.user) {
+      return res.status(401).json({ error: 'Incorrect email or password' });
+    }
+
+    const authUserId = authData.user.id;
+
+    const { data: profile } = await supabaseAdmin
+      .from('users').select('*').eq('auth_user_id', authUserId).single();
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+
+    // ============================================================
+    // 1. Anonymize referrals where THIS person was the one referred
+    //    (matched via phone numbers used on their payments)
+    // ============================================================
+    const { data: theirPayments } = await supabaseAdmin
+      .from('payments')
+      .select('phone_number')
+      .eq('user_id', profile.id);
+
+    const theirPhoneNumbers = [...new Set((theirPayments || [])
+      .map(p => p.phone_number)
+      .filter(Boolean))];
+
+    if (theirPhoneNumbers.length > 0) {
+      await supabaseAdmin
+        .from('referrals')
+        .update({ referred_phone: null })
+        .in('referred_phone', theirPhoneNumbers);
+    }
+
+    // ============================================================
+    // 2. Anonymize their OWN affiliate account (if they have one)
+    //    Keep mpesa_phone + referral_code so any pending commission
+    //    owed TO them can still be looked up and paid from admin-dashboard
+    // ============================================================
+    const { data: affiliate } = await supabaseAdmin
+      .from('affiliates').select('id').eq('user_id', profile.id).single();
+
+    if (affiliate) {
+      await supabaseAdmin
+        .from('affiliates')
+        .update({ user_id: null, auth_user_id: null, is_active: false })
+        .eq('id', affiliate.id);
+    }
+
+    // ============================================================
+    // 3. Anonymize their payment records (keep amount/status for
+    //    revenue accounting, strip personal contact info)
+    // ============================================================
+    await supabaseAdmin
+      .from('payments')
+      .update({ email: null, phone_number: null, user_id: null })
+      .eq('user_id', profile.id);
+
+    // ============================================================
+    // 4. Fully delete anything with no accounting value
+    // ============================================================
+    await supabaseAdmin.from('test_results').delete().eq('user_id', profile.id);
+    await supabaseAdmin.from('visits').delete().eq('user_id', profile.id);
+
+    // ============================================================
+    // 5. Delete their profile row
+    // ============================================================
+    await supabaseAdmin.from('users').delete().eq('id', profile.id);
+
+    // ============================================================
+    // 6. Delete the actual login (Supabase Auth)
+    // ============================================================
+    await supabaseAdmin.auth.admin.deleteUser(authUserId);
+
+    res.setHeader('Set-Cookie', clearSessionCookie());
+    return res.status(200).json({ success: true, message: 'Your account has been deleted.' });
+  } catch (error) {
+    console.error('❌ Delete account error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menu - USKAN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .menu-nav {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 24px;
+        }
+        .menu-nav .back-link {
+            color: var(--medium-grey);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .menu-nav .back-link:hover {
+            color: var(--navy);
+        }
+        .menu-container {
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        /* ===== TABS ===== */
+        .menu-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #EDF2F7;
+            padding-bottom: 8px;
+        }
+        .menu-tab {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--medium-grey);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .menu-tab:hover {
+            background: var(--off-white);
+        }
+        .menu-tab.active {
+            background: var(--off-white);
+            color: var(--navy);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* ===== FORMS ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark-grey);
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--logic-blue);
+        }
+        .form-group textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+        .form-group small {
+            font-size: 13px;
+            color: #A0AEC0;
+        }
+
+        .btn-primary-full {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-orange), #DD6B20);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-full:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 137, 54, 0.3);
+        }
+        .btn-primary-full:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger-full {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            background: #E53E3E;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-danger-full:hover {
+            background: #C0392B;
+        }
+        .btn-danger-full:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-msg {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .status-msg.success {
+            display: block;
+            background: #F0FFF4;
+            color: #155724;
+            border-left: 4px solid #38A169;
+        }
+        .status-msg.error {
+            display: block;
+            background: #FFF5F5;
+            color: #721C24;
+            border-left: 4px solid #E53E3E;
+        }
+
+        /* ===== DELETE TAB SPECIFICS ===== */
+        .warning-box {
+            background: #FFF5F5;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border-left: 4px solid #E53E3E;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #4A5568;
+        }
+        .warning-box strong {
+            color: #E53E3E;
+        }
+        .login-required-box {
+            text-align: center;
+            padding: 32px 20px;
+            background: var(--off-white);
+            border-radius: 16px;
+        }
+        .login-required-box p {
+            color: var(--medium-grey);
+            margin-bottom: 16px;
+        }
+        .login-required-box a {
+            display: inline-block;
+            padding: 10px 24px;
+            background: var(--navy);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* ===== HELP TAB ===== */
+        .help-section {
+            margin-bottom: 24px;
+        }
+        .help-section h3 {
+            font-size: 17px;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+        .help-section p {
+            font-size: 14px;
+            color: var(--dark-grey);
+            line-height: 1.6;
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #EDF2F7;
+            text-align: center;
+            font-size: 14px;
+            color: var(--medium-grey);
+        }
+    </style>
+</head>
+<body>
+    <div class="container menu-container">
+        <div class="menu-nav">
+            <a href="javascript:history.back()" class="back-link">← Back</a>
+        </div>
+
+        <div class="menu-tabs">
+            <button class="menu-tab active" data-tab="feedback">💬 Feedback</button>
+            <button class="menu-tab" data-tab="delete">🗑️ Delete Account</button>
+            <button class="menu-tab" data-tab="help">❓ Help</button>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- FEEDBACK TAB -->
+        <!-- ============================================================ -->
+        <div class="tab-panel active" id="tab-feedback">
+            <h2 style="font-size:22px; color:var(--navy); margin-bottom:4px;">Share Your Feedback</h2>
+            <p style="color:var(--medium-grey); font-size:14px; margin-bottom:20px;">Found a bug, have an idea, or just want to tell us something? We'd love to hear it.</p>
+
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="feedbackMessage">Your Feedback</label>
+                    <textarea id="feedbackMessage" placeholder="Type your feedback here..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="replyEmail">Your Email (optional)</label>
+                    <input type="email" id="replyEmail" placeholder="you@example.com" />
+                    <small>Only if you'd like us to get back to you</small>
+                </div>
+                <button type="submit" class="btn-primary-full" id="sendFeedbackBtn">Send Feedback</button>
+            </form>
+            <div id="feedbackStatus" class="status-msg"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- DELETE ACCOUNT TAB -->
+        <!-- ============================================================ -->
+        <div class="tab-panel" id="tab-delete">
+            <div id="deleteLoggedOutView" style="display:none;">
+                <div class="login-required-box">
+                    <p>You need to be logged in to delete your account.</p>
+                    <a href="login.html">Log In</a>
+                </div>
+            </div>
+
+            <div id="deleteLoggedInView" style="display:none;">
+                <h2 style="font-size:22px; color:var(--navy); margin-bottom:4px;">Delete Your Account</h2>
+                <div class="warning-box">
+                    <strong>This cannot be undone.</strong> Your account, login, and test history will be permanently deleted. If you have unpaid affiliate earnings, those records are kept so we can still pay you.
+                </div>
+
+                <form id="deleteForm">
+                    <div class="form-group">
+                        <label for="deleteEmail">Email</label>
+                        <input type="email" id="deleteEmail" placeholder="you@example.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="deletePassword">Password</label>
+                        <input type="password" id="deletePassword" placeholder="Confirm your password" required />
+                    </div>
+                    <button type="submit" class="btn-danger-full" id="deleteAccountBtn">Delete My Account</button>
+                </form>
+                <div id="deleteStatus" class="status-msg"></div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- HELP TAB -->
+        <!-- ============================================================ -->
+        <div class="tab-panel" id="tab-help">
+            <div class="help-section">
+                <h3>🧠 What is USKAN?</h3>
+                <p>USKAN is a brain test platform. Take a short cognitive test, unlock your full personalized brain report, and discover your Brain Type across Logic, Memory, Spatial, Verbal, and Speed.</p>
+            </div>
+            <div class="help-section">
+                <h3>💰 How to Earn</h3>
+                <p>After you unlock your results, register your M-Pesa number to get your own referral link. Share it with friends — when someone takes the test and pays through your link, you earn KSh 20 per referral.</p>
+            </div>
+            <div class="help-section">
+                <h3>🗑️ How to Delete My Data</h3>
+                <p>Head to the "Delete Account" tab above, log in with your email and password, and confirm. Your account, login, and test history are permanently removed. Any pending affiliate earnings you're still owed remain on record so we can pay you.</p>
+            </div>
+            <div class="help-section">
+                <h3>⏱️ Affiliate Payments</h3>
+                <p>Affiliate commissions are delivered in less than 24 hours after a successful referral.</p>
+            </div>
+        </div>
+
+        <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
+    </div>
+
+    <script>
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
+        document.querySelectorAll('.menu-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ============================================================
+        // FEEDBACK FORM
+        // ============================================================
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const message = document.getElementById('feedbackMessage').value.trim();
+            const replyEmail = document.getElementById('replyEmail').value.trim();
+            const btn = document.getElementById('sendFeedbackBtn');
+            const statusDiv = document.getElementById('feedbackStatus');
+
+            statusDiv.style.display = 'none';
+
+            if (!message) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.textContent = '❌ Please enter your feedback before sending.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+
+            try {
+                const response = await fetch('/api/email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send-feedback',
+                        message: message,
+                        replyEmail: replyEmail || null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.className = 'status-msg success';
+                    statusDiv.textContent = '✅ Thanks! Your feedback has been sent.';
+                    document.getElementById('feedbackForm').reset();
+                } else {
+                    statusDiv.className = 'status-msg error';
+                    statusDiv.textContent = '❌ ' + (data.error || 'Failed to send feedback. Please try again.');
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                statusDiv.className = 'status-msg error';
+                statusDiv.textContent = '❌ Network error. Please try again.';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Send Feedback';
+        });
+
+        // ============================================================
+        // DELETE ACCOUNT TAB - show correct view based on login state
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (user) {
+                document.getElementById('deleteLoggedInView').style.display = 'block';
+                if (user.email) {
+                    document.getElementById('deleteEmail').value = user.email;
+                }
+            } else {
+                document.getElementById('deleteLoggedOutView').style.display = 'block';
+            }
+        });
+
+        document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('deleteEmail').value.trim();
+            const password = document.getElementById('deletePassword').value;
+            const btn = document.getElementById('deleteAccountBtn');
+            const statusDiv = document.getElementById('deleteStatus');
+
+            statusDiv.style.display = 'none';
+
+            if (!email || !password) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.textContent = '❌ Please enter your email and password.';
+                return;
+            }
+
+            const confirmed = confirm('Are you absolutely sure you want to delete your account? This cannot be undone.');
+            if (!confirmed) return;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Deleting...';
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete-account', email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userProfile');
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('adminSession');
+
+                    statusDiv.className = 'status-msg success';
+                    statusDiv.textContent = '✅ Your account has been deleted. Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    statusDiv.className = 'status-msg error';
+                    statusDiv.textContent = '❌ ' + (data.error || 'Failed to delete account.');
+                    btn.disabled = false;
+                    btn.textContent = 'Delete My Account';
+                }
+            } catch (error) {
+                console.error('Delete account error:', error);
+                statusDiv.className = 'status-msg error';
+                statusDiv.textContent = '❌ Network error. Please try again.';
+                btn.disabled = false;
+                btn.textContent = 'Delete My Account';
+            }
+        });
+    </script>
+</body>
+</html>
