@@ -236,7 +236,8 @@
             <form id="feedbackForm">
                 <div class="form-group">
                     <label for="feedbackMessage">Your Feedback</label>
-                    <textarea id="feedbackMessage" placeholder="Type your feedback here..." required></textarea>
+                    <textarea id="feedbackMessage" placeholder="Type your feedback here..." maxlength="200" required></textarea>
+                    <small id="charCount">0 / 200 characters</small>
                 </div>
                 <div class="form-group">
                     <label for="replyEmail">Your Email (optional)</label>
@@ -321,6 +322,15 @@
         // ============================================================
         // FEEDBACK FORM
         // ============================================================
+        const feedbackTextarea = document.getElementById('feedbackMessage');
+        const charCountEl = document.getElementById('charCount');
+
+        feedbackTextarea.addEventListener('input', function() {
+            const len = this.value.length;
+            charCountEl.textContent = `${len} / 200 characters`;
+            charCountEl.style.color = len >= 200 ? '#E53E3E' : '#A0AEC0';
+        });
+
         document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -334,6 +344,11 @@
             if (!message) {
                 statusDiv.className = 'status-msg error';
                 statusDiv.textContent = '❌ Please enter your feedback before sending.';
+                return;
+            }
+            if (message.length > 200) {
+                statusDiv.className = 'status-msg error';
+                statusDiv.textContent = '❌ Your feedback is over 200 characters — please shorten it.';
                 return;
             }
 
@@ -353,18 +368,26 @@
 
                 const data = await response.json();
 
-                if (data.success) {
+                if (response.ok && data.success) {
                     statusDiv.className = 'status-msg success';
-                    statusDiv.textContent = '✅ Thanks! Your feedback has been sent.';
+                    statusDiv.textContent = '✅ Feedback sent! Thank you for helping us improve USKAN.';
                     document.getElementById('feedbackForm').reset();
+                    charCountEl.textContent = '0 / 200 characters';
+                    charCountEl.style.color = '#A0AEC0';
+                } else if (response.status === 429) {
+                    statusDiv.className = 'status-msg error';
+                    statusDiv.textContent = '⏳ You\'ve reached today\'s limit of 2 feedback messages. Please try again tomorrow.';
+                } else if (response.status === 400) {
+                    statusDiv.className = 'status-msg error';
+                    statusDiv.textContent = '❌ ' + (data.error || 'Please check your feedback and try again.');
                 } else {
                     statusDiv.className = 'status-msg error';
-                    statusDiv.textContent = '❌ ' + (data.error || 'Failed to send feedback. Please try again.');
+                    statusDiv.textContent = '❌ Something went wrong on our end. Please try again shortly.';
                 }
             } catch (error) {
                 console.error('Feedback error:', error);
                 statusDiv.className = 'status-msg error';
-                statusDiv.textContent = '❌ Network error. Please try again.';
+                statusDiv.textContent = '❌ Network error — check your connection and try again.';
             }
 
             btn.disabled = false;
