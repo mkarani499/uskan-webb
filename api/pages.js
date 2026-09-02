@@ -6,8 +6,8 @@ import { getSession, getVisitorToken } from './_session.js';
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const PAGE_RULES = {
-  'accrandum-dashboard.html':     { admin: true },
-  'accrandum-email.html':         { admin: true },
+  'admin-dashboard.html':     { admin: true },
+  'admin-email.html':         { admin: true },
   'affiliate-register.html':  { loggedIn: true, hasPaid: true, hasTakenTest: true },
   'results-preview.html':     { hasTakenTest: true },
   'results-full.html':        { hasPaid: true, hasTakenTest: true },
