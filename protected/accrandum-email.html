@@ -165,7 +165,7 @@
     <div class="container admin-email-container">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:16px; border-bottom:1px solid #EDF2F7; margin-bottom:24px;">
             <h1>📧 Compose & Send Email</h1>
-            <a href="admin-dashboard.html" class="back-link">← Back to Admin</a>
+            <a href="accrandum-dashboard.html" class="back-link">← Back to Admin</a>
         </div>
         
         <p class="subtitle">Send a mass email to all registered users.</p>
@@ -228,7 +228,7 @@
         
         const adminSession = localStorage.getItem('adminSession');
         if (!adminSession) {
-            window.location.href = 'admin.html';
+            window.location.href = 'accrandum.html';
         }
         
         async function loadUserCount() {

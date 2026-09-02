@@ -65,7 +65,7 @@
                 
                 if (data.success) {
                     localStorage.setItem('adminSession', 'true');
-                    window.location.href = 'admin-dashboard.html';
+                    window.location.href = 'accrandum-dashboard.html';
                 } else {
                     errorDiv.textContent = '❌ ' + (data.error || 'Incorrect email or password');
                     errorDiv.classList.add('show');

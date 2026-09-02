@@ -175,7 +175,7 @@
         </div>
 
         <div class="admin-actions">
-            <a href="admin-email.html" class="btn-secondary">📧 Send Mass Email</a>
+            <a href="accrandum-email.html" class="btn-secondary">📧 Send Mass Email</a>
         </div>
 
         <footer><p>© 2025 USKAN. All rights reserved.</p></footer>
@@ -195,13 +195,13 @@
         function logout() {
             localStorage.removeItem('adminSession');
             localStorage.removeItem('adminLoginTime');
-            window.location.href = 'admin.html';
+            window.location.href = 'accrandum.html';
         }
         window.logout = logout;
 
         const session = localStorage.getItem('adminSession');
         if (!session) {
-            window.location.href = 'admin.html';
+            window.location.href = 'accrandum.html';
         }
 
         document.querySelectorAll('.admin-tab').forEach(tab => {
