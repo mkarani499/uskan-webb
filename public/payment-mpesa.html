@@ -127,7 +127,7 @@
             // ============================================================
             // TEST MODE - Skip real M-Pesa (Remove this when going live!)
             // ============================================================
-            const TEST_MODE = true; // Set to false for real payments
+            const TEST_MODE = false; // Set to false for real payments
 
             if (TEST_MODE) {
                 console.log('🧪 TEST MODE: Payment bypassed');
@@ -171,7 +171,7 @@
                         phoneNumber: formattedPhone,
                         email: email,
                         referralCode: referralCode,
-                        amount: 50,
+                        amount: 1,
                         accountReference: `USKAN-${Date.now()}`,
                         transactionDesc: 'USKAN Brain Test'
                     })
