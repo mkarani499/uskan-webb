@@ -352,13 +352,13 @@
                 const formattedPhone = `254${phone}`;
                 const referralCode = generateReferralCode();
 
-                // ✅ Call the backend API - send authUserId (the Supabase Auth ID)
+                // ✅ Call the backend API
                 const response = await fetch('/api/affiliate', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'register-affiliate',
-                        authUserId: user.id,        // ← Send this (Supabase Auth ID)
                         mpesaPhone: formattedPhone,
                         referralCode: referralCode
                     })

@@ -397,69 +397,44 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script>
-        // ============================================================
-        // SUPABASE CONFIG
-        // ============================================================
-        const SUPABASE_URL = 'https://kfwexaanxtkueatyynba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2V4YWFueHRrdWVhdHl5bmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NzU2MDUsImV4cCI6MjA1MjA1MTYwNX0.3mhM4jOqhf3sJqVx7zXwP8K9L5R2T1Y4A6B8C0D2E4F6G8H0J2K4M6N8P0Q2R4T6V8W0Y2';
-        
-        if (typeof supabase !== 'undefined') {
-            var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('✅ Supabase client initialized');
-        } else {
-            console.error('❌ Supabase library not loaded');
-            var supabaseClient = null;
-        }
-        
-        // ============================================================
-        // MAIN LOGIC
-        // ============================================================
-        
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        const isLoggedIn = user !== null;
-        let hasAffiliate = false;
-        let affiliateData = null;
-        
+
         document.addEventListener('DOMContentLoaded', function() {
-            if (isLoggedIn) {
-                checkAffiliateStatus();
-            } else {
-                renderNotLoggedIn();
-            }
+            checkAccountStatus();
         });
-        
+
         // ============================================================
-        // CHECK AFFILIATE STATUS
+        // CHECK ACCOUNT STATUS (backend-verified, not client-trusted)
         // ============================================================
-        
-        async function checkAffiliateStatus() {
+
+        async function checkAccountStatus() {
             try {
-                const response = await fetch('/api/affiliate', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'check-affiliate' })
+                    body: JSON.stringify({ action: 'account-status' })
                 });
-                
                 const data = await response.json();
-                
-                if (data.hasAffiliate) {
-                    hasAffiliate = true;
-                    affiliateData = data.affiliate;
-                    // Redirect to dashboard
-                    window.location.href = 'affiliate-dashboard.html';
-                } else {
-                    hasAffiliate = false;
-                    renderLoggedInNoAffiliate();
+
+                if (!data.success || !data.loggedIn) {
+                    renderNotLoggedIn();
+                    return;
                 }
+
+                if (data.isAffiliate) {
+                    window.location.href = 'affiliate-dashboard.html';
+                    return;
+                }
+
+                renderLoggedInNoAffiliate(data.hasPaid, data.hasTakenTest);
             } catch (error) {
-                console.error('Error checking affiliate status:', error);
-                renderLoggedInNoAffiliate();
+                console.error('Error checking account status:', error);
+                renderNotLoggedIn();
             }
         }
-        
+
         // ============================================================
         // RENDER: Not Logged In
         // ============================================================
@@ -515,8 +490,8 @@
             `;
             
             document.getElementById('actionButtons').innerHTML = `
-                <a href="login.html" class="btn-primary-blue">🔐 Login</a>
-                <a href="register.html" class="btn-secondary-blue">📝 Register</a>
+                <a href="login.html?returnTo=income-info.html" class="btn-primary-blue">🔐 Login</a>
+                <a href="register.html?returnTo=income-info.html" class="btn-secondary-blue">📝 Register</a>
             `;
         }
         
@@ -524,8 +499,8 @@
         // RENDER: Logged In, No Affiliate
         // ============================================================
         
-        function renderLoggedInNoAffiliate() {
-            const username = user.username || user.email?.split('@')[0] || 'User';
+        function renderLoggedInNoAffiliate(hasPaid, hasTakenTest) {
+            const username = user?.username || user?.email?.split('@')[0] || 'User';
             
             document.getElementById('pageSubtitle').textContent = `Welcome, ${username}! Let's get you set up.`;
             document.getElementById('statusBadge').className = 'status-badge info';
@@ -587,84 +562,49 @@
                 <a href="brain-test.html" class="btn-primary-blue">🧠 Take the Test</a>
                 <a href="index.html" class="btn-secondary-blue">🏠 Home</a>
             `;
-            
-            // Check which steps are completed
-            checkUserProgress();
-        }
-        
-        // ============================================================
-        // CHECK USER PROGRESS (For Logged In, No Affiliate)
-        // ============================================================
-        
-        async function checkUserProgress() {
-            try {
-                if (!supabaseClient || !user) return;
-                
-                // Check if user has test results (has taken a test)
-                const { data: results, error: resultsError } = await supabaseClient
-                    .from('test_results')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .limit(1);
-                
-                // Check if user has payments (has paid)
-                const { data: payments, error: paymentsError } = await supabaseClient
-                    .from('payments')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('status', 'completed')
-                    .limit(1);
-                
-                const hasTest = results && results.length > 0;
-                const hasPaid = payments && payments.length > 0;
-                
-                // Update step items
+
+            // Apply real, backend-confirmed completion state (no client-side DB reads)
+            if (hasTakenTest) {
                 const stepTest = document.getElementById('stepTest');
-                const stepPayment = document.getElementById('stepPayment');
-                const stepAffiliate = document.getElementById('stepAffiliate');
-                
-                if (stepTest && hasTest) {
+                if (stepTest) {
                     stepTest.className = 'step-item completed';
                     stepTest.querySelector('.step-number').textContent = '✓';
                     stepTest.querySelector('.step-number').className = 'step-number done';
                     stepTest.querySelector('.step-content h4').innerHTML = '✅ Test Completed!';
                 }
-                
-                if (stepPayment && hasPaid) {
+            }
+
+            if (hasPaid) {
+                const stepPayment = document.getElementById('stepPayment');
+                if (stepPayment) {
                     stepPayment.className = 'step-item completed';
                     stepPayment.querySelector('.step-number').textContent = '✓';
                     stepPayment.querySelector('.step-number').className = 'step-number done';
                     stepPayment.querySelector('.step-content h4').innerHTML = '✅ Payment Completed!';
                 }
-                
-                // If they have done steps 1 & 2, show a special message
-                if (hasTest && hasPaid) {
-                    const highlightBox = document.querySelector('.highlight-box');
-                    if (highlightBox) {
-                        highlightBox.innerHTML = `
-                            <h3>🎉 You're Ready to Register!</h3>
-                            <p>
-                                You've taken the test and paid for your results. 
-                                Now <strong>register as an affiliate</strong> to get your referral link and start earning!
-                            </p>
-                            <br>
-                            <a href="affiliate-register.html" class="btn-success-green" style="display:inline-flex; text-decoration:none; padding:12px 28px; border-radius:10px; color:white; font-weight:700;">
-                                🔗 Register as Affiliate Now
-                            </a>
-                        `;
-                        
-                        // Hide the action buttons since we have a CTA in the box
-                        document.getElementById('actionButtons').innerHTML = `
-                            <a href="index.html" class="btn-secondary-blue">🏠 Home</a>
-                        `;
-                    }
+            }
+
+            if (hasTakenTest && hasPaid) {
+                const highlightBox = document.querySelector('.highlight-box');
+                if (highlightBox) {
+                    highlightBox.innerHTML = `
+                        <h3>🎉 You're Ready to Register!</h3>
+                        <p>
+                            You've taken the test and paid for your results. 
+                            Now <strong>register as an affiliate</strong> to get your referral link and start earning!
+                        </p>
+                        <br>
+                        <a href="affiliate-register.html" class="btn-success-green" style="display:inline-flex; text-decoration:none; padding:12px 28px; border-radius:10px; color:white; font-weight:700;">
+                            🔗 Register as Affiliate Now
+                        </a>
+                    `;
+                    document.getElementById('actionButtons').innerHTML = `
+                        <a href="index.html" class="btn-secondary-blue">🏠 Home</a>
+                    `;
                 }
-                
-            } catch (error) {
-                console.error('Error checking progress:', error);
             }
         }
-        
+
         console.log('✅ Income info page loaded');
     </script>
 </body>

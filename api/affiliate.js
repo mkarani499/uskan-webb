@@ -51,8 +51,13 @@ export default async function handler(req, res) {
 
 async function handleRegisterAffiliate(req, res) {
   try {
-    const { authUserId, mpesaPhone, referralCode } = req.body;
-    if (!authUserId || !mpesaPhone || !referralCode) {
+    const session = getSession(req);
+    if (!session?.userId) {
+      return res.status(401).json({ error: 'Please log in' });
+    }
+
+    const { mpesaPhone, referralCode } = req.body;
+    if (!mpesaPhone || !referralCode) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -64,24 +69,20 @@ async function handleRegisterAffiliate(req, res) {
       return res.status(400).json({ error: 'Invalid referral code format' });
     }
 
-    const { data: user, error: userError } = await supabaseAdmin
-      .from('users').select('id').eq('auth_user_id', authUserId).single();
-    if (userError || !user) {
-      console.error('❌ User not found:', userError);
-      return res.status(404).json({ error: 'User not found in database' });
-    }
-
     const { data: existing } = await supabaseAdmin
-      .from('affiliates').select('id').eq('user_id', user.id).single();
+      .from('affiliates').select('id').eq('user_id', session.userId).single();
     if (existing) {
       return res.status(400).json({ error: 'You already have an affiliate account.' });
     }
 
+    const { data: userRow } = await supabaseAdmin
+      .from('users').select('auth_user_id').eq('id', session.userId).single();
+
     const { data: affiliate, error } = await supabaseAdmin
       .from('affiliates')
       .insert({
-        user_id: user.id,
-        auth_user_id: authUserId,
+        user_id: session.userId,
+        auth_user_id: userRow?.auth_user_id || null,
         referral_code: referralCode,
         mpesa_phone: mpesaPhone,
         total_earnings: 0,
@@ -96,8 +97,7 @@ async function handleRegisterAffiliate(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
-    // ✅ Update user's is_affiliate flag
-    await supabaseAdmin.from('users').update({ is_affiliate: true }).eq('id', user.id);
+    await supabaseAdmin.from('users').update({ is_affiliate: true }).eq('id', session.userId);
 
     console.log('✅ Affiliate created:', affiliate.referral_code);
     return res.status(200).json({ success: true, affiliate, message: 'Affiliate account created successfully!' });

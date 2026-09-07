@@ -478,9 +478,30 @@
             font-size: 14px;
             color: var(--medium-grey);
         }
+        .scroll-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--navy);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 999;
+            animation: bounceHint 1.6s infinite;
+            pointer-events: none;
+        }
+        @keyframes bounceHint {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-6px); }
+        }
     </style>
 </head>
 <body>
+    <div id="scrollHint" class="scroll-hint">👇 Keep scrolling to unlock more</div>
     <div class="container report-container">
         <div class="report-nav">
             <div class="brand">🇰🇪 US<span>KAN</span></div>
@@ -550,10 +571,10 @@
                     🔐 Please login or register to access affiliate features.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="login.html?intent=affiliate" class="btn-affiliate-login" style="background: rgba(255,255,255,0.15); color: white; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;">
+                    <a href="login.html?returnTo=affiliate-register.html" class="btn-affiliate-login" style="background: rgba(255,255,255,0.15); color: white; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;">
                         🔐 Login
                     </a>
-                    <a href="register.html" class="btn-affiliate-register" style="background: white; color: #1A2A3A; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
+                    <a href="register.html?returnTo=affiliate-register.html" class="btn-affiliate-register" style="background: white; color: #1A2A3A; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
                         📝 Register
                     </a>
                 </div>
@@ -852,35 +873,12 @@
             const user = JSON.parse(localStorage.getItem('user') || 'null');
             const loginPrompt = document.getElementById('affiliateLoginPrompt');
 
-            console.log('🔍 Affiliate access - User:', user ? 'Logged in' : 'Not logged in');
-
             if (user) {
-                // ✅ User is logged in - go directly to affiliate register
                 window.location.href = 'affiliate-register.html';
             } else {
-                // ❌ User is NOT logged in - show login prompt
                 if (loginPrompt) {
                     loginPrompt.style.display = 'block';
                     loginPrompt.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-
-                // Store intended action for after login
-                localStorage.setItem('intendedAction', 'affiliate');
-
-                // Save progress (same as before)
-                const results = localStorage.getItem('testResults');
-                const answers = localStorage.getItem('testAnswers');
-                const time = localStorage.getItem('testTime');
-
-                if (results || answers || time) {
-                    const progressData = {
-                        results: results ? JSON.parse(results) : null,
-                        answers: answers ? JSON.parse(answers) : [],
-                        time: time ? parseInt(time) : 0,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem('testProgress', JSON.stringify(progressData));
-                    console.log('📦 Progress saved:', progressData);
                 }
             }
         }
@@ -965,25 +963,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             displayResults();
             console.log('✅ Results displayed');
-            
-            const intendedAction = localStorage.getItem('intendedAction');
-            if (intendedAction === 'affiliate') {
-                checkSession().then(session => {
-                    if (session.loggedIn) {
-                        localStorage.removeItem('intendedAction');
-                        restoreUserProgress();
-                        setTimeout(() => {
-                            openAffiliateDashboard();
-                        }, 500);
-                    }
-                });
-            }
         });
 
         window.shareResults = shareResults;
+
+        window.addEventListener('scroll', function() {
+            const hint = document.getElementById('scrollHint');
+            if (!hint) return;
+            if (window.scrollY > 300) {
+                hint.style.opacity = '0';
+                hint.style.transition = 'opacity 0.4s ease';
+                setTimeout(() => hint.remove(), 500);
+            }
+        });
+
         console.log('✅ Results script loaded');
     </script>
-    <script src="auth.js"></script>
     <script src="user-progress.js"></script>
 </body>
 </html>

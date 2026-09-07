@@ -94,11 +94,12 @@
 
             try {
                 const referralCode = localStorage.getItem('referredBy') || null;
+                const returnTo = new URLSearchParams(window.location.search).get('returnTo') || 'index.html';
                 const response = await fetch('/api/auth', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'register', username, email, password, referralCode })
+                    body: JSON.stringify({ action: 'register', username, email, password, referralCode, returnTo })
                 });
 
                 const data = await response.json();
@@ -129,6 +130,7 @@
                     // Animate progress bar for 6 seconds
                     let progress = 0;
                     const progressBar = document.getElementById('progressBar');
+                    const redirectUrl = 'login.html?returnTo=' + encodeURIComponent(returnTo);
                     const interval = setInterval(() => {
                         progress += 1;
                         if (progressBar) {
@@ -136,8 +138,6 @@
                         }
                         if (progress >= 100) {
                             clearInterval(interval);
-                            const intendedAction = localStorage.getItem('intendedAction');
-                            const redirectUrl = intendedAction === 'affiliate' ? 'login.html?intent=affiliate' : 'login.html';
                             window.location.href = redirectUrl;
                         }
                     }, 60);
@@ -145,8 +145,6 @@
                     // Fallback redirect after 6 seconds
                     setTimeout(() => {
                         clearInterval(interval);
-                        const intendedAction = localStorage.getItem('intendedAction');
-                        const redirectUrl = intendedAction === 'affiliate' ? 'login.html?intent=affiliate' : 'login.html';
                         window.location.href = redirectUrl;
                     }, 6000);
                 } else {

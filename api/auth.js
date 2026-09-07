@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
-import { createSessionCookie, clearSessionCookie, getVisitorToken, ensureVisitorToken } from './_session.js';
+import { createSessionCookie, clearSessionCookie, getSession, getVisitorToken, ensureVisitorToken } from './_session.js';
 
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
@@ -43,6 +43,8 @@ export default async function handler(req, res) {
     case 'update-password': return handleUpdatePassword(req, res);
     case 'admin-verify': return handleAdminVerify(req, res);
     case 'delete-account': return handleDeleteAccount(req, res);
+    case 'account-status': return handleAccountStatus(req, res);
+    case 'complete-verification': return handleCompleteVerification(req, res);
     default: return res.status(400).json({ error: 'Unknown or missing action.' });
   }
 }
@@ -64,7 +66,7 @@ async function handleRegister(req, res) {
       return res.status(429).json({ error: 'Try again after a few hours.' });
     }
 
-    const { username, email, password, referralCode } = req.body;
+    const { username, email, password, referralCode, returnTo } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -85,11 +87,12 @@ async function handleRegister(req, res) {
     }
 
     const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
+    const redirectPath = returnTo ? `/verified.html?returnTo=${encodeURIComponent(returnTo)}` : '/verified.html';
     const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
       email, password,
       options: {
         data: { username, email },
-        emailRedirectTo: `${baseUrl}/verified.html`
+        emailRedirectTo: `${baseUrl}${redirectPath}`
       }
     });
 
@@ -132,8 +135,23 @@ async function handleLogin(req, res) {
     if (error) return res.status(400).json({ error: 'Invalid email or password' });
 
     if (data.user) {
-      const { data: profile } = await supabaseAnon
+      let { data: profile } = await supabaseAnon
         .from('users').select('*').eq('auth_user_id', data.user.id).single();
+
+      // Repair a phantom account: a real login with no matching profile row
+      if (!profile) {
+        const { data: newProfile } = await supabaseAdmin
+          .from('users')
+          .insert({
+            email: data.user.email,
+            username: data.user.email.split('@')[0],
+            auth_user_id: data.user.id,
+            email_verified: !!data.user.email_confirmed_at
+          })
+          .select()
+          .single();
+        profile = newProfile;
+      }
 
       // Merge anonymous test/payment progress into this account
       const visitorToken = getVisitorToken(req);
@@ -393,6 +411,117 @@ async function handleDeleteAccount(req, res) {
     return res.status(200).json({ success: true, message: 'Your account has been deleted.' });
   } catch (error) {
     console.error('❌ Delete account error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// ============================================================
+// ACCOUNT STATUS - used to show/hide UI based on real backend state
+// ============================================================
+async function handleAccountStatus(req, res) {
+  try {
+    const session = getSession(req);
+    let loggedIn = false, hasPaid = false, hasTakenTest = false, isAffiliate = false;
+
+    if (session?.userId) {
+      loggedIn = true;
+      const { data: profile } = await supabaseAdmin
+        .from('users').select('has_paid, has_taken_test').eq('id', session.userId).single();
+      if (profile) {
+        hasPaid = !!profile.has_paid;
+        hasTakenTest = !!profile.has_taken_test;
+      }
+      const { data: affiliate } = await supabaseAdmin
+        .from('affiliates').select('id').eq('user_id', session.userId).single();
+      isAffiliate = !!affiliate;
+    }
+
+    if (!hasPaid || !hasTakenTest) {
+      const visitorToken = getVisitorToken(req);
+      if (visitorToken) {
+        const { data: vp } = await supabaseAdmin
+          .from('visitor_progress').select('has_paid, has_taken_test').eq('visitor_token', visitorToken).single();
+        if (vp) {
+          hasPaid = hasPaid || !!vp.has_paid;
+          hasTakenTest = hasTakenTest || !!vp.has_taken_test;
+        }
+      }
+    }
+
+    return res.status(200).json({ success: true, loggedIn, hasPaid, hasTakenTest, isAffiliate });
+  } catch (error) {
+    console.error('❌ Account status error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// ============================================================
+// COMPLETE VERIFICATION - called by verified.html to auto-log-in
+// the person using the tokens Supabase's confirmation link carries
+// ============================================================
+async function handleCompleteVerification(req, res) {
+  try {
+    const { accessToken, refreshToken } = req.body;
+    if (!accessToken) {
+      return res.status(400).json({ error: 'Missing verification token' });
+    }
+
+    const { data: sessionData, error: sessionError } = await supabaseAnon.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken || ''
+    });
+
+    if (sessionError || !sessionData.user) {
+      return res.status(401).json({ error: 'Invalid or expired verification link' });
+    }
+
+    const user = sessionData.user;
+
+    let { data: profile } = await supabaseAdmin
+      .from('users').select('*').eq('auth_user_id', user.id).single();
+
+    if (!profile) {
+      const { data: newProfile } = await supabaseAdmin.from('users').insert({
+        email: user.email,
+        username: user.user_metadata?.username || user.email.split('@')[0],
+        auth_user_id: user.id,
+        email_verified: true
+      }).select().single();
+      profile = newProfile;
+    } else if (!profile.email_verified) {
+      await supabaseAdmin.from('users').update({ email_verified: true }).eq('id', profile.id);
+      profile.email_verified = true;
+    }
+
+    // Merge anonymous test/payment progress, same as normal login
+    const visitorToken = getVisitorToken(req);
+    if (visitorToken && profile) {
+      const { data: vp } = await supabaseAdmin
+        .from('visitor_progress').select('*').eq('visitor_token', visitorToken).single();
+      if (vp) {
+        const updates = {};
+        if (vp.has_taken_test && !profile.has_taken_test) updates.has_taken_test = true;
+        if (vp.has_paid && !profile.has_paid) updates.has_paid = true;
+        if (Object.keys(updates).length > 0) {
+          await supabaseAdmin.from('users').update(updates).eq('id', profile.id);
+          profile = { ...profile, ...updates };
+        }
+      }
+    }
+
+    res.setHeader('Set-Cookie', createSessionCookie({ userId: profile?.id, isAdmin: false }));
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: profile?.username || user.email.split('@')[0],
+        profile
+      }
+    });
+  } catch (error) {
+    console.error('❌ Complete verification error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

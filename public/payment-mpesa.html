@@ -85,8 +85,10 @@
         <div id="paymentStatus" class="payment-status">
             <div class="status-icon">⏳</div>
             <h3>Waiting for your confirmation...</h3>
-            <p>Check your phone for the M-Pesa PIN prompt.</p>
+            <p>Check your phone for the M-Pesa PIN prompt, then press the button below.</p>
             <button id="checkStatusBtn" class="btn-secondary" style="margin-top:12px;">Check Status</button>
+            <div id="statusResultMsg" style="margin-top:12px; font-size:14px; color:#718096;"></div>
+            <a id="tryAgainLink" href="javascript:void(0)" onclick="window.location.reload()" style="display:none; margin-top:12px; color:#3182CE; font-weight:600; text-decoration:none;">← Go back and try again</a>
         </div>
 
         <div id="paymentSuccess" class="payment-success">
@@ -127,7 +129,7 @@
             // ============================================================
             // TEST MODE - Skip real M-Pesa (Remove this when going live!)
             // ============================================================
-            const TEST_MODE = true; // Set to false for real payments
+            const TEST_MODE = false; // Set to false for real payments
 
             if (TEST_MODE) {
                 console.log('🧪 TEST MODE: Payment bypassed');
@@ -182,15 +184,11 @@
 
                 if (data.success) {
                     checkoutRequestID = data.checkoutRequestID;
-
-                    // Store for polling
                     localStorage.setItem('checkoutRequestID', checkoutRequestID);
 
                     document.getElementById('paymentStatus').style.display = 'block';
                     document.getElementById('mpesaForm').style.display = 'none';
-
-                    // Start polling for payment status
-                    startPolling(checkoutRequestID);
+                    // No automatic polling - the person presses "Check Status" themselves
                 } else {
                     showToast('❌ Payment failed: ' + (data.error || 'Unknown error'));
                     payBtn.disabled = false;
@@ -205,70 +203,19 @@
             }
         });
 
-        // ============================================================
-        // POLL PAYMENT STATUS
-        // ============================================================
-        function startPolling(checkoutID) {
-            let attempts = 0;
-            const maxAttempts = 30;
-            const pollStartTime = Date.now();
-            const TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
-
-            const pollInterval = setInterval(async () => {
-                attempts++;
-
-                if (Date.now() - pollStartTime >= TIMEOUT_MS) {
-                    clearInterval(pollInterval);
-                    showToast('⏳ Payment timed out. Please try again.');
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 2000);
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/mpesa?action=verify-payment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            checkoutRequestID: checkoutID
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.status === 'completed') {
-                        clearInterval(pollInterval);
-                        document.getElementById('paymentStatus').style.display = 'none';
-                        document.getElementById('paymentSuccess').style.display = 'block';
-
-                        // Set payment completed flag
-                        localStorage.setItem('paymentCompleted', 'true');
-
-                        setTimeout(() => {
-                            window.location.href = 'results-full.html';
-                        }, 3000);
-
-                    } else if (data.status === 'failed' || attempts >= maxAttempts) {
-                        clearInterval(pollInterval);
-                        showToast('⏳ Payment still processing. You can check status manually.');
-                    }
-
-                } catch (error) {
-                    console.error('Status check error:', error);
-                }
-            }, 5000);
-        }
-
-        // Check status button
+        // Check status button - the ONLY thing that checks status. No auto-reload, ever.
         document.getElementById('checkStatusBtn')?.addEventListener('click', async function() {
             const checkoutID = localStorage.getItem('checkoutRequestID');
+            const resultMsg = document.getElementById('statusResultMsg');
+            const tryAgainLink = document.getElementById('tryAgainLink');
+
             if (!checkoutID) {
                 showToast('❌ No pending payment found');
                 return;
             }
+
+            resultMsg.textContent = '⏳ Checking...';
+            tryAgainLink.style.display = 'none';
 
             try {
                 const response = await fetch('/api/mpesa?action=verify-payment', {
@@ -277,28 +224,29 @@
                     body: JSON.stringify({ checkoutRequestID: checkoutID })
                 });
                 const data = await response.json();
-                showToast(`Status: ${data.status} - ${data.resultDesc || ''}`);
                 console.log('Payment status:', data);
 
                 if (data.status === 'completed') {
+                    resultMsg.textContent = '✅ Payment confirmed!';
                     document.getElementById('paymentStatus').style.display = 'none';
                     document.getElementById('paymentSuccess').style.display = 'block';
                     localStorage.setItem('paymentCompleted', 'true');
                     setTimeout(function() {
                         window.location.href = 'results-full.html';
-                    }, 2000);
-                } else if (data.status === 'failed') {
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 10000);
+                    }, 1500);
+                } else if (data.status === 'pending') {
+                    resultMsg.textContent = '⏳ Still waiting for confirmation. Check your phone, then press Check Status again.';
+                } else {
+                    resultMsg.textContent = '❌ Payment was not completed.';
+                    tryAgainLink.style.display = 'inline-block';
                 }
             } catch (error) {
                 console.error('Status check error:', error);
-                showToast('❌ Error checking status');
+                resultMsg.textContent = '❌ Error checking status. Please try again.';
             }
         });
 
-        console.log('✅ Payment page ready (backend-only mode)');
+        console.log('✅ Payment page ready (manual status check only)');
     </script>
 </body>
 </html>

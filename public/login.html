@@ -84,15 +84,10 @@
     </div>
 
     <script>
-        // Check for intent in URL
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const intent = urlParams.get('intent');
-            if (intent === 'affiliate') {
-                localStorage.setItem('intendedAction', 'affiliate');
-                console.log('📌 Affiliate intent detected, will redirect back to results after login');
-            }
-        });
+        function getReturnTo() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('returnTo') || 'index.html';
+        }
 
         // ============================================================
         // LOGIN HANDLER
@@ -120,6 +115,7 @@
             try {
                 const response = await fetch('/api/auth', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'login', email, password })
                 });
@@ -127,27 +123,13 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Save user to localStorage
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('accessToken', data.accessToken);
-
-                    // ===== CHECK FOR INTENDED ACTION =====
-                    const intendedAction = localStorage.getItem('intendedAction');
-                    
-                    if (intendedAction === 'affiliate') {
-                        localStorage.removeItem('intendedAction');
-                        successDiv.textContent = '✅ Login successful! Redirecting...';
-                        successDiv.style.display = 'block';
-                        setTimeout(() => {
-                            window.location.href = 'results-full.html';
-                        }, 1000);
-                        return;
-                    }
 
                     successDiv.textContent = '✅ Login successful! Redirecting...';
                     successDiv.style.display = 'block';
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = getReturnTo();
                     }, 1000);
                 } else {
                     errorDiv.textContent = '❌ ' + (data.error || 'Login failed');

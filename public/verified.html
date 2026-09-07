@@ -108,5 +108,53 @@
         </p>
         <p class="footer-text">© 2025 USKAN</p>
     </div>
+
+    <script>
+        (async function() {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const queryParams = new URLSearchParams(window.location.search);
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
+            const returnTo = queryParams.get('returnTo') || 'index.html';
+
+            const messageEl = document.querySelector('.message');
+            const titleEl = document.querySelector('h1');
+
+            if (!accessToken) {
+                if (messageEl) {
+                    messageEl.innerHTML = 'You can now log in to continue.<br /><a href="login.html?returnTo=' + encodeURIComponent(returnTo) + '" style="color:#3182CE; font-weight:600;">Click here to log in</a>';
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'complete-verification', accessToken, refreshToken })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    if (titleEl) titleEl.textContent = "You're All Set!";
+                    if (messageEl) messageEl.textContent = 'Redirecting you back...';
+                    setTimeout(() => {
+                        window.location.href = returnTo;
+                    }, 1200);
+                } else {
+                    if (messageEl) {
+                        messageEl.innerHTML = 'Your email is verified. Please <a href="login.html?returnTo=' + encodeURIComponent(returnTo) + '" style="color:#3182CE; font-weight:600;">log in</a> to continue.';
+                    }
+                }
+            } catch (error) {
+                console.error('Verification completion error:', error);
+                if (messageEl) {
+                    messageEl.innerHTML = 'Your email is verified. Please <a href="login.html?returnTo=' + encodeURIComponent(returnTo) + '" style="color:#3182CE; font-weight:600;">log in</a> to continue.';
+                }
+            }
+        })();
+    </script>
 </body>
 </html>

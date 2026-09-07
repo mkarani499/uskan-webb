@@ -144,6 +144,26 @@
         .btn-track-income:active {
             transform: translateY(0);
         }
+        .btn-get-referral {
+            padding: 8px 18px;
+            background: #ECC94B;
+            color: #1A2A3A;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(236, 201, 75, 0.35);
+        }
+        .btn-get-referral:hover {
+            background: #D69E2E;
+            transform: translateY(-2px);
+        }
 
         .test-intro {
             text-align: center;
@@ -211,6 +231,7 @@
                 <button onclick="handleTrackIncome()" class="btn-track-income">
                     📊 Track Your Income
                 </button>
+                <a href="affiliate-register.html" id="getReferralLinkBtn" class="btn-get-referral">🔗 Get Referral Link</a>
                 <a href="index.html" class="back-link">← Home</a>
             </div>
             
@@ -331,6 +352,35 @@
         }
 
         window.handleTrackIncome = handleTrackIncome;
+
+        async function checkReferralButtonVisibility() {
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'account-status' })
+                });
+                const data = await response.json();
+                const btn = document.getElementById('getReferralLinkBtn');
+                if (btn && data.success && data.loggedIn && data.hasPaid && !data.isAffiliate) {
+                    btn.style.display = 'inline-flex';
+                }
+            } catch (error) {
+                console.error('Error checking referral button visibility:', error);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', checkReferralButtonVisibility);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname + window.location.search;
+            document.querySelectorAll('a[href="login.html"]').forEach(a => {
+                a.href = 'login.html?returnTo=' + encodeURIComponent(currentPath);
+            });
+            document.querySelectorAll('a[href="register.html"]').forEach(a => {
+                a.href = 'register.html?returnTo=' + encodeURIComponent(currentPath);
+            });
+        });
     </script>
     <script src="user-progress.js"></script>
     <script src="script.js"></script>
