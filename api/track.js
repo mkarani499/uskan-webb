@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { createClient } from '@supabase/supabase-js';
-import { ensureVisitorToken } from './_session.js';
+import { ensureVisitorToken, getSession } from './_session.js';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -32,6 +32,13 @@ export default async function handler(req, res) {
       await supabase.from('visitor_progress')
         .update({ has_taken_test: true, test_results: results || null })
         .eq('visitor_token', token);
+
+      const session = getSession(req);
+      if (session?.userId) {
+        await supabase.from('users')
+          .update({ has_taken_test: true })
+          .eq('id', session.userId);
+      }
     } else {
       const { page, userId, referrer } = req.body;
 

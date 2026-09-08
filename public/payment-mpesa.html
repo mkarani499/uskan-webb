@@ -236,6 +236,7 @@
                     }, 1500);
                 } else if (data.status === 'pending') {
                     resultMsg.textContent = '⏳ Still waiting for confirmation. Check your phone, then press Check Status again.';
+                    tryAgainLink.style.display = 'inline-block';
                 } else {
                     resultMsg.textContent = '❌ Payment was not completed.';
                     tryAgainLink.style.display = 'inline-block';

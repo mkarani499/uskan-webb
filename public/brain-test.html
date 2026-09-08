@@ -263,7 +263,15 @@
         
         <!-- Start Button -->
         <div class="start-btn-wrapper">
-            <a href="test.html" class="btn-primary btn-large">🚀 Start the Test</a>
+            <a href="test.html" id="startTestBtn" class="btn-primary btn-large" style="display:none;">🚀 Start the Test</a>
+            <div id="loginRequiredMsg" style="display:none;">
+                <p style="font-size:16px; font-weight:700; color:var(--primary-orange); line-height:1.5; margin-bottom:4px;">💰 When you make money… we will record it.</p>
+                <p style="font-size:15px; font-weight:600; color:var(--navy); line-height:1.5; margin-bottom:12px;">Please login/register so we can save your earnings.</p>
+                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                    <a href="login.html" class="btn-login" style="padding:10px 24px;">🔐 Login</a>
+                    <a href="register.html" class="btn-register" style="padding:10px 24px;">📝 Register</a>
+                </div>
+            </div>
             <p style="font-size:14px; color:var(--medium-grey); margin-top:8px;">Takes about 10–12 minutes • KSh 50 for full results</p>
         </div>
         
@@ -353,7 +361,7 @@
 
         window.handleTrackIncome = handleTrackIncome;
 
-        async function checkReferralButtonVisibility() {
+        async function checkAccountBasedUI() {
             try {
                 const response = await fetch('/api/auth', {
                     method: 'POST',
@@ -362,15 +370,26 @@
                     body: JSON.stringify({ action: 'account-status' })
                 });
                 const data = await response.json();
-                const btn = document.getElementById('getReferralLinkBtn');
-                if (btn && data.success && data.loggedIn && data.hasPaid && !data.isAffiliate) {
-                    btn.style.display = 'inline-flex';
+
+                const referralBtn = document.getElementById('getReferralLinkBtn');
+                if (referralBtn && data.success && data.loggedIn && data.hasPaid && !data.isAffiliate) {
+                    referralBtn.style.display = 'inline-flex';
+                }
+
+                const startBtn = document.getElementById('startTestBtn');
+                const loginMsg = document.getElementById('loginRequiredMsg');
+                if (data.success && data.loggedIn) {
+                    if (startBtn) startBtn.style.display = 'inline-block';
+                } else {
+                    if (loginMsg) loginMsg.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Error checking referral button visibility:', error);
+                console.error('Error checking account status:', error);
+                const loginMsg = document.getElementById('loginRequiredMsg');
+                if (loginMsg) loginMsg.style.display = 'block';
             }
         }
-        document.addEventListener('DOMContentLoaded', checkReferralButtonVisibility);
+        document.addEventListener('DOMContentLoaded', checkAccountBasedUI);
 
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname + window.location.search;

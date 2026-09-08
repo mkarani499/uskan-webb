@@ -307,9 +307,27 @@ function determineBrainType(results) {
 // INITIALIZE
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Only run test engine if we're on the test page
     if (document.getElementById('questionText')) {
+        try {
+            const response = await fetch('/api/auth', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'account-status' })
+            });
+            const data = await response.json();
+            if (!data.success || !data.loggedIn) {
+                window.location.href = 'brain-test.html';
+                return;
+            }
+        } catch (error) {
+            console.error('Error verifying login before test:', error);
+            window.location.href = 'brain-test.html';
+            return;
+        }
+
         // Check if brainQuestions is defined
         if (typeof brainQuestions !== 'undefined' && brainQuestions.length > 0) {
             console.log('📊 Test page loaded, questions:', brainQuestions.length);
