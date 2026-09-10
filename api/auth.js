@@ -66,7 +66,7 @@ async function handleRegister(req, res) {
       return res.status(429).json({ error: 'Try again after a few hours.' });
     }
 
-    const { username, email, password, referralCode, returnTo } = req.body;
+    const { username, email, password, referralCode } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -87,12 +87,11 @@ async function handleRegister(req, res) {
     }
 
     const baseUrl = process.env.BASE_URL || 'https://uskan-webb.vercel.app';
-    const redirectPath = returnTo ? `/verified.html?returnTo=${encodeURIComponent(returnTo)}` : '/verified.html';
     const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
       email, password,
       options: {
         data: { username, email },
-        emailRedirectTo: `${baseUrl}${redirectPath}`
+        emailRedirectTo: `${baseUrl}/verified.html`
       }
     });
 

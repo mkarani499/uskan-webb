@@ -94,12 +94,11 @@
 
             try {
                 const referralCode = localStorage.getItem('referredBy') || null;
-                const returnTo = new URLSearchParams(window.location.search).get('returnTo') || 'index.html';
                 const response = await fetch('/api/auth', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'register', username, email, password, referralCode, returnTo })
+                    body: JSON.stringify({ action: 'register', username, email, password, referralCode })
                 });
 
                 const data = await response.json();
@@ -130,7 +129,7 @@
                     // Animate progress bar for 6 seconds
                     let progress = 0;
                     const progressBar = document.getElementById('progressBar');
-                    const redirectUrl = 'login.html?returnTo=' + encodeURIComponent(returnTo);
+                    const redirectUrl = 'login.html';
                     const interval = setInterval(() => {
                         progress += 1;
                         if (progressBar) {

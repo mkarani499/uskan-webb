@@ -84,11 +84,6 @@
     </div>
 
     <script>
-        function getReturnTo() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('returnTo') || 'index.html';
-        }
-
         // ============================================================
         // LOGIN HANDLER
         // ============================================================
@@ -129,7 +124,7 @@
                     successDiv.textContent = '✅ Login successful! Redirecting...';
                     successDiv.style.display = 'block';
                     setTimeout(() => {
-                        window.location.href = getReturnTo();
+                        window.location.href = 'index.html';
                     }, 1000);
                 } else {
                     errorDiv.textContent = '❌ ' + (data.error || 'Login failed');

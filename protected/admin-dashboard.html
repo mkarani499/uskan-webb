@@ -192,7 +192,17 @@
                 .replace(/'/g, '&#039;');
         }
 
-        function logout() {
+        async function logout() {
+            try {
+                await fetch('/api/auth', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'logout' })
+                });
+            } catch (error) {
+                console.error('Logout request failed:', error);
+            }
             localStorage.removeItem('adminSession');
             localStorage.removeItem('adminLoginTime');
             window.location.href = 'admin.html';

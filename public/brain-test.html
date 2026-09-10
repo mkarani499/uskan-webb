@@ -263,14 +263,10 @@
         
         <!-- Start Button -->
         <div class="start-btn-wrapper">
-            <a href="test.html" id="startTestBtn" class="btn-primary btn-large" style="display:none;">🚀 Start the Test</a>
+            <button onclick="handleStartTest()" id="startTestBtn" class="btn-primary btn-large">🚀 Start the Test</button>
             <div id="loginRequiredMsg" style="display:none;">
-                <p style="font-size:16px; font-weight:700; color:var(--primary-orange); line-height:1.5; margin-bottom:4px;">💰 When you make money… we will record it.</p>
-                <p style="font-size:15px; font-weight:600; color:var(--navy); line-height:1.5; margin-bottom:12px;">Please login/register so we can save your earnings.</p>
-                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                    <a href="login.html" class="btn-login" style="padding:10px 24px;">🔐 Login</a>
-                    <a href="register.html" class="btn-register" style="padding:10px 24px;">📝 Register</a>
-                </div>
+                <p style="font-size:16px; font-weight:700; color:var(--primary-orange); line-height:1.5; margin-bottom:4px; margin-top:12px;">💰 When you make money… we will record it.</p>
+                <p style="font-size:15px; font-weight:600; color:var(--navy); line-height:1.5;">Please login/register so we can save your earnings.</p>
             </div>
             <p style="font-size:14px; color:var(--medium-grey); margin-top:8px;">Takes about 10–12 minutes • KSh 50 for full results</p>
         </div>
@@ -310,7 +306,17 @@
             }
         });
         
-        function handleLogout() {
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'logout' })
+                });
+            } catch (error) {
+                console.error('Logout request failed:', error);
+            }
             localStorage.removeItem('user');
             localStorage.removeItem('userProfile');
             localStorage.removeItem('adminSession');
@@ -361,7 +367,7 @@
 
         window.handleTrackIncome = handleTrackIncome;
 
-        async function checkAccountBasedUI() {
+        async function checkReferralButtonVisibility() {
             try {
                 const response = await fetch('/api/auth', {
                     method: 'POST',
@@ -370,36 +376,40 @@
                     body: JSON.stringify({ action: 'account-status' })
                 });
                 const data = await response.json();
-
                 const referralBtn = document.getElementById('getReferralLinkBtn');
                 if (referralBtn && data.success && data.loggedIn && data.hasPaid && !data.isAffiliate) {
                     referralBtn.style.display = 'inline-flex';
                 }
-
-                const startBtn = document.getElementById('startTestBtn');
-                const loginMsg = document.getElementById('loginRequiredMsg');
-                if (data.success && data.loggedIn) {
-                    if (startBtn) startBtn.style.display = 'inline-block';
-                } else {
-                    if (loginMsg) loginMsg.style.display = 'block';
-                }
             } catch (error) {
-                console.error('Error checking account status:', error);
-                const loginMsg = document.getElementById('loginRequiredMsg');
-                if (loginMsg) loginMsg.style.display = 'block';
+                console.error('Error checking referral button visibility:', error);
             }
         }
-        document.addEventListener('DOMContentLoaded', checkAccountBasedUI);
+        document.addEventListener('DOMContentLoaded', checkReferralButtonVisibility);
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentPath = window.location.pathname + window.location.search;
-            document.querySelectorAll('a[href="login.html"]').forEach(a => {
-                a.href = 'login.html?returnTo=' + encodeURIComponent(currentPath);
-            });
-            document.querySelectorAll('a[href="register.html"]').forEach(a => {
-                a.href = 'register.html?returnTo=' + encodeURIComponent(currentPath);
-            });
-        });
+        // ============================================================
+        // START TEST - checked fresh on every click, no state cached
+        // ============================================================
+        async function handleStartTest() {
+            const msg = document.getElementById('loginRequiredMsg');
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'account-status' })
+                });
+                const data = await response.json();
+                if (data.success && data.loggedIn) {
+                    window.location.href = 'test.html';
+                } else {
+                    if (msg) msg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking login before test:', error);
+                if (msg) msg.style.display = 'block';
+            }
+        }
+        window.handleStartTest = handleStartTest;
     </script>
     <script src="user-progress.js"></script>
     <script src="script.js"></script>
