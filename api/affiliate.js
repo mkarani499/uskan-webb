@@ -112,7 +112,7 @@ async function handleCheckAffiliate(req, res) {
     const session = getSession(req);
     if (!session?.userId) return res.status(401).json({ error: 'Please log in' });
 
-    const { data: affiliate, error } = await supabaseAnon
+    const { data: affiliate, error } = await supabaseAdmin
       .from('affiliates').select('id').eq('user_id', session.userId).single();
     if (error && error.code !== 'PGRST116') {
       console.error('Database error:', error);
@@ -131,7 +131,7 @@ async function handleGetAffiliateData(req, res) {
     const session = getSession(req);
     if (!session?.userId) return res.status(401).json({ error: 'Please log in' });
 
-    const { data: affiliate, error: affiliateError } = await supabaseAnon
+    const { data: affiliate, error: affiliateError } = await supabaseAdmin
       .from('affiliates').select('*').eq('user_id', session.userId).single();
     if (affiliateError && affiliateError.code !== 'PGRST116') {
       console.error('❌ Affiliate fetch error:', affiliateError);
@@ -142,7 +142,7 @@ async function handleGetAffiliateData(req, res) {
       return res.status(200).json({ hasAffiliate: false, affiliate: null });
     }
 
-    const { data: referrals, error: referralsError } = await supabaseAnon
+    const { data: referrals, error: referralsError } = await supabaseAdmin
       .from('referrals').select('*').eq('affiliate_id', affiliate.id).order('created_at', { ascending: false });
     if (referralsError) console.error('❌ Referrals fetch error:', referralsError);
 

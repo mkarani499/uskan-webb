@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
 
-const SECRET = process.env.SESSION_SECRET;
+const SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'uskan-default-secret';
 const SESSION_COOKIE = 'uskan_session';
 const VISITOR_COOKIE = 'uskan_visitor';
 
@@ -20,7 +20,9 @@ function parseCookies(header) {
 }
 
 function serializeCookie(name, value, { maxAge } = {}) {
-  let str = `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL || !!(process.env.BASE_URL && process.env.BASE_URL.startsWith('https'));
+  const secureFlag = isProduction ? '; Secure' : '';
+  let str = `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly${secureFlag}; SameSite=Lax`;
   if (maxAge !== undefined) str += `; Max-Age=${maxAge}`;
   return str;
 }

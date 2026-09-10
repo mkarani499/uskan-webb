@@ -134,16 +134,29 @@ async function handleLogin(req, res) {
     if (error) return res.status(400).json({ error: 'Invalid email or password' });
 
     if (data.user) {
-      let { data: profile } = await supabaseAnon
+      let { data: profile } = await supabaseAdmin
         .from('users').select('*').eq('auth_user_id', data.user.id).single();
+
+      // If not found by auth_user_id, try matching by email
+      if (!profile && data.user.email) {
+        const { data: profileByEmail } = await supabaseAdmin
+          .from('users').select('*').eq('email', data.user.email).single();
+        if (profileByEmail) {
+          if (!profileByEmail.auth_user_id) {
+            await supabaseAdmin.from('users').update({ auth_user_id: data.user.id }).eq('id', profileByEmail.id);
+          }
+          profile = { ...profileByEmail, auth_user_id: data.user.id };
+        }
+      }
 
       // Repair a phantom account: a real login with no matching profile row
       if (!profile) {
+        const fallbackUsername = data.user.user_metadata?.username || data.user.email.split('@')[0];
         const { data: newProfile } = await supabaseAdmin
           .from('users')
           .insert({
             email: data.user.email,
-            username: data.user.email.split('@')[0],
+            username: fallbackUsername,
             auth_user_id: data.user.id,
             email_verified: !!data.user.email_confirmed_at
           })
@@ -174,7 +187,7 @@ async function handleLogin(req, res) {
         user: {
           id: data.user.id,
           email: data.user.email,
-          username: profile?.username || data.user.email.split('@')[0],
+          username: profile?.username || data.user.user_metadata?.username || data.user.email.split('@')[0],
           profile
         },
         accessToken: data.session.access_token
@@ -211,15 +224,23 @@ async function handleVerifyUser(req, res) {
     const { data: { user }, error } = await supabaseAnon.auth.getUser(accessToken);
     if (error || !user) return res.status(401).json({ error: 'Invalid session' });
 
-    const { data: profile } = await supabaseAnon
+    let { data: profile } = await supabaseAdmin
       .from('users').select('*').eq('auth_user_id', user.id).single();
+
+    if (!profile && user.email) {
+      const { data: profileByEmail } = await supabaseAdmin
+        .from('users').select('*').eq('email', user.email).single();
+      if (profileByEmail) {
+        profile = profileByEmail;
+      }
+    }
 
     return res.status(200).json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
-        username: profile?.username || user.email.split('@')[0],
+        username: profile?.username || user.user_metadata?.username || user.email.split('@')[0],
         profile,
         emailVerified: user.email_confirmed_at !== null
       }
